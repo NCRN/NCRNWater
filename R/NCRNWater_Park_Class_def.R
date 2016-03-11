@@ -1,18 +1,16 @@
 #' @title S4 Class Definition for Park object in  NCRNWater
 #' 
 #' @description
-#' An S4 class that contains the data from water monitoring from a single park. Data on sites will be store as one or more S4 objects in 
+#' An S4 class that contains the data from water monitoring from a single park. Data on sites will be stored as one or more S4 objects in 
 #' each park object  
-#' @slot ParkCode A short code to designate the park (or group of plots), typically an NPS 4 letter code. Stored as a length 1 character vector. 
+#' @slot ParkCode A short code to designate the park, typically an NPS 4 letter code. Stored as a length 1 character vector. 
 #' @slot ShortName A short name for the park. Stored as a length 1 character vector. 
 #' @slot LongName  A long, formal name for the park. Stored as a length 1 character vector. 
-#' @slot Network The code for the Inventory & Montoirng network (or other networ) the park belongs to. Stored as a length 1 character vector. 
-#' @slot Points A \code{data.frame} with information on the mointoring points, such as names and lat/long.
-#' @slot Visits A \code{data.frame} with information on each sampling visit.
-#' @slot Birds  A \code{data.frame} with the bird monitoring data. 
-#' @slot Species A \code{data.frame} with meta-data about the bird species, including AOU Code, Latin and common names, as well as guild assignments for the BCI calculations.
+#' @slot Network The code for the Inventory & Montoirng network (or other network) the park belongs to. Stored as a length 1 character vector.
+#' @slot Sites A list of \code{Site} objects associated with the park. 
+
 #' 
-#' @exportClass NCRNbirds
+#' @exportClass Park
 
 setClass(Class="Park",
          slots=c(
