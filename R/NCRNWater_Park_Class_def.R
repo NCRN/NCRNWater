@@ -17,8 +17,14 @@ setClass(Class="Park",
            ParkCode="character",
            ShortName="character",
            LongName="character",
-           
            Network="character",
-           
-           Sites="list")
+           Sites="list"
+          ),
+         
+         prototype=list(ParkCode=character(), 
+                        ShortName=character(),
+                        LongName=character(), 
+                        Network=character(), 
+                        Sites=list()
+                        )
 )
