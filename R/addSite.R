@@ -20,7 +20,7 @@
               Coordinates=Coordinates,
               Type=Type
        )
-   park@Sites<-Xsite
+   park@Sites<-list(c(park@Sites,XSite))
    return(park)
    
    
