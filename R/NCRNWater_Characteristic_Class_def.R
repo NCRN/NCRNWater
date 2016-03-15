@@ -1,7 +1,9 @@
-#' @title S4 Class Definition for Chacteristic object in  NCRNWater
+setClassUnion(name="Num_or_DF",members= c("numeric","data.frame"))
+
+#' @title S4 Class Definition for Characteristic object in  NCRNWater
 #' 
-#' @description
-#' An S4 class that contains the data from water monitoring for a single water quality characteristic as a single site in a single park.   
+#' @description An S4 class that contains the data from water monitoring for a single water quality characteristic as a single site in a single park.   
+#' 
 #' @slot CharacteristicName The name of the water quality characteristic. Stored as a length 1 character vector. 
 #' @slot DisplayName A name for the characteristic suitable for dispaly on graphs, tables etc. Stored as a length 1 character vector. 
 #' @slot SampleFraction The sample fraction of the characteristic. Stored as a length 1 character vector. 
@@ -13,11 +15,14 @@
 #' @slot LowerType,UpperType The type of assessment indicated by the lower and upper points. A length 1 character vector.
 #' @slot LowerDescription,UpperDescription A description of the lowerand upper assesements point. Stored as a length 1 character vector.
 #' @slot AssessmentDetails Additional description of the assessement point. Stored as a length 1 character vector.
-#' @exportClass Park
+#' 
+#' @exportClass Characteristic
 
-setClassUnion("Num_or_DF", c("numeric","data.frame"))
 
-setClass(Class="Chacteristic",
+#setOldClass("data.frame")
+
+
+setClass(Class="Characteristic",
           slots=c(ChacteristicName="character",
                  DisplayName="character",
                  Substrate="character",
