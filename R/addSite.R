@@ -10,17 +10,22 @@
 #' 
 #' @return Returns the park object with the site added.
 #' 
+#' @details This command can be used to add a \code{Site} object to the list of existing sites in an exisitng \code{Park} object. The \code{SiteCode} will be used to name the Site in the list. \code{addCharacteristic} can be used to add a charactersitic to the site. 
+#' 
 #' @export
  
 
  addSite<-function(park,SiteCode,SiteName,Coordinates,Type){
-   XSite<-new("Site",
+   XSite<-list(
+     new("Site",
               SiteCode=SiteCode,
               SiteName=SiteName,
               Coordinates=Coordinates,
               Type=Type
        )
-   park@Sites<-list(c(park@Sites,XSite))
+   )
+   names(XSite)<-SiteCode
+   park@Sites<-c(park@Sites,XSite)
    return(park)
    
    

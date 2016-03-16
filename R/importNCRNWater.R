@@ -23,6 +23,8 @@ importNCRNWater<-function(Dir){
             LongName="Antietam National Battlefield",
             Network="NCRN"
   )
+    ANTI<-addSite(park=ANTI,SiteCode="NCRN_ANTI_SHCK",SiteName = "Shaprsburg Creek",Coordinates=numeric(),Type="Stream")
+  
   
   CATO<-new("Park", 
             ParkCode="CATO", 
@@ -30,14 +32,10 @@ importNCRNWater<-function(Dir){
             LongName="Catoctin Mountain Park", 
             Network="NCRN"
   ) 
-
-  CHOH<-new("Park", 
-            ParkCode="CHOH", 
-            ShortName="C&O Canal", 
-            LongName="Chesapeake & Ohio Canal National Historical Park", 
-            Network="NCRN"
-  ) 
-
+    CATO<-addSite(park=CATO,SiteCode="NCRN_CATO_BGHC",SiteName = "Big Hunting Creek", Coordinates=numeric(),Type="Stream")
+    CATO<-addSite(park=CATO,SiteCode="NCRN_CATO_OWCK",SiteName = "Owens Creek", Coordinates=numeric(),Type="Stream")
+    CATO<-addSite(park=CATO,SiteCode="NCRN_CATO_WHST",SiteName = "Blue Blazes Creek", Coordinates=numeric(),Type="Stream")
+  
   
   GWMP<-new("Park", 
             ParkCode="GWMP", 
@@ -45,7 +43,18 @@ importNCRNWater<-function(Dir){
             LongName="George Washington Memorial Parkway", 
             Network="NCRN"
   )
-            
+    GWMP<-addSite(park=GWMP,SiteCode="NCRN_GWMP_MICR",SiteName = "Minnehaha Creek", Coordinates=numeric(),Type="Stream")
+    GWMP<-addSite(park=GWMP,SiteCode="NCRN_GWMP_MIRU",SiteName = "Mine Run", Coordinates=numeric(),Type="Stream")
+    GWMP<-addSite(park=GWMP,SiteCode="NCRN_GWMP_PIRU",SiteName = "Pimmit Run", Coordinates=numeric(),Type="Stream")
+    GWMP<-addSite(park=GWMP,SiteCode="NCRN_GWMP_TURU",SiteName = "Turkey Run", Coordinates=numeric(),Type="Stream")
+  
+  GREE<-new("Park", 
+            ParkCode="GREE", 
+            ShortName="Greenbelt", 
+            LongName="Greenbelt Park", 
+            Network="NCRN"
+  ) 
+    GREE<-addSite(park=GREE,SiteCode="NCRN_NACE_STCK",SiteName = "Still Creek", Coordinates=numeric(),Type="Stream")
   
   HAFE<-new("Park", 
             ParkCode="HAFE", 
@@ -53,6 +62,7 @@ importNCRNWater<-function(Dir){
             LongName="Harpers Ferry National Histroical Park", 
             Network="NCRN"
   )
+    HAFE<-addSite(park=HAFE,SiteCode="NCRN_HAFE_FLSP",SiteName = "Flowing Springs Run", Coordinates=numeric(),Type="Stream")
 
   MANA<-new("Park",
             ParkCode="MANA",
@@ -60,6 +70,7 @@ importNCRNWater<-function(Dir){
             LongName="Manassas National Battlefield Park", 
             Network="NCRN"
   )
+    MANA<-addSite(park=MANA,SiteCode="NCRN_MANA_YOBR",SiteName = "Young's Branch", Coordinates=numeric(),Type="Stream")
   
   MONO<-new("Park",
             ParkCode="MONO",
@@ -67,6 +78,8 @@ importNCRNWater<-function(Dir){
             LongName="Monocacy National Battlefield", 
             Network="NCRN"
   )
+    MONO<-addSite(park=MONO,SiteCode="NCRN_MONO_BUCK",SiteName = "Bush Creek", Coordinates=numeric(),Type="Stream")
+    MONO<-addSite(park=MONO,SiteCode="NCRN_MONO_GAMI",SiteName = "Gambrill Mill Creek", Coordinates=numeric(),Type="Stream")
 
   NACE<-new("Park",
             ParkCode="NACE",
@@ -74,6 +87,8 @@ importNCRNWater<-function(Dir){
             LongName="National Captial Parks-East", 
             Network="NCRN"
   )
+    NACE<-addSite(park=NACE,SiteCode="NCRN_NACE_HECR",SiteName = "Henson Creek", Coordinates=numeric(),Type="Stream")
+    NACE<-addSite(park=NACE,SiteCode="NCRN_NACE_OXRU",SiteName = "Oxon Run", Coordinates=numeric(),Type="Stream")
   
   PRWI<-new("Park",
             ParkCode="PRWI",
@@ -81,6 +96,14 @@ importNCRNWater<-function(Dir){
             LongName="Prince William Forest Park", 
             Network="NCRN"
   )
+    PRWI<-addSite(park=PRWI,SiteCode="NCRN_PRWI_BONE",SiteName = "Boneyard Run", Coordinates=numeric(),Type="Stream")
+    PRWI<-addSite(park=PRWI,SiteCode="NCRN_PRWI_cARU",SiteName = "Carters Run", Coordinates=numeric(),Type="Stream")
+    PRWI<-addSite(park=PRWI,SiteCode="NCRN_PRWI_MARU",SiteName = "Mawavi Run", Coordinates=numeric(),Type="Stream")
+    PRWI<-addSite(park=PRWI,SiteCode="NCRN_PRWI_NFQC",SiteName = "Quantico Creek", Coordinates=numeric(),Type="Stream")
+    PRWI<-addSite(park=PRWI,SiteCode="NCRN_PRWI_ORRU",SiteName = "Orenda Run", Coordinates=numeric(),Type="Stream")
+    PRWI<-addSite(park=PRWI,SiteCode="NCRN_PRWI_SFQC",SiteName = "South Fork Quantico Creek", Coordinates=numeric(),Type="Stream")
+    PRWI<-addSite(park=PRWI,SiteCode="NCRN_PRWI_SORU",SiteName = "Sow Run", Coordinates=numeric(),Type="Stream")
+    PRWI<-addSite(park=PRWI,SiteCode="NCRN_PRWI_TARU",SiteName = "Taylor Run", Coordinates=numeric(),Type="Stream")
 
   
   ROCR<-new("Park",
@@ -89,7 +112,18 @@ importNCRNWater<-function(Dir){
             LongName="Rock Creek Park", 
             Network="NCRN"
   )
-            
+    ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_BAKE",SiteName = "Battery Kemble Creek", Coordinates=numeric(),Type="Stream")
+    ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_BRBR",SiteName = "Broad Branch", Coordinates=numeric(),Type="Stream")
+    ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_DUOA",SiteName = "Dumbarton Oaks", Coordinates=numeric(),Type="Stream")
+    ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_FEBR",SiteName = "Fenwick Branch", Coordinates=numeric(),Type="Stream")
+    ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_HACR",SiteName = "Hazen Creek", Coordinates=numeric(),Type="Stream")
+    ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_KLVA",SiteName = "Klingle Valley", Coordinates=numeric(),Type="Stream")
+    ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_LUBR",SiteName = "Luzon Branch", Coordinates=numeric(),Type="Stream")
+    ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_NOST",SiteName = "Normanstone Branch", Coordinates=numeric(),Type="Stream")
+    ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_PHBR",SiteName = "Pinehurst Branch", Coordinates=numeric(),Type="Stream")
+    ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_ROC3",SiteName = "Rock Creek at Dumbarton Oaks", Coordinates=numeric(),Type="Stream")
+    ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_SVPS",SiteName = "Soapstone Vallye Stream", Coordinates=numeric(),Type="Stream")
+  
   
   WOTR<-new("Park",
             ParkCode="WOTR",
@@ -97,6 +131,10 @@ importNCRNWater<-function(Dir){
             LongName="Wolf Trap National Park for the Performing Arts", 
             Network="NCRN"
   )
+  WOTR<-addSite(park=WOTR,SiteCode="NCRN_WOTR_CHCK",SiteName = "Courthouse Creek", Coordinates=numeric(),Type="Stream")
+  WOTR<-addSite(park=WOTR,SiteCode="NCRN_WOTR_WOTR",SiteName = "Wolf Trap Creek", Coordinates=numeric(),Type="Stream")
   
-  return(c(ANTI,CATO,CHOH,GWMP,HAFE,MANA,MONO,NACE,PRWI,ROCR,WOTR))
+  NCRN<-as.list(c(ANTI,CATO,GREE,GWMP,HAFE,MANA,MONO,NACE,PRWI,ROCR,WOTR))
+  names(NCRN)<-c("ANTI","CATO","GREE","GWMP","HAFE","MANA","MONO","NACE","PRWI","ROCR","WOTR")
+  return(NCRN)
 }
