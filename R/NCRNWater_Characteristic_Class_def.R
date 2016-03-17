@@ -23,7 +23,7 @@ setClassUnion(name="Num_or_DF",members= c("numeric","data.frame"))
 
 
 setClass(Class="Characteristic",
-          slots=c(ChacteristicName="character",
+          slots=c(CharacteristicName="character",
                  DisplayName="character",
                  Substrate="character",
                  SampleFraction="character",
