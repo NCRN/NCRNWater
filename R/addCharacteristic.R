@@ -14,7 +14,8 @@
 #' @param LowerPoint,Upperpoint Indicates the assessmen points. Values lower than the lower point are considered to have failed the assessement, whereas values higher than the higher point are considered failures. Can either be a length 1 numerical vector, or a \code{data.frame}  giving the lower assessment value for each measurement. The vector method should be used for assessments that do not change, whereas the \code{data.frame} is for assmesent that change based on the time of the year or other factors.
 #' @param LowerType,UpperType The type of assessment indicated by the lower and upper points. A length 1 character vector.
 #' @param LowerDescription,UpperDescription A description of the lowerand upper assesements point. Stored as a length 1 character vector.
-#' @parma AssessmentDetails Additional description of the assessement point. Stored as a length 1 character vector.
+#' @param AssessmentDetails Additional description of the assessement point. Stored as a length 1 character vector.
+#' 
 #' 
 #' @return If no park is specified,returns the site object with the characteristic added. If a park is specified, returns the park object with the characteristic added to the site.
 #' 
@@ -23,25 +24,15 @@
 #' @export
  
 
- addCharacteristic<-function(park=NULL,site,CharacteristicName,DisplayName,SampleFraction,Category,Details,Units,Data,LowerPoint,LowerType,
-                             LowerDescription, UpperPoint, UpperType, UpperDescription,AssessmentDetails){
+ addCharacteristic<-function(park,site,CharacteristicName,DisplayName,SampleFraction,Category,Details,Units,Data,LowerPoint,LowerType,
+                     LowerDescription, UpperPoint, UpperType, UpperDescription,AssessmentDetails){
+  
+   tryCatch(missing(site),  error=function(err) stop("You need to specify a site", call.=FALSE))
+   XCall<-match.call() #figure out what args user put in.
    XCharacteristic<-list(
-     new("Characteristic",
-          CharacteristicName=CharacteristicName,
-          DisplayName=DisplayName,
-          SampleFraction=SampleFraction,
-          Category=Category,
-          Details=Details,
-          Units=Units,
-          Data=Data,
-          LowerPoint=LowerPoint,
-          LowerType=LowerType,
-          LowerDescription=LowerDescription,
-          UpperPoint=UpperPoint, 
-          UpperType=UpperType, 
-          UpperDescription=UpperDescription,
-          AssessmentDetails=AssessmentDetails
-       )
+     do.call("new", 
+      c(Class="Characteristic",as.list(XCall)[-1][!names(XCall[-1]) %in% c("park","site")]) #passes all args but "park" & "site' to new()
+     )
    )
    
    names(XCharacteristic)<-CharacteristicName
@@ -49,7 +40,6 @@
      site@Characteristics<-c(site@Characterstics,XCharacteristic)
      return(site)
    } else{
-     #return(park@Sites[[site]]@Characteristics)
       park@Sites[[site]]@Characteristics<-c(park@Sites[[site]]@Characteristics,XCharacteristic)
    return(park)
    }

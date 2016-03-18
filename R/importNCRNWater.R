@@ -24,6 +24,8 @@ importNCRNWater<-function(Dir){
             Network="NCRN"
   )
     ANTI<-addSite(park=ANTI,SiteCode="NCRN_ANTI_SHCK",SiteName = "Shaprsburg Creek",Coordinates=numeric(),Type="Stream")
+    ANTI<-addCharacteristic(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
+                          Units="\u03bceq/l",Data=data.frame(), LowerPoint=600)
   
   
   CATO<-new("Park", 
@@ -131,7 +133,7 @@ importNCRNWater<-function(Dir){
             LongName="Wolf Trap National Park for the Performing Arts", 
             Network="NCRN"
   )
-  WOTR<-addSite(park=WOTR,SiteCode="NCRN_WOTR_CHCK",SiteName = "Courthouse Creek", Coordinates=numeric(),Type="Stream")
+  WOTR<-addSite(park=WOTR,SiteCode="NCRN_WOTR_CHCK",SiteName = "Courthouse Creek", Type="Stream")
   WOTR<-addSite(park=WOTR,SiteCode="NCRN_WOTR_WOTR",SiteName = "Wolf Trap Creek", Coordinates=numeric(),Type="Stream")
   
   NCRN<-as.list(c(ANTI,CATO,GREE,GWMP,HAFE,MANA,MONO,NACE,PRWI,ROCR,WOTR))

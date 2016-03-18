@@ -16,17 +16,16 @@
  
 
  addSite<-function(park,SiteCode,SiteName,Coordinates,Type){
-   XSite<-list(
-     new("Site",
-              SiteCode=SiteCode,
-              SiteName=SiteName,
-              Coordinates=Coordinates,
-              Type=Type
-       )
-   )
-   names(XSite)<-SiteCode
-   park@Sites<-c(park@Sites,XSite)
-   return(park)
+  XCall<-match.call() #figure out what args user put in.
+  XSite<-list(
+    do.call("new", 
+      c(Class="Site",as.list(XCall)[-1][!names(XCall[-1]) %in% "park"]) #takes arguments from user and passes all but "park" to new()
+    )
+  )
+
+  names(XSite)<-SiteCode
+  park@Sites<-c(park@Sites,XSite)
+  return(park)
    
    
  }
