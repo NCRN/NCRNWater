@@ -5,7 +5,8 @@ setClassUnion(name="Num_or_DF",members= c("numeric","data.frame"))
 #' @description An S4 class that contains the data from water monitoring for a single water quality characteristic as a single site in a single park.   
 #' 
 #' @slot CharacteristicName The name of the water quality characteristic. Stored as a length 1 character vector. 
-#' @slot DisplayName A name for the characteristic suitable for dispaly on graphs, tables etc. Stored as a length 1 character vector. 
+#' @slot DisplayName A name for the characteristic suitable for dispaly on graphs, tables etc. Stored as a length 1 character vector.
+#' @slot Substrate The substrate of the characteristic, stored as a length 1 character vector. 
 #' @slot SampleFraction The sample fraction of the characteristic. Stored as a length 1 character vector. 
 #' @slot Category The category for the charactersitic. Stored as a length 1 character vector.
 #' @slot Details A description of the characterisitc as needed. Stored as a length 1 character vector. 

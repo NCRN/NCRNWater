@@ -6,7 +6,8 @@
 #' @param site If \code{park} is not specified, then a \code{Site} object. If \code{park} is specified, then the SiteCode correspoiding to a site object conatined in the park object.
 #' @param CharacteristicName The name of the water quality characteristic. Stored as a length 1 character vector. 
 #' @param DisplayName A name for the characteristic suitable for dispaly on graphs, tables etc. Stored as a length 1 character vector. 
-#' @param SampleFraction The sample fraction of the characteristic. Stored as a length 1 character vector. 
+#' @param SampleFraction The sample fraction of the characteristic. Stored as a length 1 character vector.
+#' @param Substate The substrate of the characteristic, stored as a length 1  character vector. 
 #' @param Category The category for the charactersitic. Stored as a length 1 character vector.
 #' @param Details A description of the characterisitc as needed. Stored as a length 1 character vector. 
 #' @param Units  The units of measurement of the characteristic. Stored as a length 1 character vector. 
@@ -24,7 +25,7 @@
 #' @export
  
 
- addCharacteristic<-function(park,site,CharacteristicName,DisplayName,SampleFraction,Category,Details,Units,Data,LowerPoint,LowerType,
+ addCharacteristic<-function(park,site,CharacteristicName,DisplayName,Substrate,SampleFraction=NA,Category,Details,Units,Data,LowerPoint,LowerType,
                      LowerDescription, UpperPoint, UpperType, UpperDescription,AssessmentDetails){
   
    tryCatch(missing(site),  error=function(err) stop("You need to specify a site", call.=FALSE))

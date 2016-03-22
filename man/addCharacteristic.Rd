@@ -4,8 +4,8 @@
 \alias{addCharacteristic}
 \title{addCharacteristic}
 \usage{
-addCharacteristic(park = NULL, site, CharacteristicName, DisplayName,
-  SampleFraction, Category, Details, Units, Data, LowerPoint, LowerType,
+addCharacteristic(park, site, CharacteristicName, DisplayName, Substrate,
+  SampleFraction = NA, Category, Details, Units, Data, LowerPoint, LowerType,
   LowerDescription, UpperPoint, UpperType, UpperDescription, AssessmentDetails)
 }
 \arguments{
@@ -32,6 +32,10 @@ addCharacteristic(park = NULL, site, CharacteristicName, DisplayName,
 \item{LowerType, UpperType}{The type of assessment indicated by the lower and upper points. A length 1 character vector.}
 
 \item{LowerDescription, UpperDescription}{A description of the lowerand upper assesements point. Stored as a length 1 character vector.}
+
+\item{AssessmentDetails}{Additional description of the assessement point. Stored as a length 1 character vector.}
+
+\item{Substate}{The substrate of the characteristic, stored as a length 1  character vector.}
 }
 \value{
 If no park is specified,returns the site object with the characteristic added. If a park is specified, returns the park object with the characteristic added to the site.

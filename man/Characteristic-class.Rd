@@ -14,6 +14,8 @@ An S4 class that contains the data from water monitoring for a single water qual
 
 \item{\code{DisplayName}}{A name for the characteristic suitable for dispaly on graphs, tables etc. Stored as a length 1 character vector.}
 
+\item{\code{Substrate}}{The substrate of the characteristic, stored as a length 1 character vector.}
+
 \item{\code{SampleFraction}}{The sample fraction of the characteristic. Stored as a length 1 character vector.}
 
 \item{\code{Category}}{The category for the charactersitic. Stored as a length 1 character vector.}
