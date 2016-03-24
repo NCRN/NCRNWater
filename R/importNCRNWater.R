@@ -1,3 +1,6 @@
+#' @include NCRNWater_Park_Class_def.R
+#' @include NCRNWater_Site_Class_def.R
+#' @include NCRNWater_Characteristic_Class_def.R
 #' @title importNCRNWater
 #' 
 #' @description This function imports data from a .csv files exporterd from NPStoret and saves it as \code{Park} objects. 
@@ -6,8 +9,8 @@
 #' 
 #' @return Returns 11 \code{Park} objects, one for each park, as a \code{list}.
 #' 
-#' @importFrom dplyr rename select
-#' @importFrom magrittr %>% 
+#' @importFrom dplyr rename select filter
+#' @importFrom magrittr "%>%" 
 #' 
 #' @export
 
@@ -19,8 +22,8 @@ importNCRNWater<-function(Dir){
   setwd(Dir)
 
   
-  Indata<-read.csv("Water Data.csv", header = T, as.is=T) %>% rename(SiteCode=StationID,Date=Visit.Start.Date,
-                                                                     Value=Result.Value.Text)
+  Indata<-read.csv("Water Data.csv", header = T, as.is=T) %>% rename(SiteCode=StationID, Date=Visit.Start.Date,
+                                                                     Value=Result.Value.Text, Characteristic=Local.Characteristic.Name)
   setwd(OldDir)
   
   ANTI<-new("Park",
@@ -29,14 +32,13 @@ importNCRNWater<-function(Dir){
             LongName="Antietam National Battlefield",
             Network="NCRN"
   )
-    ANTI<-addSite(park=ANTI,SiteCode="NCRN_ANTI_SHCK",SiteName = "Shaprsburg Creek",Coordinates=numeric(),Type="Stream")
-    ANTI<-addCharacteristic(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
+  ANTI<-addSite(park=ANTI,SiteCode="NCRN_ANTI_SHCK",SiteName = "Shaprsburg Creek",Coordinates=numeric(),Type="Stream")
+  ANTI<-addCharacteristic(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                           Units="\u03bceq/l",
-                          Data=get("Indata", sys.frame(1)) %>% 
-                            filter(SiteCode=="NCRN_ANTI_SHCK") %>%  dplyr::select(Date,Value), 
+                          Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ANTI_SHCK",Characteristic=="ANC" ) %>% 
+                            dplyr::select(Date,Value), 
                           LowerPoint=600)
   
-    return(ANTI)
   
   CATO<-new("Park", 
             ParkCode="CATO", 

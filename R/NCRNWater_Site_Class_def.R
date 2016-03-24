@@ -1,3 +1,4 @@
+#' @include NCRNWater_Park_Class_def.R
 #' @title S4 Class Definition for Site object in  NCRNWater
 #' 
 #' @description

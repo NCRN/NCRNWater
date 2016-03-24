@@ -2,10 +2,12 @@
 
 export(addCharacteristic)
 export(addSite)
+export(getParkNames)
 export(importNCRNWater)
 exportClasses(Characteristic)
 exportClasses(Park)
 exportClasses(Site)
+importFrom(dplyr,filter)
 importFrom(dplyr,rename)
 importFrom(dplyr,select)
 importFrom(magrittr,"%>%")

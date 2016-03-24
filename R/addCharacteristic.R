@@ -1,3 +1,5 @@
+#' @include NCRNWater_Park_Class_def.R
+#' @include NCRNWater_Site_Class_def.R
 #' @title addCharacteristic
 #' 
 #' @description This function adds a water quality characteristic to an existing \code{Site} object.. 
