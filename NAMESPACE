@@ -2,7 +2,9 @@
 
 export(addCharacteristic)
 export(addSite)
+export(getCharacteristics)
 export(getParkNames)
+export(getSiteInfo)
 export(getSites)
 export(importNCRNWater)
 exportClasses(Characteristic)

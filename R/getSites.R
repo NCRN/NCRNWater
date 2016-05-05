@@ -1,4 +1,6 @@
 #' @include NCRNWater_Park_Class_def.R 
+#' @include NCRNWater_Site_Class_def.R
+#' @importFrom magrittr %>%
 #' @title getSites
 #' 
 #' @description Retrieves sites from a \code{Park} object or a \code{list} of such objects.
@@ -15,8 +17,8 @@ setGeneric(name="getSites",function(object,sitecode=NA){standardGeneric("getSite
 
 setMethod(f="getSites", signature=c(object="list"),
           function(object,sitecode){
-            OutList<-lapply(object,FUN=getSites, sitecode) 
-            return(OutList[!sapply(OutList, is.null)])
+            OutList<-sapply(object,FUN=getSites, sitecode) %>% unname
+            return(OutList[!sapply(OutList, is.null)] ) %>% unlist(recursive=FALSE)
 })  
             
 
@@ -24,7 +26,10 @@ setMethod(f="getSites", signature=c(object="list"),
 setMethod(f="getSites", signature=c(object="Park"),
           function(object,sitecode){
             OutSites<-names(object@Sites) %in% sitecode
-            SiteOut<-if(all(is.na(sitecode))) return(object@Sites) else{
-              if(all(!OutSites)) return() else  return(object@Sites[OutSites])
+            
+            SiteOut<-if(all(is.na(sitecode))) return(object@Sites) else {
+              if(all(!OutSites)) return() else  {
+                return(object@Sites[OutSites]) 
+              }  
             }
 })
