@@ -7,7 +7,7 @@
 getCharacteristics(object, sitecode = NA, charname = NA)
 }
 \arguments{
-\item{object}{One of a \code{Site} object, a \code{list} of\code{Site} objects, a \code{Park} objec or a list of \code{Park} objects.}
+\item{object}{One of a \code{Site} object, a \code{Park} object or a list of \code{Site} and/or \code{Park} objects.}
 
 \item{sitecode}{One of more sitecodes, in quotes. If \code{object} is a \code{Park} object or a \code{list} of \code{Park} objects, then the site code argument can be used to select which sites should be ssued}
 

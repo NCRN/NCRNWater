@@ -17,7 +17,7 @@ setGeneric(name="getSites",function(object,sitecode=NA){standardGeneric("getSite
 
 setMethod(f="getSites", signature=c(object="list"),
           function(object,sitecode){
-            OutList<-sapply(object,FUN=getSites, sitecode) %>% unname
+            OutList<-lapply(object,FUN=getSites, sitecode) %>% unname
             return(OutList[!sapply(OutList, is.null)] ) %>% unlist(recursive=FALSE)
 })  
             
