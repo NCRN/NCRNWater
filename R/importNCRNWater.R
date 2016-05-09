@@ -38,40 +38,40 @@ importNCRNWater<-function(Dir){
                           Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ANTI_SHCK",Characteristic=="ANC" ) %>% 
                             dplyr::select(Date,Value), 
                           LowerPoint=600)
-  ANTI<-addCharacteristic(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+  ANTI<-addChar(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
                           Units="%",
                           Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ANTI_SHCK",Characteristic=="DO (%)" ) %>% 
                             dplyr::select(Date,Value) 
                           )
-  ANTI<-addCharacteristic(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+  ANTI<-addChar(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
                           Units="mg/l",
                           Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ANTI_SHCK",Characteristic=="DO (mg/L)" ) %>% 
                             dplyr::select(Date,Value), 
                           LowerPoint=5.0)
-  ANTI<-addCharacteristic(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="Nitrate", DisplayName="Nitrate",
+  ANTI<-addChar(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="Nitrate", DisplayName="Nitrate",
                           Units="mg/l",
                           Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ANTI_SHCK",Characteristic=="Nitrate 2007" ) %>% 
                             dplyr::select(Date,Value), 
                           UpperPoint=0.31)
-  ANTI<-addCharacteristic(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="pH", DisplayName="pH",
+  ANTI<-addChar(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="pH", DisplayName="pH",
                           Units="pH Units",
                           Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ANTI_SHCK",Characteristic=="pH" ) %>% 
                             dplyr::select(Date,Value), 
                           LowerPoint=6.0, UpperPoint=9.0)
-  ANTI<-addCharacteristic(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="SC", DisplayName="Specific Conductance",
+  ANTI<-addChar(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="SC", DisplayName="Specific Conductance",
                           Units="\u03bcS/cm",
                           Data=get("Indata",sys.frame(1)) %>% 
                             filter(SiteCode=="NCRN_ANTI_SHCK",Characteristic=="Specific conductance") %>%
                             dplyr::select(Date,Value), 
                           UpperPoint=171)
-  ANTI<-addCharacteristic(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+  ANTI<-addChar(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
                           Units="mg/l",
                           Data=get("Indata",sys.frame(1)) %>%
                             filter(SiteCode=="NCRN_ANTI_SHCK",Characteristic=="Total Phosphorus 2009" ) %>% 
                             dplyr::select(Date,Value), 
                           UpperPoint=0.037)
-  ANTI<-addCharacteristic(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="WaterTemp", DisplayName="Water Temperature",
-                          Units="\u00b0",
+  ANTI<-addChar(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="WaterTemp", DisplayName="Water Temperature",
+                          Units="\u00b0C",
                           Data=get("Indata", sys.frame(1)) %>% 
                             filter(SiteCode=="NCRN_ANTI_SHCK",Characteristic=="Water Temperature" ) %>% 
                             dplyr::select(Date,Value), 

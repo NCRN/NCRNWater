@@ -20,13 +20,13 @@ An S4 class that contains the data from water monitoring for a single water qual
 
 \item{\code{Category}}{The category for the charactersitic. Stored as a length 1 character vector.}
 
-\item{\code{Details}}{A description of the characterisitc as needed. Stored as a length 1 character vector.}
+\item{\code{Details}}{A description of the characteristic as needed. Stored as a length 1 character vector.}
 
 \item{\code{Units}}{The units of measurement of the characteristic. Stored as a length 1 character vector.}
 
 \item{\code{Data}}{A \code{data.frame} containing the water quality data. Should have cloumns representing the date, measurment, any QAQC flags etc. for each measurement.}
 
-\item{\code{LowerPoint,Upperpoint}}{Indicates the assessmen points. Values lower than the lower point are considered to have failed the assessement, whereas values higher than the higher point are considered failures. Can either be a length 1 numerical vector, or a \code{data.frame}  giving the lower assessment value for each measurement. The vector method should be used for assessments that do not change, whereas the \code{data.frame} is for assmesent that change based on the time of the year or other factors.}
+\item{\code{LowerPoint,Upperpoint}}{Indicates the assessment points. Values lower than the lower point are considered to have failed the assessement, whereas values higher than the higher point are considered failures. Can either be a length 1 numerical vector, or a \code{data.frame}  giving the lower assessment value for each measurement. The vector method should be used for assessments that do not change, whereas the \code{data.frame} is for assmesent that change based on the time of the year or other factors.}
 
 \item{\code{LowerType,UpperType}}{The type of assessment indicated by the lower and upper points. A length 1 character vector.}
 

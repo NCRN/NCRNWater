@@ -15,7 +15,7 @@
 #' \item{"SiteName"}{Returns the name of the site.}
 #' \item{"coords"}{Returns the latitude and longitude of the site as a length 2 vector.}
 #' \item{"type"}{Returns the type of the site.}
-#'  \item{"ParkCode"}{Returns the park code for the park the site is in.}
+#'\item{"ParkCode"}{Returns the park code for the park the site is in.}
 #' \item{"ParkShortName"}{ The default. Returns the short name of the park the site is in.}
 #' \item{"ParkLongName"}{Returns the long name of the park the site is in.}
 #' \item{"Network}{Returns the network code for the network the site is in.}

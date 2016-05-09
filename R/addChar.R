@@ -1,9 +1,9 @@
 #' @include NCRNWater_Park_Class_def.R
 #' @include NCRNWater_Site_Class_def.R
 #' @include NCRNWater_Characteristic_Class_def.R
-#' @title addCharacteristic
+#' @title addChar
 #' 
-#' @description This function adds a water quality characteristic to an existing \code{Site} object.. 
+#' @description This function adds a water quality characteristic to an existing \code{Site} object.
 #' 
 #' @param park A \code{Park} object
 #' @param site If \code{park} is not specified, then a \code{Site} object. If \code{park} is specified, then the SiteCode correspoiding to a site object conatined in the park object.
@@ -28,7 +28,7 @@
 #' @export
  
 
- addCharacteristic<-function(park,site,CharacteristicName,DisplayName,Substrate,SampleFraction=NA,Category,Details,Units,Data,LowerPoint,LowerType,
+ addChar<-function(park,site,CharacteristicName,DisplayName,Substrate,SampleFraction=NA,Category,Details,Units,Data,LowerPoint,LowerType,
                      LowerDescription, UpperPoint, UpperType, UpperDescription,AssessmentDetails){
   
    tryCatch(missing(site),  error=function(err) stop("You need to specify a site", call.=FALSE))
