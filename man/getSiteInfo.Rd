@@ -9,16 +9,22 @@ getSiteInfo(object, sitecode = NA, info)
 \arguments{
 \item{object}{Either a \code{Park} object or a \code{site} object or a \code{list} of such objects.}
 
-\item{info}{Type of infromation to return. One of four options, in quotes.
+\item{sitecode}{Name of one or more sites, in quotes.}
+
+\item{info}{Type of infromation to return. One of several options, in quotes.
 \describe{
-\item{"code"}{ The default. Returns the site code}
-\item{"name"}{Returns the name of the site}
-\item{"coords"}{Returns the latitude and longitude of the site as a length 2 vector}
-\item{"type"}{Returns the type of the site}
+\item{"SiteCode"}{ The default. Returns the site code.}
+\item{"SiteName"}{Returns the name of the site.}
+\item{"coords"}{Returns the latitude and longitude of the site as a length 2 vector.}
+\item{"type"}{Returns the type of the site.}
+ \item{"ParkCode"}{Returns the park code for the park the site is in.}
+\item{"ParkShortName"}{ The default. Returns the short name of the park the site is in.}
+\item{"ParkLongName"}{Returns the long name of the park the site is in.}
+\item{"Network}{Returns the network code for the network the site is in.}
 }}
 }
 \value{
-A character vector with one or more park names.
+Either a vector or a list with information for each site. Only the "coords" option returns a list.
 }
 \description{
 Retreives the metadata from a \code{Site} object or a \code{list} of such objects.

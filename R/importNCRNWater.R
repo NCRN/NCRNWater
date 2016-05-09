@@ -174,7 +174,7 @@ importNCRNWater<-function(Dir){
     ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_NOST",SiteName = "Normanstone Branch", Coordinates=numeric(),Type="Stream")
     ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_PHBR",SiteName = "Pinehurst Branch", Coordinates=numeric(),Type="Stream")
     ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_ROC3",SiteName = "Rock Creek at Dumbarton Oaks", Coordinates=numeric(),Type="Stream")
-    ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_SVPS",SiteName = "Soapstone Vallye Stream", Coordinates=numeric(),Type="Stream")
+    ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_SVPS",SiteName = "Soapstone Valley Stream", Coordinates=numeric(),Type="Stream")
   
   
   WOTR<-new("Park",

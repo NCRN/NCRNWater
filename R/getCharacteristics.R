@@ -30,8 +30,6 @@ setMethod(f="getCharacteristics", signature=c(object="Park"),
            
             SiteList<-getSites(object=object, sitecode = sitecode) 
             getCharacteristics(object=SiteList, sitecode=sitecode,charname=charname)
-
-
 })
 
 
