@@ -38,7 +38,7 @@ getCharInfo(object, sitecode = NA, charname = NA, info)
 }}
 }
 \value{
-Either a vector or a list with information for each site. Only the "coords" option returns a list.
+Either a vector or a list with information for each character. Only the data option returns a list.
 }
 \description{
 Retreives the metadata from a \code{Site} object or a \code{list} of such objects.

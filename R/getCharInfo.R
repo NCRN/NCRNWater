@@ -34,29 +34,41 @@
 #' \item{"Network}{Returns the network code for the network the site is in.}
 #' } 
 #' 
-#' @return Either a vector or a list with information for each site. Only the "coords" option returns a list.
+#' @return Either a vector or a list with information for each character. Only the data option returns a list.
 #' 
 #' @export
 
 setGeneric(name="getCharInfo",function(object,sitecode=NA,charname=NA,info){standardGeneric("getCharInfo")},signature=c("object") )
 
+setMethod(f="getCharInfo", signature=c(object="list"),
+          function(object,sitecode,charname, info){
+            lapply(object,FUN=getCharInfo, sitecode=sitecode, charname=charname, info=info) %>% unname %>% unlist(recursive=F)
+})  
 
-# setMethod(f="getSiteInfo", signature=c(object="list"),
-#           function(object,sitecode, info){
-#             lapply(object,FUN=getSiteInfo, sitecode=sitecode, info=info) %>% unname %>% unlist(recursive=F)
-# })  
-# 
-# 
-# #### Given one park get the sites and run again ####
-# setMethod(f="getSiteInfo", signature=c(object="Park"),
-#     function(object,sitecode,info){
-#       switch(info,
-#         ParkCode=, ParkShortName=, ParkLongName=, Network =
-#           return(getParkInfo(object, info=info) %>% rep(times=getSites(object=object, sitecode=sitecode) %>% length)), #info from Park Object
-#       
-#         return(sapply(getSites(object=object, sitecode = sitecode) %>% unname(), FUN=getSiteInfo, info=info)) #default - info from site object
-#        )
-# })
+#### Given one park get the sites and run again ####
+setMethod(f="getCharInfo", signature=c(object="Park"),
+    function(object,sitecode,charname,info){
+      switch(info,
+        ParkCode=, ParkShortName=, ParkLongName=, Network =#info from Park Object
+        return(getParkInfo(object, info=info) %>% rep(times=getChars(object=object, sitecode=sitecode,charname=charname) %>% length)), 
+        SiteCode=,SiteName=,coords=,type= 
+          return(getSiteInfo(object, info=info) %>% rep(times=getChars(object=object, charname=charname) %>% length)), #info from Site Object
+        Data=
+          return(lapply(getChars(object=object,sitecode=sitecode,charname=charname) %>% unname(),FUN=getCharInfo,info=info)),#data returns a list
+          return(sapply(getChars(object=object, sitecode = sitecode, charname=charname) %>% unname(), FUN=getCharInfo, info=info)) #default - info from site object
+      )
+ })
+
+ #### Given one Site get the characteristics and run again ####
+ setMethod(f="getCharInfo", signature=c(object="Site"),
+    function(object,sitecode,charname,info){
+     switch(info,
+              SiteCode=,SiteName=,coords=,type= 
+        return(getSiteInfo(object, info=info) %>% rep(times=getChars(object=object, charname=charname) %>% length)), #info from Site Object
+        Data=return(lapply(getChars(object=object,charname=charname) %>% unname(), FUN=getCharInfo,info=info)), #data returns a list
+        return(sapply(getChars(object=object,charname=charname) %>% unname(), FUN=getCharInfo,info=info)) #default-info from Characteristic object
+      )
+ })
 
 
 #### Given one Characteristic get the info ####

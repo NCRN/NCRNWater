@@ -10,7 +10,7 @@
 #' @return Returns 11 \code{Park} objects, one for each park, as a \code{list}.
 #' 
 #' @importFrom dplyr rename select filter
-#' @importFrom magrittr "%>%" 
+#' @importFrom magrittr %>%
 #' 
 #' @export
 
@@ -33,7 +33,7 @@ importNCRNWater<-function(Dir){
             Network="NCRN"
   )
   ANTI<-addSite(park=ANTI,SiteCode="NCRN_ANTI_SHCK",SiteName = "Shaprsburg Creek",Coordinates=numeric(),Type="Stream")
-  ANTI<-addCharacteristic(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
+  ANTI<-addChar(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                           Units="\u03bceq/l",
                           Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ANTI_SHCK",Characteristic=="ANC" ) %>% 
                             dplyr::select(Date,Value), 
