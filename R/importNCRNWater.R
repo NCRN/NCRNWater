@@ -10,9 +10,11 @@
 #' @return Returns 11 \code{Park} objects, one for each park, as a \code{list}.
 #' 
 #' @importFrom dplyr rename select filter
+#' @importFrom lubridate mdy
 #' @importFrom magrittr %>%
 #' 
 #' @export
+#' @export %>%
 
 
 
@@ -25,6 +27,9 @@ importNCRNWater<-function(Dir){
   Indata<-read.csv("Water Data.csv", header = T, as.is=T) %>% rename(SiteCode=StationID, Date=Visit.Start.Date,
                                                                      Value=Result.Value.Text, Characteristic=Local.Characteristic.Name)
   setwd(OldDir)
+  
+  Indata$Date<-mdy(Indata$Date)
+  
   
   ANTI<-new("Park",
             ParkCode="ANTI",
@@ -85,6 +90,53 @@ importNCRNWater<-function(Dir){
             Network="NCRN"
   ) 
     CATO<-addSite(park=CATO,SiteCode="NCRN_CATO_BGHC",SiteName = "Big Hunting Creek", Coordinates=numeric(),Type="Stream")
+    CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
+                  Units="\u03bceq/l",
+                  Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_BGHC",Characteristic=="ANC" ) %>% 
+                    dplyr::select(Date,Value), 
+                  LowerPoint=200)
+    CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+                  Units="%",
+                  Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_BGHC",Characteristic=="DO (%)" ) %>% 
+                    dplyr::select(Date,Value) 
+    )
+    CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+                  Units="mg/l",
+                  Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_BGHC",Characteristic=="DO (mg/L)" ) %>% 
+                    dplyr::select(Date,Value), 
+                  LowerPoint=5.0)
+    CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="Nitrate", DisplayName="Nitrate",
+                  Units="mg/l",
+                  Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_BGHC",Characteristic=="Nitrate 2007" ) %>% 
+                    dplyr::select(Date,Value), 
+                  UpperPoint=0.31)
+    CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="pH", DisplayName="pH",
+                  Units="pH Units",
+                  Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_BGHC",Characteristic=="pH" ) %>% 
+                    dplyr::select(Date,Value), 
+                  LowerPoint=6.0, UpperPoint=9.0)
+    CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="SC", DisplayName="Specific Conductance",
+                  Units="\u03bcS/cm",
+                  Data=get("Indata",sys.frame(1)) %>% 
+                    filter(SiteCode=="NCRN_CATO_BGHC",Characteristic=="Specific conductance") %>%
+                    dplyr::select(Date,Value), 
+                  UpperPoint=171)
+    CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+                  Units="mg/l",
+                  Data=get("Indata",sys.frame(1)) %>%
+                    filter(SiteCode=="NCRN_CATO_BGHC",Characteristic=="Total Phosphorus 2009" ) %>% 
+                    dplyr::select(Date,Value), 
+                  UpperPoint=0.037)
+    CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="WaterTemp", DisplayName="Water Temperature",
+                  Units="\u00b0C",
+                  Data=get("Indata", sys.frame(1)) %>% 
+                    filter(SiteCode=="NCRN_CATO_BGHC",Characteristic=="Water Temperature" ) %>% 
+                    dplyr::select(Date,Value), 
+                  UpperPoint=20)
+    
+    
+    
+    
     CATO<-addSite(park=CATO,SiteCode="NCRN_CATO_OWCK",SiteName = "Owens Creek", Coordinates=numeric(),Type="Stream")
     CATO<-addSite(park=CATO,SiteCode="NCRN_CATO_WHST",SiteName = "Blue Blazes Creek", Coordinates=numeric(),Type="Stream")
   
