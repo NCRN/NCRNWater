@@ -90,56 +90,141 @@ importNCRNWater<-function(Dir){
             Network="NCRN"
   ) 
     CATO<-addSite(park=CATO,SiteCode="NCRN_CATO_BGHC",SiteName = "Big Hunting Creek", Coordinates=numeric(),Type="Stream")
-    CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
+      CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_BGHC",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-    CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_BGHC",Characteristic=="DO (%)" ) %>% 
-                    dplyr::select(Date,Value) 
-    )
-    CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+                    dplyr::select(Date,Value))
+      CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_BGHC",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=5.0)
-    CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="Nitrate", DisplayName="Nitrate",
+      CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="Nitrate", DisplayName="Nitrate",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_BGHC",Characteristic=="Nitrate 2007" ) %>% 
                     dplyr::select(Date,Value), 
                   UpperPoint=0.31)
-    CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="pH", DisplayName="pH",
+      CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="pH", DisplayName="pH",
                   Units="pH Units",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_BGHC",Characteristic=="pH" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=6.0, UpperPoint=9.0)
-    CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="SC", DisplayName="Specific Conductance",
+      CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="SC", DisplayName="Specific Conductance",
                   Units="\u03bcS/cm",
                   Data=get("Indata",sys.frame(1)) %>% 
                     filter(SiteCode=="NCRN_CATO_BGHC",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-    CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>%
                     filter(SiteCode=="NCRN_CATO_BGHC",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
                   UpperPoint=0.037)
-    CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="WaterTemp", DisplayName="Water Temperature",
+      CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="WaterTemp", DisplayName="Water Temperature",
                   Units="\u00b0C",
                   Data=get("Indata", sys.frame(1)) %>% 
                     filter(SiteCode=="NCRN_CATO_BGHC",Characteristic=="Water Temperature" ) %>% 
                     dplyr::select(Date,Value), 
                   UpperPoint=20)
     
-    
-    
-    
     CATO<-addSite(park=CATO,SiteCode="NCRN_CATO_OWCK",SiteName = "Owens Creek", Coordinates=numeric(),Type="Stream")
+      CATO<-addChar(park=CATO, site="NCRN_CATO_OWCK", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
+                  Units="\u03bceq/l",
+                  Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_OWCK",Characteristic=="ANC" ) %>% 
+                    dplyr::select(Date,Value), 
+                  LowerPoint=200)
+      CATO<-addChar(park=CATO, site="NCRN_CATO_OWCK", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+                  Units="%",
+                  Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_OWCK",Characteristic=="DO (%)" ) %>% 
+                    dplyr::select(Date,Value))
+      CATO<-addChar(park=CATO, site="NCRN_CATO_OWCK", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+                  Units="mg/l",
+                  Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_OWCK",Characteristic=="DO (mg/L)" ) %>% 
+                    dplyr::select(Date,Value), 
+                  LowerPoint=5.0)
+      CATO<-addChar(park=CATO, site="NCRN_CATO_OWCK", CharacteristicName="Nitrate", DisplayName="Nitrate",
+                  Units="mg/l",
+                  Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_OWCK",Characteristic=="Nitrate 2007" ) %>% 
+                    dplyr::select(Date,Value), 
+                  UpperPoint=0.31)
+      CATO<-addChar(park=CATO, site="NCRN_CATO_OWCK", CharacteristicName="pH", DisplayName="pH",
+                  Units="pH Units",
+                  Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_OWCK",Characteristic=="pH" ) %>% 
+                    dplyr::select(Date,Value), 
+                  LowerPoint=6.0, UpperPoint=9.0)
+      CATO<-addChar(park=CATO, site="NCRN_CATO_OWCK", CharacteristicName="SC", DisplayName="Specific Conductance",
+                  Units="\u03bcS/cm",
+                  Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_OWCK",Characteristic=="Specific conductance") %>%
+                    dplyr::select(Date,Value), 
+                  UpperPoint=171)
+      CATO<-addChar(park=CATO, site="NCRN_CATO_OWCK", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+                  Units="mg/l",
+                  Data=get("Indata",sys.frame(1)) %>%
+                    filter(SiteCode=="NCRN_CATO_OWCK",Characteristic=="Total Phosphorus 2009" ) %>% 
+                    dplyr::select(Date,Value), 
+                  UpperPoint=0.037)
+      CATO<-addChar(park=CATO, site="NCRN_CATO_OWCK", CharacteristicName="WaterTemp", DisplayName="Water Temperature",
+                  Units="\u00b0C",
+                  Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_OWCK",Characteristic=="Water Temperature" ) %>% 
+                    dplyr::select(Date,Value), 
+                  UpperPoint=20)
+    
     CATO<-addSite(park=CATO,SiteCode="NCRN_CATO_WHST",SiteName = "Blue Blazes Creek", Coordinates=numeric(),Type="Stream")
-  
+      CATO<-addChar(park=CATO, site="NCRN_CATO_WHST", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
+                  Units="\u03bceq/l",
+                  Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_WHST",Characteristic=="ANC" ) %>% 
+                    dplyr::select(Date,Value), 
+                  LowerPoint=200)
+      CATO<-addChar(park=CATO, site="NCRN_CATO_WHST", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+                  Units="%",
+                  Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_WHST",Characteristic=="DO (%)" ) %>% 
+                    dplyr::select(Date,Value) )
+      CATO<-addChar(park=CATO, site="NCRN_CATO_WHST", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+                  Units="mg/l",
+                  Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_WHST",Characteristic=="DO (mg/L)" ) %>% 
+                    dplyr::select(Date,Value), 
+                  LowerPoint=5.0)
+      CATO<-addChar(park=CATO, site="NCRN_CATO_WHST", CharacteristicName="Nitrate", DisplayName="Nitrate",
+                  Units="mg/l",
+                  Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_WHST",Characteristic=="Nitrate 2007" ) %>% 
+                    dplyr::select(Date,Value), 
+                  UpperPoint=0.31)
+      CATO<-addChar(park=CATO, site="NCRN_CATO_WHST", CharacteristicName="pH", DisplayName="pH",
+                  Units="pH Units",
+                  Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_WHST",Characteristic=="pH" ) %>% 
+                    dplyr::select(Date,Value), 
+                  LowerPoint=6.0, UpperPoint=9.0)
+      CATO<-addChar(park=CATO, site="NCRN_CATO_WHST", CharacteristicName="SC", DisplayName="Specific Conductance",
+                  Units="\u03bcS/cm",
+                  Data=get("Indata",sys.frame(1)) %>% 
+                    filter(SiteCode=="NCRN_CATO_WHST",Characteristic=="Specific conductance") %>%
+                    dplyr::select(Date,Value), 
+                  UpperPoint=171)
+      CATO<-addChar(park=CATO, site="NCRN_CATO_WHST", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+                  Units="mg/l",
+                  Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_WHST",Characteristic=="Total Phosphorus 2009" ) %>% 
+                    dplyr::select(Date,Value), 
+                  UpperPoint=0.037)
+      CATO<-addChar(park=CATO, site="NCRN_CATO_WHST", CharacteristicName="WaterTemp", DisplayName="Water Temperature",
+                  Units="\u00b0C",
+                  Data=get("Indata", sys.frame(1)) %>% 
+                    filter(SiteCode=="NCRN_CATO_WHST",Characteristic=="Water Temperature" ) %>% 
+                    dplyr::select(Date,Value), 
+                  UpperPoint=20)
+  GREE<-new("Park", 
+                ParkCode="GREE", 
+                ShortName="Greenbelt", 
+                LongName="Greenbelt Park", 
+                Network="NCRN"
+  ) 
+    GREE<-addSite(park=GREE,SiteCode="NCRN_NACE_STCK",SiteName = "Still Creek", Coordinates=numeric(),Type="Stream")
+      
   
   GWMP<-new("Park", 
             ParkCode="GWMP", 
@@ -148,17 +233,50 @@ importNCRNWater<-function(Dir){
             Network="NCRN"
   )
     GWMP<-addSite(park=GWMP,SiteCode="NCRN_GWMP_MICR",SiteName = "Minnehaha Creek", Coordinates=numeric(),Type="Stream")
+      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_MICR", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
+                  Units="\u03bceq/l",
+                  Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_MICR",Characteristic=="ANC" ) %>% 
+                    dplyr::select(Date,Value), 
+                  LowerPoint=200)
+      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_MICR", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+                  Units="%",
+                  Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_MICR",Characteristic=="DO (%)" ) %>% 
+                    dplyr::select(Date,Value) )
+      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_MICR", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+                  Units="mg/l",
+                  Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_MICR",Characteristic=="DO (mg/L)" ) %>% 
+                    dplyr::select(Date,Value), 
+                  LowerPoint=5.0)
+      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_MICR", CharacteristicName="Nitrate", DisplayName="Nitrate",
+                  Units="mg/l",
+                  Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_MICR",Characteristic=="Nitrate 2007" ) %>% 
+                    dplyr::select(Date,Value), 
+                  UpperPoint=0.31)
+      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_MICR", CharacteristicName="pH", DisplayName="pH",
+                  Units="pH Units",
+                  Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_MICR",Characteristic=="pH" ) %>% 
+                    dplyr::select(Date,Value), 
+                  LowerPoint=6.0, UpperPoint=9.0)
+      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_MICR", CharacteristicName="SC", DisplayName="Specific Conductance",
+                  Units="\u03bcS/cm",
+                  Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_MICR",Characteristic=="Specific conductance") %>%
+                    dplyr::select(Date,Value), 
+                  UpperPoint=171)
+      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_MICR", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+                  Units="mg/l",
+                  Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_MICR",Characteristic=="Total Phosphorus 2009" ) %>% 
+                    dplyr::select(Date,Value), 
+                  UpperPoint=0.037)
+      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_MICR", CharacteristicName="WaterTemp", DisplayName="Water Temperature",
+                  Units="\u00b0C",
+                  Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_MICR",Characteristic=="Water Temperature" ) %>% 
+                    dplyr::select(Date,Value), 
+                  UpperPoint=20)
+    
+    
     GWMP<-addSite(park=GWMP,SiteCode="NCRN_GWMP_MIRU",SiteName = "Mine Run", Coordinates=numeric(),Type="Stream")
     GWMP<-addSite(park=GWMP,SiteCode="NCRN_GWMP_PIRU",SiteName = "Pimmit Run", Coordinates=numeric(),Type="Stream")
     GWMP<-addSite(park=GWMP,SiteCode="NCRN_GWMP_TURU",SiteName = "Turkey Run", Coordinates=numeric(),Type="Stream")
-  
-  GREE<-new("Park", 
-            ParkCode="GREE", 
-            ShortName="Greenbelt", 
-            LongName="Greenbelt Park", 
-            Network="NCRN"
-  ) 
-    GREE<-addSite(park=GREE,SiteCode="NCRN_NACE_STCK",SiteName = "Still Creek", Coordinates=numeric(),Type="Stream")
   
   HAFE<-new("Park", 
             ParkCode="HAFE", 
