@@ -5,7 +5,7 @@
 \title{getWData}
 \usage{
 getWData(object, sitecode = NA, charname = NA, mindate = NA,
-  maxdate = NA)
+  maxdate = NA, months = NA, years = NA, wyears = NA)
 }
 \arguments{
 \item{object}{Either a \code{Characteristic} object a \code{Site} object, a \code{Park} object or a \code{list} of such objects.}
@@ -17,6 +17,12 @@ getWData(object, sitecode = NA, charname = NA, mindate = NA,
 \item{mindate}{The earliest date of data to include, in quotes. Date is in the same format as the \code{Date} in the \code{Data} slot.}
 
 \item{maxdate}{The latest date of data to include, in quotes. Date is in the same format as the \code{Date} in the \code{Data} slot.}
+
+\item{months}{A numeric vector corresponding to months of the year. Only data from those months will be returned.}
+
+\item{years}{A numeric vector corresponding to calendar years. Only data from those months will be returned.}
+
+\item{wyears}{A numeric vector correspoing to the water years. Only data from those water years will be returned.}
 }
 \value{
 A \code{data.frame} based on the \code{Data} slot of \code{Charactersitic} objects.
@@ -27,6 +33,8 @@ Gets data from \code{Characteristic} objects and formats it for ease in analysis
 \details{
 This fuction is intended to be the primary method for accessing water data. Data from various \code{objects} (see below) is comined into a single \code{data.frame} along with comumns indicating which park/site/characteristic the data is from. 
  
-   If \code{object} is a \code{Charactersitic} object \code{getWData} will return a \code{data.frame} with colums consisting of \code{Date} and \code{Value} from the \code{Data} slot as well as a column named \code{Characteristic} with the data from the {charname} slot. If \code{object} is a \code{Site} object it will return a \code{data.frame} that also includes a column named \code{Site} which comes from the \code{SiteCode} slot. If \code{object} is a \code{Park} object then a column named \code{Park} is included which comes from the \code{ParkCode} slot.
+   If \code{object} is a \code{Charactersitic} object \code{getWData} will return a \code{data.frame} with colums consisting of \code{Date} and \code{Value} from the \code{Data} slot as well as a column named \code{Characteristic} with the data from the {charname} slot. If \code{object} is a \code{Site} object it will return a \code{data.frame} that also includes a column named \code{Site} which comes from the \code{SiteCode} slot. If \code{object} is a \code{Park} object then a column named \code{Park} is included which comes from the \code{ParkCode} slot.  
+   
+   Data can be filtered in a variety of ways. A date range can be selected by using the \code{mindate} and/or \code{maxdate} arguments. Dates passed to these arguments must be in text format and the same format as the dates in the data. The \code{months} argument will filter for data from one or more months. This argument requires months to be listed as one or more integers, e.g. \code{months=c(3,4)} will return only data collected in March or April. If \code{NA} is passed to \code{months} (the default), or \code{NA} is an element of the vector passed to \code{months} then data from all months will be returned. The \code{years} argument works in the same way, except that it only returns data from specific years. The \code{wyears} argument is the similar to \code{years} except that it filters by "water year". USGS water years start on October 1st and end on September 30th, so water year 2010 went from October 1st 2009 through September 30th 2010.
 }
 
