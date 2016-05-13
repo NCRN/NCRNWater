@@ -4,7 +4,8 @@
 \alias{getWData}
 \title{getWData}
 \usage{
-getWData(object, sitecode = NA, charname = NA)
+getWData(object, sitecode = NA, charname = NA, mindate = NA,
+  maxdate = NA)
 }
 \arguments{
 \item{object}{Either a \code{Characteristic} object a \code{Site} object, a \code{Park} object or a \code{list} of such objects.}
@@ -12,6 +13,10 @@ getWData(object, sitecode = NA, charname = NA)
 \item{sitecode}{One of more sitecodes, in quotes. If \code{object} is a \code{Park} object or a \code{list} of \code{Park} objects, then the site code argument can be used to select which sites should be ssued}
 
 \item{charname}{Name of one or more characteristics, in quotes.}
+
+\item{mindate}{The earliest date of data to include, in quotes. Date is in the same format as the \code{Date} in the \code{Data} slot.}
+
+\item{maxdate}{The latest date of data to include, in quotes. Date is in the same format as the \code{Date} in the \code{Data} slot.}
 }
 \value{
 A \code{data.frame} based on the \code{Data} slot of \code{Charactersitic} objects.

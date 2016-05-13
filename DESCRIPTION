@@ -1,8 +1,8 @@
 Package: NCRNWater
 Type: Package
 Title: Data analysis and visualization for NCRN water monitoring.
-Version: 0.11.0
-Date: 2016-05-12
+Version: 0.11.1
+Date: 2016-05-13
 Author: John Paul Schmit
 Maintainer: John Paul Schmit <john_schmit@nps.gov>
 Description: This pacakge is designed to analyze and visualize data from the
