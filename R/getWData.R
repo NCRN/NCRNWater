@@ -21,7 +21,8 @@
 #' @param months A numeric vector corresponding to months of the year. Only data from those months will be returned.
 #' @param years A numeric vector corresponding to calendar years. Only data from those months will be returned.
 #' @param wyears A numeric vector correspoing to the water years. Only data from those water years will be returned.
-#' 
+#' @param minvalue A number, indicating that only measuerments wtih values greater than or equal to \code{minvalue} should be returned.
+#' @param maxalue A number, indicating that only measuerments wtih values less than or equal to \code{maxvalue} should be returned.
 #' 
 #' @return A \code{data.frame} based on the \code{Data} slot of \code{Charactersitic} objects. 
 #' 
@@ -33,13 +34,14 @@
 #' 
 #' @export
 
-setGeneric(name="getWData",function(object,sitecode=NA,charname=NA,mindate=NA,maxdate=NA,months=NA,years=NA,wyears=NA){standardGeneric("getWData")},signature=c("object") )
+setGeneric(name="getWData",function(object,sitecode=NA,charname=NA,mindate=NA,maxdate=NA,months=NA,years=NA,wyears=NA,
+                                    minvalue=NA,maxvalue=NA){standardGeneric("getWData")},signature=c("object") )
 
 
 #### Given a list, break it down and feed it back to getWData ####
 setMethod(f="getWData", signature=c(object="list"),
-          function(object,sitecode,charname,mindate,maxdate,months,years,wyears){
-            lapply(object,FUN=getWData, sitecode=sitecode, charname=charname, mindate=mindate, maxdate=maxdate,months=months,years=years, wyears=wyears) %>% 
+          function(object,sitecode,charname,mindate,maxdate,months,years,wyears,minvalue,maxvalue){
+            lapply(object,FUN=getWData, sitecode=sitecode, charname=charname, mindate=mindate, maxdate=maxdate,months=months,years=years, wyears=wyears,minvalue=minvalue,maxvalue=maxvalue) %>% 
             bind_rows() %>% 
             as.data.frame %>% 
             return
@@ -47,9 +49,10 @@ setMethod(f="getWData", signature=c(object="list"),
 
 #### Given one park get the sites and run again ####
 setMethod(f="getWData", signature=c(object="Park"),
-     function(object,sitecode,charname,mindate,maxdate,months,years,wyears){
+     function(object,sitecode,charname,mindate,maxdate,months,years,wyears,minvalue,maxvalue){
         getSites(object, sitecode=sitecode) %>% 
-        lapply(getWData, charname=charname, mindate=mindate, maxdate=maxdate, months=months,years=years,wyears=wyears) %>% 
+        lapply(getWData, charname=charname, mindate=mindate, maxdate=maxdate, months=months,years=years,wyears=wyears,
+               minvalue=minvalue,maxvalue=maxvalue) %>% 
         bind_rows() %>% 
         mutate(Park=getParkInfo(object,info='ParkCode')) %>% 
         as.data.frame %>% 
@@ -59,9 +62,9 @@ setMethod(f="getWData", signature=c(object="Park"),
 
 #### Given one Site get the characteristics and run again ####
 setMethod(f="getWData", signature=c(object="Site"),
-     function(object,charname,mindate,maxdate,months,years,wyears){
+     function(object,charname,mindate,maxdate,months,years,wyears,minvalue,maxvalue){
          getChars(object,charname=charname) %>% 
-         lapply(getWData,mindate=mindate, maxdate=maxdate,months=months,years=years,wyears=wyears) %>% 
+         lapply(getWData,mindate=mindate, maxdate=maxdate,months=months,years=years,wyears=wyears,minvalue=minvalue,maxvalue=maxvalue) %>% 
          bind_rows() %>%
          mutate(Site=getSiteInfo(object, info="SiteCode")) %>% 
          as.data.frame %>% 
@@ -71,7 +74,7 @@ setMethod(f="getWData", signature=c(object="Site"),
 
 #### Given one Characteristic get the data ####
 setMethod(f="getWData", signature=c(object="Characteristic"),
-  function(object,mindate,maxdate, months,years,wyears){
+  function(object,mindate,maxdate, months,years,wyears,minvalue,maxvalue){
      OutData<-data.frame(c(getCharInfo(object,info="Data"), Characteristic= getCharInfo(object,info="CharName")), stringsAsFactors = FALSE) 
       
     if(!is.na(mindate)) OutData<-filter(OutData, Date>mindate)
@@ -81,12 +84,12 @@ setMethod(f="getWData", signature=c(object="Characteristic"),
       
     if(all(!is.na(wyears))){ 
       #need to get data ranges for the water years, allowing for non-consecutive years
-      MyIntervals<-lapply(wyears,FUN=function(x) {interval(start=mdy(paste0("01-01-",x))-months(3), end=mdy(paste0("12-30-",x))-months(3)) })
-      OutData<-filter(OutData, outer(OutData$Date, do.call("c", MyIntervals), "%within%") %>% rowSums >0) #filtering here, a pain.
+      MyIntervals<-lapply(wyears,FUN=function(x) {interval(start=mdy(paste0("10-01-",x-1)), end=mdy(paste0("09-30-",x)) ) })
+      OutData<-filter(OutData, outer(OutData$Date, do.call("c", MyIntervals), "%within%") %>% rowSums >0) #filtering here
     } 
-      
-      
-      ### To do: min and max values
-      
-      return(OutData)
+    
+    if(!is.na(minvalue)) OutData<-filter(OutData, Value>=minvalue)
+    if(!is.na(maxvalue)) OutData<-filter(OutData, Value<=maxvalue)  
+    
+    return(OutData)
 })

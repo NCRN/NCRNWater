@@ -5,7 +5,8 @@
 \title{getWData}
 \usage{
 getWData(object, sitecode = NA, charname = NA, mindate = NA,
-  maxdate = NA, months = NA, years = NA, wyears = NA)
+  maxdate = NA, months = NA, years = NA, wyears = NA, minvalue = NA,
+  maxvalue = NA)
 }
 \arguments{
 \item{object}{Either a \code{Characteristic} object a \code{Site} object, a \code{Park} object or a \code{list} of such objects.}
@@ -23,6 +24,10 @@ getWData(object, sitecode = NA, charname = NA, mindate = NA,
 \item{years}{A numeric vector corresponding to calendar years. Only data from those months will be returned.}
 
 \item{wyears}{A numeric vector correspoing to the water years. Only data from those water years will be returned.}
+
+\item{minvalue}{A number, indicating that only measuerments wtih values greater than or equal to \code{minvalue} should be returned.}
+
+\item{maxalue}{A number, indicating that only measuerments wtih values less than or equal to \code{maxvalue} should be returned.}
 }
 \value{
 A \code{data.frame} based on the \code{Data} slot of \code{Charactersitic} objects.
