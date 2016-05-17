@@ -1,6 +1,7 @@
 #' @include getWData.R
 #' @importFrom magrittr %>% 
 #' @importFrom lubridate year month
+#' @importFrom ggplot2 ggplot aes geom_boxplot
 
 #' 
 #' @title waterbox
@@ -12,7 +13,10 @@
 #' \describe{
 #' \item{"year"}{The default. Will prodice a boxplot for each year in the data}
 #' \item{"month"}{ Will prodoce a boxplot for each month, combining data across years. That is all January data will be in one box, all February data in another, etc.}
+#' \item{"site}{If more than one site is included in the input object, this will produce a different box for each site.}
+#' \item{"park"}{If more than one park is included int he input object, theis will prodice a different box for each park}
 #' }
+#' @param ylab, Text, defaults to \code{NA}. A label for the y-axis. If an \code{Characteristic}, \code{Site}, or \code{Park} object is passed to \code{object}, then the y-label will default to the Display Name and Units for the Charecteristic, unless overwitten by the \code{ylab} argument. If a \code{data.frame} is passed then the y-lable will either be the text from \code{ylab} or blank if \code{ylab} is left as \code{NA}.
 #' 
 #' @param ... Additional arguments used to select and filter data passed to \code{\link{getWData}}
 #' 
@@ -22,66 +26,40 @@
 #' 
 #' @export
 
-setGeneric(name="waterbox",function(object,groupby="year",...){standardGeneric("waterbox")},signature=c("object") )
+setGeneric(name="waterbox",function(object,groupby="year",ylab=NA,...){standardGeneric("waterbox")},signature=c("object") )
 setClassUnion(name="NCRNWaterObj",members=c("Park","Site","Characteristic"))
-#            setMethod(f="getWData", signature=c(object="list"),
-#                      function(object,sitecode,charname,mindate,maxdate,months,years,wyears,minvalue,maxvalue){
-#                        lapply(object,FUN=getWData, sitecode=sitecode, charname=charname, mindate=mindate, maxdate=maxdate,months=months,years=years, wyears=wyears,minvalue=minvalue,maxvalue=maxvalue) %>% 
-#                          bind_rows() %>% 
-#                          as.data.frame %>% 
-#                          return
-#                      })  
-           
-#            #### Given one park get the sites and run again ####
-#            setMethod(f="getWData", signature=c(object="Park"),
-#                      function(object,sitecode,charname,mindate,maxdate,months,years,wyears,minvalue,maxvalue){
-#                        getSites(object, sitecode=sitecode) %>% 
-#                          lapply(getWData, charname=charname, mindate=mindate, maxdate=maxdate, months=months,years=years,wyears=wyears,
-#                                 minvalue=minvalue,maxvalue=maxvalue) %>% 
-#                          bind_rows() %>% 
-#                          mutate(Park=getParkInfo(object,info='ParkCode')) %>% 
-#                          as.data.frame %>% 
-#                          return
-#                      })
-           
-#            
-#            #### Given one Site get the characteristics and run again ####
-#            setMethod(f="getWData", signature=c(object="Site"),
-#                      function(object,charname,mindate,maxdate,months,years,wyears,minvalue,maxvalue){
-#                        getChars(object,charname=charname) %>% 
-#                          lapply(getWData,mindate=mindate, maxdate=maxdate,months=months,years=years,wyears=wyears,minvalue=minvalue,maxvalue=maxvalue) %>% 
-#                          bind_rows() %>%
-#                          mutate(Site=getSiteInfo(object, info="SiteCode")) %>% 
-#                          as.data.frame %>% 
-#                          return
-#                      })
-#            
-           
-           #### Given one Characteristic get the data ####
+
+setMethod(f="waterbox", signature=c(object="list"),
+          function(object, groupby,ylab,...){
+            PlotData<-getWData(object=object,...)
+            waterbox(object=PlotData, groupby=groupby,ylab=ylab)
+})
+
 setMethod(f="waterbox", signature=c(object="NCRNWaterObj"),
-                     function(object,groupby,...){
+                     function(object,groupby,ylab,...){
                        PlotData<-getWData(object=object,...)
-                       waterbox(object=PlotData,groupby=groupby)
+                       waterbox(object=PlotData,groupby=groupby,ylab=ylab)
 })
 
 setMethod(f="waterbox", signature=c(object="data.frame"),
-          function(object,groupby,...){
+          function(object,groupby,ylab){
             Grouper<-switch(groupby,
                             year=object$Date %>% year %>% factor,
-                            month=object$Date %>% month %>% factor)
-            
+                            month=object$Date %>% month %>% factor,
+                            site=object$Site,
+                            park=object$Park)
+            if(is.na(ylab)) ylab<-""
             ggplot(object,aes(Grouper,Value)) +
-              geom_boxplot() %>%
-              return
-          })
+            geom_boxplot() +
+              scale_y_continuous(name=ylab) %>% 
+            return
+})
 
 
 ###
 # boxplot ideas
-# use getWdata to get a data set so do dots.
-# response will be Values
-# possible gropus are = year, month, site, park
 # can add thresholds if desired
+#limit data used to sets with x number of observations
 
 
 
