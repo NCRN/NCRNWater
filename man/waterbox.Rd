@@ -4,10 +4,13 @@
 \alias{waterbox}
 \title{waterbox}
 \usage{
-waterbox(object, groupby = "year", ylab = NA, ...)
+waterbox(object, charname, groupby = "year", yname = NA, xname = NA,
+  labels = NA, ...)
 }
 \arguments{
 \item{object}{Either a \code{data.frame} that is the output of \code{getWData}, a \code{Characteristic} object a \code{Site} object, a \code{Park} object or a \code{list} of such objects.}
+
+\item{charname}{Required if \code{object} is not a \code{data.frame}. Name, in quotes, of a single \code{Characteristic} whose data should be graphed.}
 
 \item{groupby}{Indicates how the data for the boxplot should be grouped. A text variable in quotes. Choices are:
 \describe{
@@ -17,12 +20,16 @@ waterbox(object, groupby = "year", ylab = NA, ...)
 \item{"park"}{If more than one park is included int he input object, theis will prodice a different box for each park}
 }}
 
-\item{ylab, }{Text, defaults to \code{NA}. A label for the y-axis. If an \code{Characteristic}, \code{Site}, or \code{Park} object is passed to \code{object}, then the y-label will default to the Display Name and Units for the Charecteristic, unless overwitten by the \code{ylab} argument. If a \code{data.frame} is passed then the y-lable will either be the text from \code{ylab} or blank if \code{ylab} is left as \code{NA}.}
+\item{yname}{Text, defaults to \code{NA}. A label for the y-axis. If an \code{Characteristic}, \code{Site}, or \code{Park} object is passed to \code{object}, then the y-label will default to the Display Name and Units for the Charecteristic, unless overwitten by the \code{yname} argument. If a \code{data.frame} is passed then the y-label will either be the text from \code{yname} or blank if \code{yname} is left as \code{NA}.}
+
+\item{xname}{Text, defaults to \code{NA}. A label for the x-axis. If a \code{Characteristic}, \code{Site}, or \code{Park} object is passed to \code{object}, then the x-label will default to whatever is indicated in \code{groupby}.unless overwitten by the \code{xname} argument. If a \code{data.frame} is passed then the x-label will either be the text from \code{xname} or blank if \code{xname} is left as \code{NA}.}
+
+\item{labels}{A character vector indicating the labels for the bars, defaults to NA. If labels are provided (one for each bar) they will be printed. If \code{object} is a \code{data.frame} and \code{labels} is \code{NA} then no labels will be printed. If \code{object} is a \code{Characteristic}, \code{Site}, or \code{Park} object, and \code{labels} is \code{NA} then the default will depend on the \code{gropby} argument. "year" will be labeled with 4 digit years, "month" with 3 letter months (Jan,Feb, etc), "site" with the site name from the \code{Site}'s \code{Display Name} slot and "park" with the \code{Park}'s short name from the \code{ShortName} slot.}
 
 \item{...}{Additional arguments used to select and filter data passed to \code{\link{getWData}}}
 }
 \value{
-
+Creates a boxplot
 }
 \description{
 Produces box plots from water data.
