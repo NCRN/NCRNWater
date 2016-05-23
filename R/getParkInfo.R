@@ -15,7 +15,7 @@
 #' 
 #' @export
 
-setGeneric(name="getParkInfo",function(object,info="ShortName"){standardGeneric("getParkInfo")},signature=c("object") )
+setGeneric(name="getParkInfo",function(object,info="ParkShortName"){standardGeneric("getParkInfo")},signature=c("object") )
 
 
 setMethod(f="getParkInfo", signature=c(object="list"),

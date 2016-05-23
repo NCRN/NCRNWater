@@ -4,7 +4,7 @@
 \alias{getParkInfo}
 \title{getParkInfo}
 \usage{
-getParkInfo(object, info = "ShortName")
+getParkInfo(object, info = "ParkShortName")
 }
 \arguments{
 \item{object}{Either a \code{Park} object or a \code{list} of such objects.}
