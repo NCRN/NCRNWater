@@ -23,6 +23,7 @@
 #' @param wyears A numeric vector correspoing to the water years. Only data from those water years will be returned.
 #' @param minvalue A number, indicating that only measuerments wtih values greater than or equal to \code{minvalue} should be returned.
 #' @param maxalue A number, indicating that only measuerments wtih values less than or equal to \code{maxvalue} should be returned.
+#' @param minobs  An integer indicating the minimum number of observations needed for a dataset to be returned. This is assessed after the other filters are applied. Defaults to 0.
 #' 
 #' @return A \code{data.frame} based on the \code{Data} slot of \code{Charactersitic} objects. 
 #' 
@@ -31,19 +32,20 @@
 #'    If \code{object} is a \code{Charactersitic} object \code{getWData} will return a \code{data.frame} with colums consisting of \code{Date} and \code{Value} from the \code{Data} slot as well as a column named \code{Characteristic} with the data from the {charname} slot. If \code{object} is a \code{Site} object it will return a \code{data.frame} that also includes a column named \code{Site} which comes from the \code{SiteCode} slot. If \code{object} is a \code{Park} object then a column named \code{Park} is included which comes from the \code{ParkCode} slot.  
 #'    
 #'    Data can be filtered in a variety of ways. A date range can be selected by using the \code{mindate} and/or \code{maxdate} arguments. Dates passed to these arguments must be in text format and the same format as the dates in the data. The \code{months} argument will filter for data from one or more months. This argument requires months to be listed as one or more integers, e.g. \code{months=c(3,4)} will return only data collected in March or April. If \code{NA} is passed to \code{months} (the default), or \code{NA} is an element of the vector passed to \code{months} then data from all months will be returned. The \code{years} argument works in the same way, except that it only returns data from specific years. The \code{wyears} argument is the similar to \code{years} except that it filters by "water year". USGS water years start on October 1st and end on September 30th, so water year 2010 went from October 1st 2009 through September 30th 2010.
+#'  
 #'    
-#'    If an \code{Characteristic} object has an empty data slot, or the filtering options are such that no data meets the criteria, then a \code{data.frame} with zero rows in returned. 
+#'    If an \code{Characteristic} object has an empty data slot, or the filtering options are such that no data meets the criteria, then a \code{data.frame} with zero rows in returned. An empty \code{data.frame} is also returned if after filtering there are fewer observatiosn than \code{minobs}. This can be useful when getting data for analysis or graphics and you only wish to use datasets with sufficient observations. 
 #' 
 #' @export
 
 setGeneric(name="getWData",function(object,sitecode=NA,charname=NA,mindate=NA,maxdate=NA,months=NA,years=NA,wyears=NA,
-                                    minvalue=NA,maxvalue=NA){standardGeneric("getWData")},signature=c("object") )
+                                    minvalue=NA,maxvalue=NA,minobs=0){standardGeneric("getWData")},signature=c("object") )
 
 
 #### Given a list, break it down and feed it back to getWData ####
 setMethod(f="getWData", signature=c(object="list"),
-          function(object,sitecode,charname,mindate,maxdate,months,years,wyears,minvalue,maxvalue){
-            lapply(object,FUN=getWData, sitecode=sitecode, charname=charname, mindate=mindate, maxdate=maxdate,months=months,years=years, wyears=wyears,minvalue=minvalue,maxvalue=maxvalue) %>% 
+          function(object,sitecode,charname,mindate,maxdate,months,years,wyears,minvalue,maxvalue,minobs){
+            lapply(object,FUN=getWData, sitecode=sitecode, charname=charname, mindate=mindate, maxdate=maxdate,months=months,years=years, wyears=wyears,minvalue=minvalue,maxvalue=maxvalue,minobs=minobs) %>% 
             bind_rows() %>% 
             as.data.frame %>% 
             return
@@ -51,10 +53,10 @@ setMethod(f="getWData", signature=c(object="list"),
 
 #### Given one park get the sites and run again ####
 setMethod(f="getWData", signature=c(object="Park"),
-     function(object,sitecode,charname,mindate,maxdate,months,years,wyears,minvalue,maxvalue){
+     function(object,sitecode,charname,mindate,maxdate,months,years,wyears,minvalue,maxvalue,minobs){
         getSites(object, sitecode=sitecode) %>% 
         lapply(getWData, charname=charname, mindate=mindate, maxdate=maxdate, months=months,years=years,wyears=wyears,
-               minvalue=minvalue,maxvalue=maxvalue) %>% 
+               minvalue=minvalue,maxvalue=maxvalue,minobs=minobs) %>% 
         bind_rows() %>% 
         mutate(Park=getParkInfo(object,info='ParkCode')) %>% 
         as.data.frame %>% 
@@ -64,9 +66,10 @@ setMethod(f="getWData", signature=c(object="Park"),
 
 #### Given one Site get the characteristics and run again ####
 setMethod(f="getWData", signature=c(object="Site"),
-     function(object,charname,mindate,maxdate,months,years,wyears,minvalue,maxvalue){
+     function(object,charname,mindate,maxdate,months,years,wyears,minvalue,maxvalue,minobs){
          getChars(object,charname=charname) %>% 
-         lapply(getWData,mindate=mindate, maxdate=maxdate,months=months,years=years,wyears=wyears,minvalue=minvalue,maxvalue=maxvalue) %>% 
+         lapply(getWData,mindate=mindate, maxdate=maxdate,months=months,years=years,wyears=wyears,minvalue=minvalue,
+                maxvalue=maxvalue,minobs=minobs) %>% 
          bind_rows() %>%
          mutate(Site=getSiteInfo(object, info="SiteCode")) %>% 
          as.data.frame %>% 
@@ -76,7 +79,7 @@ setMethod(f="getWData", signature=c(object="Site"),
 
 #### Given one Characteristic get the data ####
 setMethod(f="getWData", signature=c(object="Characteristic"),
-  function(object,mindate,maxdate, months,years,wyears,minvalue,maxvalue){
+  function(object,mindate,maxdate, months,years,wyears,minvalue,maxvalue,minobs){
      OutData<-tryCatch({    ### tryCatch is here if there data slot is empty 
         data.frame(c(getCharInfo(object,info="Data"), Characteristic= getCharInfo(object,info="CharName")), stringsAsFactors = FALSE)
        },
@@ -97,7 +100,9 @@ setMethod(f="getWData", signature=c(object="Characteristic"),
     } 
     
     if(!is.na(minvalue)) OutData<-filter(OutData, Value>=minvalue)
-    if(!is.na(maxvalue)) OutData<-filter(OutData, Value<=maxvalue)  
+    if(!is.na(maxvalue)) OutData<-filter(OutData, Value<=maxvalue)
+    if(nrow(OutData)<minobs) return(NULL)
+    
     
     return(OutData)
 })

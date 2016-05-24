@@ -2,7 +2,7 @@
 #' @importFrom magrittr %>% 
 #' @importFrom lubridate year month
 #' @importFrom ggplot2 ggplot aes geom_boxplot scale_x_discrete labs theme_bw theme element_blank geom_hline
-#' @importFrom plotly ggplotly
+#' @importFrom plotly ggplotly config
 
 #' 
 #' @title waterbox
@@ -69,20 +69,20 @@ setMethod(f="waterbox", signature=c(object="data.frame"),
                             month=object$Date %>% month(label=T) %>% unique %>% sort %>% as.character,
                             site=object$Site %>% unique,
                             park=object$Park %>% unique)
+            
             OutPlot<-ggplot(object,aes(Grouper,Value)) +
               geom_boxplot() +
-              {if (is.numeric(points)) geom_hline(yintercept=points)}+
+              {if (is.numeric(points)) geom_hline(yintercept=points,color="red",linetype="dashed",size=1.1)}+
               labs(title=title,y=yname)+
               scale_x_discrete(name=xname,labels=labels)+
               theme_bw()+
               theme(panel.grid = element_blank())
-            ifelse(webplot, return(ggplotly(OutPlot)),return(OutPlot))
+            ifelse(webplot, return(ggplotly(OutPlot) %>% plotly::config(displaylogo=F)),return(OutPlot))
 })
 
 
 ###
 # boxplot ideas
-# can add thresholds if desired
 #limit data used to sets with x number of observations
 
 
