@@ -1,13 +1,14 @@
 #' @include getWData.R
+#' @include waterbox.R
 #' @importFrom magrittr %>% 
 #' @importFrom lubridate year month
-#' @importFrom ggplot2 ggplot aes geom_boxplot scale_x_discrete labs theme_bw theme element_blank geom_hline
+#' @importFrom ggplot2 ggplot aes geom_point labs theme_bw theme element_blank geom_hline geom_line scale_color_discrete scale_shape_manual scale_x_continuous
 #' @importFrom plotly ggplotly config
 
 #' 
-#' @title waterbox
+#' @title waterseries
 #' 
-#' @description Produces box plots from water data. 
+#' @description Produces a time series plot from water data. 
 #' 
 #' @param object Either a \code{data.frame} that is the output of \code{getWData}, a \code{Characteristic} object a \code{Site} object, a \code{Park} object or a \code{list} of such objects.
 #' @param charname Required if \code{object} is not a \code{data.frame}. Name, in quotes, of a single \code{Characteristic} whose data should be graphed.
@@ -33,54 +34,62 @@
 #' 
 #' @export
 
-setGeneric(name="waterbox",function(object,charname, by="year",points=TRUE,yname=NA,xname=NA,labels=NA,title=NULL,webplot=FALSE,...){standardGeneric("waterbox")},signature=c("object") )
-
-setClassUnion(name="NCRNWaterObj", members=c("Park","Site","Characteristic","list"))
+setGeneric(name="waterseries",function(object,charname, by="none",points=TRUE,yname=NA,xname=NA,labels=NA,title=NULL,webplot=FALSE,...){standardGeneric("waterseries")},signature=c("object") )
 
 
-setMethod(f="waterbox", signature=c(object="NCRNWaterObj"),
-  function(object,charname,by,points,yname,xname,labels,title,webplot,...){
-   PlotData<-getWData(object=object,charname=charname,...)
-   if(is.na(yname)) yname<-paste0(getCharInfo(object=object, charname=charname, info="DisplayName")," (",
-                                getCharInfo(object=object, charname=charname, info="Units"),")") %>% unique
-   if(is.na(xname)) xname<-switch(by,
-                          year="Year",
-                          month="Month",
-                          site="Site",
-                          park="Park"
-                    )
-   
-   if(points) points<-c(getCharInfo(object=object,charname=charname, 
-                                    info="LowerPoint"),getCharInfo(object=object,charname=charname, info="UpperPoint")) %>% unlist %>% unique
-   waterbox(object=PlotData,by=by,points=points,yname=yname,xname=xname,labels=labels,title=title,webplot=webplot)
-})
 
-setMethod(f="waterbox", signature=c(object="data.frame"),
+setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
+          function(object,charname,by,points,yname,xname,labels,title,webplot,...){
+            PlotData<-getWData(object=object,charname=charname,...)
+            if(is.na(yname)) yname<-paste0(getCharInfo(object=object, charname=charname, info="DisplayName")," (",
+                                           getCharInfo(object=object, charname=charname, info="Units"),")") %>% unique
+            if(is.na(xname)) xname<-switch(by,
+                                           none="",
+                                           year="Month",
+                                           month="Year",
+                                           site="Date",
+                                           park="Date"
+            )
+            
+            if(points) points<-c(getCharInfo(object=object,charname=charname, 
+                                             info="LowerPoint"),getCharInfo(object=object,charname=charname, info="UpperPoint")) %>% unlist %>% unique
+            waterseries(object=PlotData,by=by,points=points,yname=yname,xname=xname,labels=labels,title=title,webplot=webplot)
+          })
+
+setMethod(f="waterseries", signature=c(object="data.frame"),
           function(object,by,points,yname,xname,labels,title,webplot){
             Grouper<-switch(by,
+                            none=factor(1),
                             year=object$Date %>% year %>% factor,
                             month=object$Date %>% month(label=T) %>% factor,
-                            site=object$Site,
-                            park=object$Park)
+                            site=object$Site %>% factor,
+                            park=object$Park %>% factor)
             if(is.na(yname)) yname<-""
             if(all(is.na(xname))) xname<-""
             if(all(is.na(labels))) labels<-switch(by,
-                            year=object$Date %>% year %>% unique,
-                            month=object$Date %>% month(label=T) %>% unique %>% sort %>% as.character,
-                            site=object$Site %>% unique,
-                            park=object$Park %>% unique)
+                                                  year=object$Date %>% year %>% unique,
+                                                  month=object$Date %>% month(label=T) %>% unique %>% sort %>% as.character,
+                                                  site=object$Site %>% unique,
+                                                  park=object$Park %>% unique)
             
-            OutPlot<-ggplot(object,aes(Grouper,Value)) +
-              geom_boxplot() +
-              {if (is.numeric(points)) geom_hline(yintercept=points,color="red",linetype="dashed",size=1.1)}+
-              labs(title=title,y=yname)+
-              scale_x_discrete(name=xname,labels=labels)+
-              theme_bw()+
-              theme(panel.grid = element_blank())
+            Xaxis<-if(by=="year") month(object$Date,label=F) else object$Date
+           
+            
+            OutPlot<-ggplot(object,aes(Xaxis,Value,color=Grouper,shape=Grouper)) +
+            
+              geom_point( size=1.75) +
+              geom_line(size=.8) +
+              scale_color_discrete(name="legend",labels=labels) +
+              scale_shape_manual(name="legend",values=1:nlevels(Grouper), labels=labels) +
+              {if(by=="year") scale_x_continuous(name=xname,labels=Xaxis %>% unique %>% sort %>% month(T) %>% as.character, breaks=1:12)} +
+              {if (is.numeric(points)) geom_hline(yintercept=points,color="red",linetype="dashed",size=1.1)} +
+              labs(title=title,y=yname,x=xname) +
+              theme_bw() +
+              theme(panel.grid = element_blank(), legend.title=element_blank(),legend.position=if(by=="none") "none" else "bottom")
+            
             ifelse(webplot, return(ggplotly(OutPlot) %>% plotly::config(displaylogo=F)),return(OutPlot))
 })
 
 
 
 
-       
