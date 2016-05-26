@@ -1,7 +1,7 @@
 Package: NCRNWater
 Type: Package
 Title: Data analysis and visualization for NCRN water monitoring.
-Version: 0.13.0
+Version: 0.14.0
 Date: 2016-05-25
 Author: John Paul Schmit
 Maintainer: John Paul Schmit <john_schmit@nps.gov>
@@ -13,10 +13,10 @@ LazyData: true
 Depends:
     R (>= 3.1.2)
 Imports:
-  dplyr,
-  ggplot2,
-  lubridate,
-  plotly
+    dplyr,
+    ggplot2,
+    lubridate,
+    plotly
 RoxygenNote: 5.0.1
 Collate:
     'NCRNWater_Characteristic_Class_def.R'
@@ -32,4 +32,5 @@ Collate:
     'getWData.R'
     'importNCRNWater.R'
     'waterbox.R'
+    'waterheat.R'
     'waterseries.R'
