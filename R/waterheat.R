@@ -2,7 +2,7 @@
 #' @include waterbox.R
 #' @importFrom magrittr %>% 
 #' @importFrom lubridate year month
-#' @importFrom ggplot2 ggplot aes geom_raster scale_fill_gradientn scale_y_reverse scale_x_discrete labs theme_bw theme element_blank geom_hline
+#' @importFrom ggplot2 ggplot aes geom_raster scale_fill_gradientn element_rect labs theme_bw theme element_blank 
 #' @importFrom plotly ggplotly config
 
 #' 
@@ -68,14 +68,21 @@ setMethod(f="waterheat", signature=c(object="data.frame"),
                                                   month=object$Date %>% month(label=T) %>% unique %>% sort %>% as.character,
                                                   site=object$Site %>% unique,
                                                   park=object$Park %>% unique)
+            object<-object[order(object$Date),]
+            
+            
+            ### make new dataframe for heat map.
+            HeatData=data.frame
+            HeatData$Horiz<--seq(from=min(object$Date), to=max(object$Date), by="month") %>% format("%b-%y") %>% factor(levels(unique(.)))
+            
             Vert<-switch(by,
                          month=object$Date %>% month(T) %>% factor(levels=rev(levels(.))),
                           site=object$Site
             )
             Horiz<-switch(by,
                           month=object$Date %>% year %>% factor,
-                          site=object$Date %>%  format("%b-%y")  #paste0(year(object$Date),"-",month(object$Date,T))
-            )
+                          site=object$Date %>%  format("%b-%y") %>% factor(levels=unique(.))
+             )
             if(is.na(xname)) xname<-switch(by,
                           month="Year",
                           site="Date")
@@ -83,19 +90,16 @@ setMethod(f="waterheat", signature=c(object="data.frame"),
             if(is.na(yname)) yname<-switch(by,
                                            month="Month",
                                            site="Site")
-            
+           # return(list(Horiz=Horiz, Vert=Vert, fill=object$Value))
             OutPlot<-ggplot(object,aes(x=Horiz,y=Vert,fill=Value)) +
-              geom_raster()+
+              geom_raster() +
               scale_fill_gradientn(colors=c("blue","white","red")) +
-              #scale_y_reverse()
-            # +
-            #   {if (is.numeric(points)) geom_hline(yintercept=points,color="red",linetype="dashed",size=1.1)}+
-               labs(title=title,y=yname,x=xname)
-            #   scale_x_discrete(name=xname,labels=labels)+
-            #   theme_bw()+
-            #  theme(panel.grid = element_blank())
+               labs(title=title,y=yname,x=xname)+
+               theme_bw()+
+              theme(panel.grid = element_blank(), panel.background=element_rect(fill="grey",color="grey"))
+            
             ifelse(webplot, return(ggplotly(OutPlot) %>% plotly::config(displaylogo=F)),return(OutPlot))
-          })
+})
 
 
 
