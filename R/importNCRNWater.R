@@ -43,12 +43,12 @@ importNCRNWater<-function(Dir){
                           Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ANTI_SHCK",Characteristic=="ANC" ) %>% 
                             dplyr::select(Date,Value), 
                           LowerPoint=600)
-  ANTI<-addChar(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+  ANTI<-addChar(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                           Units="%",
                           Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ANTI_SHCK",Characteristic=="DO (%)" ) %>% 
                             dplyr::select(Date,Value) 
                           )
-  ANTI<-addChar(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+  ANTI<-addChar(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                           Units="mg/l",
                           Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ANTI_SHCK",Characteristic=="DO (mg/L)" ) %>% 
                             dplyr::select(Date,Value), 
@@ -69,7 +69,7 @@ importNCRNWater<-function(Dir){
                             filter(SiteCode=="NCRN_ANTI_SHCK",Characteristic=="Specific conductance") %>%
                             dplyr::select(Date,Value), 
                           UpperPoint=171)
-  ANTI<-addChar(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+  ANTI<-addChar(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                           Units="mg/l",
                           Data=get("Indata",sys.frame(1)) %>%
                             filter(SiteCode=="NCRN_ANTI_SHCK",Characteristic=="Total Phosphorus 2009" ) %>% 
@@ -95,11 +95,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_BGHC",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_BGHC",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value))
-      CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_BGHC",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -120,7 +120,7 @@ importNCRNWater<-function(Dir){
                     filter(SiteCode=="NCRN_CATO_BGHC",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>%
                     filter(SiteCode=="NCRN_CATO_BGHC",Characteristic=="Total Phosphorus 2009" ) %>% 
@@ -139,11 +139,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_OWCK",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      CATO<-addChar(park=CATO, site="NCRN_CATO_OWCK", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      CATO<-addChar(park=CATO, site="NCRN_CATO_OWCK", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_OWCK",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value))
-      CATO<-addChar(park=CATO, site="NCRN_CATO_OWCK", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      CATO<-addChar(park=CATO, site="NCRN_CATO_OWCK", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_OWCK",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -163,7 +163,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_OWCK",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      CATO<-addChar(park=CATO, site="NCRN_CATO_OWCK", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      CATO<-addChar(park=CATO, site="NCRN_CATO_OWCK", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>%
                     filter(SiteCode=="NCRN_CATO_OWCK",Characteristic=="Total Phosphorus 2009" ) %>% 
@@ -181,11 +181,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_WHST",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      CATO<-addChar(park=CATO, site="NCRN_CATO_WHST", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      CATO<-addChar(park=CATO, site="NCRN_CATO_WHST", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_WHST",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      CATO<-addChar(park=CATO, site="NCRN_CATO_WHST", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      CATO<-addChar(park=CATO, site="NCRN_CATO_WHST", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_WHST",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -206,7 +206,7 @@ importNCRNWater<-function(Dir){
                     filter(SiteCode=="NCRN_CATO_WHST",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      CATO<-addChar(park=CATO, site="NCRN_CATO_WHST", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      CATO<-addChar(park=CATO, site="NCRN_CATO_WHST", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_WHST",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -229,11 +229,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_NACE_STCK",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      GREE<-addChar(park=GREE, site="NCRN_NACE_STCK", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      GREE<-addChar(park=GREE, site="NCRN_NACE_STCK", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_NACE_STCK",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      GREE<-addChar(park=GREE, site="NCRN_NACE_STCK", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      GREE<-addChar(park=GREE, site="NCRN_NACE_STCK", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_NACE_STCK",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -253,7 +253,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% 
                     filter(SiteCode=="NCRN_NACE_STCK",Characteristic=="Specific conductance") %>% dplyr::select(Date,Value), 
                   UpperPoint=171)
-      GREE<-addChar(park=GREE, site="NCRN_NACE_STCK", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      GREE<-addChar(park=GREE, site="NCRN_NACE_STCK", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_NACE_STCK",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -278,11 +278,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_MICR",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_MICR", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_MICR", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_MICR",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_MICR", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_MICR", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_MICR",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -302,7 +302,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_MICR",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_MICR", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_MICR", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_MICR",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -320,11 +320,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_MIRU",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_MIRU", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_MIRU", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_MIRU",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_MIRU", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_MIRU", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_MIRU",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -344,7 +344,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_MIRU",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_MIRU", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_MIRU", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_MIRU",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -361,11 +361,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_PIRU",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_PIRU", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_PIRU", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_PIRU",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_PIRU", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_PIRU", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_PIRU",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -385,7 +385,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_PIRU",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_PIRU", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      GWMP<-addChar(park=GWMP, site="NCRN_GWMP_PIRU", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_PIRU",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -402,11 +402,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_TURU",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-    GWMP<-addChar(park=GWMP, site="NCRN_GWMP_TURU", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+    GWMP<-addChar(park=GWMP, site="NCRN_GWMP_TURU", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_TURU",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-    GWMP<-addChar(park=GWMP, site="NCRN_GWMP_TURU", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+    GWMP<-addChar(park=GWMP, site="NCRN_GWMP_TURU", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_TURU",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -426,7 +426,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_TURU",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-    GWMP<-addChar(park=GWMP, site="NCRN_GWMP_TURU", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+    GWMP<-addChar(park=GWMP, site="NCRN_GWMP_TURU", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_TURU",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -449,11 +449,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_HAFE_FLSP",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=600)
-      HAFE<-addChar(park=HAFE, site="NCRN_HAFE_FLSP", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      HAFE<-addChar(park=HAFE, site="NCRN_HAFE_FLSP", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_HAFE_FLSP",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      HAFE<-addChar(park=HAFE, site="NCRN_HAFE_FLSP", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      HAFE<-addChar(park=HAFE, site="NCRN_HAFE_FLSP", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_HAFE_FLSP",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -473,7 +473,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_HAFE_FLSP",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      HAFE<-addChar(park=HAFE, site="NCRN_HAFE_FLSP", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      HAFE<-addChar(park=HAFE, site="NCRN_HAFE_FLSP", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_HAFE_FLSP",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -496,11 +496,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_MANA_YOBR",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      MANA<-addChar(park=MANA, site="NCRN_MANA_YOBR", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      MANA<-addChar(park=MANA, site="NCRN_MANA_YOBR", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_MANA_YOBR",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      MANA<-addChar(park=MANA, site="NCRN_MANA_YOBR", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      MANA<-addChar(park=MANA, site="NCRN_MANA_YOBR", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_MANA_YOBR",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -520,7 +520,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_MANA_YOBR",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      MANA<-addChar(park=MANA, site="NCRN_MANA_YOBR", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      MANA<-addChar(park=MANA, site="NCRN_MANA_YOBR", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_MANA_YOBR",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -543,11 +543,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_MONO_BUCK",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=600)
-      MONO<-addChar(park=MONO, site="NCRN_MONO_BUCK", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      MONO<-addChar(park=MONO, site="NCRN_MONO_BUCK", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_MONO_BUCK",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      MONO<-addChar(park=MONO, site="NCRN_MONO_BUCK", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      MONO<-addChar(park=MONO, site="NCRN_MONO_BUCK", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_MONO_BUCK",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -567,7 +567,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_MONO_BUCK",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      MONO<-addChar(park=MONO, site="NCRN_MONO_BUCK", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      MONO<-addChar(park=MONO, site="NCRN_MONO_BUCK", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_MONO_BUCK",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -584,11 +584,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_MONO_GAMI",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=600)
-      MONO<-addChar(park=MONO, site="NCRN_MONO_GAMI", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      MONO<-addChar(park=MONO, site="NCRN_MONO_GAMI", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_MONO_GAMI",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      MONO<-addChar(park=MONO, site="NCRN_MONO_GAMI", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      MONO<-addChar(park=MONO, site="NCRN_MONO_GAMI", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_MONO_GAMI",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -608,7 +608,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_MONO_GAMI",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      MONO<-addChar(park=MONO, site="NCRN_MONO_GAMI", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      MONO<-addChar(park=MONO, site="NCRN_MONO_GAMI", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_MONO_GAMI",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -632,11 +632,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_NACE_HECR",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      NACE<-addChar(park=NACE, site="NCRN_NACE_HECR", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      NACE<-addChar(park=NACE, site="NCRN_NACE_HECR", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_NACE_HECR",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      NACE<-addChar(park=NACE, site="NCRN_NACE_HECR", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      NACE<-addChar(park=NACE, site="NCRN_NACE_HECR", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_NACE_HECR",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -656,7 +656,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_NACE_HECR",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      NACE<-addChar(park=NACE, site="NCRN_NACE_HECR", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      NACE<-addChar(park=NACE, site="NCRN_NACE_HECR", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_NACE_HECR",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -673,11 +673,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_NACE_OXRU",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      NACE<-addChar(park=NACE, site="NCRN_NACE_OXRU", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      NACE<-addChar(park=NACE, site="NCRN_NACE_OXRU", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_NACE_OXRU",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      NACE<-addChar(park=NACE, site="NCRN_NACE_OXRU", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      NACE<-addChar(park=NACE, site="NCRN_NACE_OXRU", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_NACE_OXRU",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -697,7 +697,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_NACE_OXRU",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      NACE<-addChar(park=NACE, site="NCRN_NACE_OXRU", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      NACE<-addChar(park=NACE, site="NCRN_NACE_OXRU", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_NACE_OXRU",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -720,11 +720,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_BONE",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_BONE", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_BONE", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_BONE",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_BONE", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_BONE", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_BONE",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -744,7 +744,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_BONE",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_BONE", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_BONE", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_BONE",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -761,11 +761,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_CARU",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_CARU", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_CARU", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_CARU",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_CARU", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_CARU", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_CARU",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -785,7 +785,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_CARU",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_CARU", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_CARU", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_CARU",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -802,11 +802,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_MARU",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_MARU", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_MARU", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_MARU",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_MARU", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_MARU", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_MARU",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -826,7 +826,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_MARU",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_MARU", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_MARU", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_MARU",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -843,11 +843,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_NFQC",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_NFQC", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_NFQC", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_NFQC",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_NFQC", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_NFQC", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_NFQC",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -867,7 +867,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_NFQC",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_NFQC", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_NFQC", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_NFQC",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -884,11 +884,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_ORRU",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_ORRU", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_ORRU", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_ORRU",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_ORRU", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_ORRU", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_ORRU",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -908,7 +908,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_ORRU",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_ORRU", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_ORRU", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_ORRU",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -925,13 +925,13 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_SFQC",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_SFQC", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_SFQC", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_SFQC",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
       PRWI<-addChar(park=PRWI, site="NCRN_PRWI_SFQC", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
                   Units="mg/l",
-                  Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_SFQC",Characteristic=="DO (mg/L)" ) %>% 
+                  Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_SFQC",Characteristic=="DO" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=5.0)
       PRWI<-addChar(park=PRWI, site="NCRN_PRWI_SFQC", CharacteristicName="Nitrate", DisplayName="Nitrate",
@@ -949,7 +949,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_SFQC",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_SFQC", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_SFQC", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_SFQC",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -966,11 +966,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_SORU",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_SORU", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_SORU", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_SORU",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_SORU", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_SORU", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_SORU",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -990,7 +990,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_SORU",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_SORU", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_SORU", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_SORU",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1007,11 +1007,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_TARU",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_TARU", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_TARU", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_TARU",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_TARU", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_TARU", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_TARU",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1031,7 +1031,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_TARU",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_TARU", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_TARU", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_TARU",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1055,11 +1055,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_BAKE",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_BAKE", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_BAKE", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_BAKE",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_BAKE", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_BAKE", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_BAKE",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1079,7 +1079,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_BAKE",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_BAKE", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_BAKE", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_BAKE",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1096,11 +1096,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_BRBR",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_BRBR", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_BRBR", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_BRBR",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_BRBR", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_BRBR", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_BRBR",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1120,7 +1120,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_BRBR",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_BRBR", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_BRBR", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_BRBR",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1137,11 +1137,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_DUOA",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_DUOA", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_DUOA", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_DUOA",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_DUOA", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_DUOA", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_DUOA",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1161,7 +1161,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_DUOA",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_DUOA", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_DUOA", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_DUOA",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1178,11 +1178,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_FEBR",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_FEBR", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_FEBR", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_FEBR",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_FEBR", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_FEBR", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_FEBR",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1202,7 +1202,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_FEBR",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_FEBR", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_FEBR", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_FEBR",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1219,11 +1219,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_HACR",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-    ROCR<-addChar(park=ROCR, site="NCRN_ROCR_HACR", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+    ROCR<-addChar(park=ROCR, site="NCRN_ROCR_HACR", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_HACR",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-    ROCR<-addChar(park=ROCR, site="NCRN_ROCR_HACR", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+    ROCR<-addChar(park=ROCR, site="NCRN_ROCR_HACR", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_HACR",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1243,7 +1243,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_HACR",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-    ROCR<-addChar(park=ROCR, site="NCRN_ROCR_HACR", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+    ROCR<-addChar(park=ROCR, site="NCRN_ROCR_HACR", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_HACR",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1260,11 +1260,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_KLVA",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_KLVA", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_KLVA", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_KLVA",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_KLVA", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_KLVA", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_KLVA",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1284,7 +1284,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_KLVA",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_KLVA", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_KLVA", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_KLVA",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1301,11 +1301,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_LUBR",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_LUBR", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_LUBR", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_LUBR",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_LUBR", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_LUBR", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_LUBR",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1325,7 +1325,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_LUBR",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_LUBR", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_LUBR", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_LUBR",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1342,11 +1342,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_NOST",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_NOST", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_NOST", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_NOST",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_NOST", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_NOST", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_NOST",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1366,7 +1366,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_NOST",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_NOST", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_NOST", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_NOST",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1383,11 +1383,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_PHBR",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_PHBR", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_PHBR", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_PHBR",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_PHBR", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_PHBR", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_PHBR",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1407,7 +1407,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_PHBR",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_PHBR", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_PHBR", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_PHBR",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1424,11 +1424,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_ROC3",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_ROC3", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_ROC3", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_ROC3",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_ROC3", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_ROC3", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_ROC3",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1448,7 +1448,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_ROC3",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_ROC3", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_ROC3", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_ROC3",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1465,11 +1465,11 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_SVPS",Characteristic=="ANC" ) %>% 
                     dplyr::select(Date,Value), 
                   LowerPoint=200)
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_SVPS", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_SVPS", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                   Units="%",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_SVPS",Characteristic=="DO (%)" ) %>% 
                     dplyr::select(Date,Value) )
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_SVPS", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_SVPS", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                   Units="mg/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_SVPS",Characteristic=="DO (mg/L)" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1489,7 +1489,7 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_SVPS",Characteristic=="Specific conductance") %>%
                     dplyr::select(Date,Value), 
                   UpperPoint=171)
-      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_SVPS", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_SVPS", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                   Units="mg/l",
                   Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_SVPS",Characteristic=="Total Phosphorus 2009" ) %>% 
                     dplyr::select(Date,Value), 
@@ -1513,11 +1513,11 @@ importNCRNWater<-function(Dir){
                 Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_WOTR_CHCK",Characteristic=="ANC" ) %>% 
                   dplyr::select(Date,Value), 
                 LowerPoint=200)
-      WOTR<-addChar(park=WOTR, site="NCRN_WOTR_CHCK", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      WOTR<-addChar(park=WOTR, site="NCRN_WOTR_CHCK", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                 Units="%",
                 Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_WOTR_CHCK",Characteristic=="DO (%)" ) %>% 
                   dplyr::select(Date,Value) )
-      WOTR<-addChar(park=WOTR, site="NCRN_WOTR_CHCK", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      WOTR<-addChar(park=WOTR, site="NCRN_WOTR_CHCK", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                 Units="mg/l",
                 Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_WOTR_CHCK",Characteristic=="DO (mg/L)" ) %>% 
                   dplyr::select(Date,Value), 
@@ -1537,7 +1537,7 @@ importNCRNWater<-function(Dir){
                 Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_WOTR_CHCK",Characteristic=="Specific conductance") %>%
                   dplyr::select(Date,Value), 
                 UpperPoint=171)
-      WOTR<-addChar(park=WOTR, site="NCRN_WOTR_CHCK", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      WOTR<-addChar(park=WOTR, site="NCRN_WOTR_CHCK", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                 Units="mg/l",
                 Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_WOTR_CHCK",Characteristic=="Total Phosphorus 2009" ) %>% 
                   dplyr::select(Date,Value), 
@@ -1554,11 +1554,11 @@ importNCRNWater<-function(Dir){
                 Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_WOTR_WOTR",Characteristic=="ANC" ) %>% 
                   dplyr::select(Date,Value), 
                 LowerPoint=200)
-      WOTR<-addChar(park=WOTR, site="NCRN_WOTR_WOTR", CharacteristicName="DOper", DisplayName="Dissolved Oxygen (%)",
+      WOTR<-addChar(park=WOTR, site="NCRN_WOTR_WOTR", CharacteristicName="DOper", DisplayName="Dissolved Oxygen",
                 Units="%",
                 Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_WOTR_WOTR",Characteristic=="DO (%)" ) %>% 
                   dplyr::select(Date,Value) )
-      WOTR<-addChar(park=WOTR, site="NCRN_WOTR_WOTR", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen (mg/l) ",
+      WOTR<-addChar(park=WOTR, site="NCRN_WOTR_WOTR", CharacteristicName="DOmg", DisplayName="Dissolved Oxygen",
                 Units="mg/l",
                 Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_WOTR_WOTR",Characteristic=="DO (mg/L)" ) %>% 
                   dplyr::select(Date,Value), 
@@ -1578,7 +1578,7 @@ importNCRNWater<-function(Dir){
                 Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_WOTR_WOTR",Characteristic=="Specific conductance") %>%
                   dplyr::select(Date,Value), 
                 UpperPoint=171)
-      WOTR<-addChar(park=WOTR, site="NCRN_WOTR_WOTR", CharacteristicName="Phosporus", DisplayName="Total Phosphorus",
+      WOTR<-addChar(park=WOTR, site="NCRN_WOTR_WOTR", CharacteristicName="Phosphorus", DisplayName="Total Phosphorus",
                 Units="mg/l",
                 Data=get("Indata",sys.frame(1)) %>% filter(SiteCode=="NCRN_WOTR_WOTR",Characteristic=="Total Phosphorus 2009" ) %>% 
                   dplyr::select(Date,Value), 
