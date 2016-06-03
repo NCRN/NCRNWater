@@ -4,8 +4,9 @@
 \alias{waterheat}
 \title{waterheat}
 \usage{
-waterheat(object, charname, by = "year", yname = NA, xname = NA,
-  labels = NA, title = NULL, webplot = FALSE, ...)
+waterheat(object, charname, by = "site", yname = NA, xname = NA,
+  labels = NA, title = NULL, ltitle = NA, stat = "mean",
+  webplot = FALSE, ...)
 }
 \arguments{
 \item{object}{Required. Either a \code{data.frame} that is the output of \code{getWData}, a \code{Characteristic} object a \code{Site} object, a \code{Park} object or a \code{list} of such objects.}
@@ -25,6 +26,12 @@ waterheat(object, charname, by = "year", yname = NA, xname = NA,
 \item{labels}{A character vector indicating the labels for the ticks on the y-axis. bars, If left as \code{NA}, and \code{by} is "month", the tick labels will be the three letter abbreviation for the month, if \code{by} is "site", and object is a \code{Site} or \code{Park} object, then the tick labels will be the site names.}
 
 \item{title}{A title in the graph in quotes. Defauls to \code{NULL}, which indicates no title should be used.}
+
+\item{ltitle}{The title for the legend in quotes. Defaults to \code{NA}. If left as \code{NA} and \code{object} is a \code{Park}, \code{Site}, or \code{Characteristic} object, the title will be the characteristic name and units.}
+
+\item{stat}{Used to determine cell values is more than one observation corresponds to a single cell. One of four options:"mean","median",min" or "max", corresponing to the mean (the default), the meidan, the minimum or the maximum of all values for that cell.}
+
+\item{webplot}{If \code{TRUE} plot will be an interactive html plot by passing it to \code{\link{ggplotly}}? in the \code{plotly} package.}
 
 \item{...}{Additional arguments used to select and filter data passed to \code{\link{getWData}}}
 }

@@ -25,13 +25,19 @@
 #' 
 #' @param title A title in the graph in quotes. Defauls to \code{NULL}, which indicates no title should be used. 
 #' 
+#' @param ltitle The title for the legend in quotes. Defaults to \code{NA}. If left as \code{NA} and \code{object} is a \code{Park}, \code{Site}, or \code{Characteristic} object, the title will be the characteristic name and units. 
+#' 
+#' @param stat Used to determine cell values is more than one observation corresponds to a single cell. One of four options:"mean","median",min" or "max", corresponing to the mean (the default), the meidan, the minimum or the maximum of all values for that cell.
+#'  
+#' @param webplot If \code{TRUE} plot will be an interactive html plot by passing it to \code{\link{ggplotly}}? in the \code{plotly} package. 
+#' 
 #' @param ... Additional arguments used to select and filter data passed to \code{\link{getWData}}
 #' 
 #' @return Creates a heatmap
 #' 
 #' @export
 
-setGeneric(name="waterheat",function(object,charname, by="year",yname=NA,xname=NA,labels=NA,title=NULL,webplot=FALSE,...){standardGeneric("waterheat")},signature=c("object") )
+setGeneric(name="waterheat",function(object,charname, by="site",yname=NA,xname=NA,labels=NA,title=NULL,ltitle=NA,stat="mean", webplot=FALSE,...){standardGeneric("waterheat")},signature=c("object") )
 
 
 setMethod(f="waterheat", signature=c(object="NCRNWaterObj"),
@@ -41,65 +47,69 @@ setMethod(f="waterheat", signature=c(object="NCRNWaterObj"),
                               site=getSiteInfo(object,info="SiteName"),
                               month=NA
             )
-            waterheat(object=PlotData,by=by,yname=yname,xname=xname,labels=labels,title=title,webplot=webplot)
+            
+            if(is.na(ltitle)) ltitle <-paste0(getCharInfo(object=object, charname=charname, info="DisplayName")," (",
+                                           getCharInfo(object=object, charname=charname, info="Units"),")") %>% unique
+            
+            waterheat(object=PlotData,by=by,yname=yname,xname=xname,labels=labels,title=title,ltitle=ltitle,stat=stat, webplot=webplot)
           })
 
 
 setMethod(f="waterheat", signature=c(object="data.frame"),
-          function(object,by,yname,xname,labels,title,webplot){
-
-            object<-object[order(object$Date),]
+  function(object,by,yname,xname,labels,title,ltitle,stat, webplot){
+    object<-object[order(object$Date),]
             
+    ###* make new data.frame for heat map ####
+    HeatData<-data.frame(Horiz=switch(by,
+          month=object$Date %>% year %>% factor,
+          site=seq(from=min(object$Date), to=max(object$Date), by="month") %>% 
+            format("%b-%y") %>% factor(levels=unique(.)) %>% rep(.,times=object$Site %>% unique %>% length)
+        ))
             
-            ### make new data.frame for heat map.
-            HeatData<-data.frame(Horiz=switch(by,
-                month=object$Date %>% year %>% factor,
-                site=seq(from=min(object$Date), to=max(object$Date), by="month") %>% 
-                      format("%b-%y") %>% factor(levels=unique(.)) %>% rep(.,times=object$Site %>% unique %>% length)
-              )
-            )
-            
-            HeatData$Vert=switch(by,
-                month=object$Date %>% month(T) %>% factor(levels=rev(levels(.))),
-                site=rep(unique(object$Site), each=HeatData$Horiz %>% unique %>% length)
-            )
-           
-           HeatData <- switch(by,
-                              month=HeatData %>% left_join(object %>% select(Date, Value ) %>% 
-                                      mutate(Year=Date %>% year %>% factor, 
-                                             Date=Date %>% month(T) %>% factor(levels=levels(HeatData$Vert))),
-                                      by=c("Horiz"="Year", "Vert"="Date")),
-                              site= HeatData %>% left_join(object %>% select(Date, Site, Value ) %>%
-                                    mutate(Date=format(Date,"%b-%y") %>% factor(levels=levels(HeatData$Horiz))), 
-                                  by=c("Horiz"="Date","Vert"="Site"))
-           )
-
-            if(is.na(xname)) xname<-switch(by,
+    HeatData$Vert=switch(by,
+      month=object$Date %>% month(T) %>% factor(levels=rev(levels(.))),
+      site=rep(unique(object$Site), each=HeatData$Horiz %>% unique %>% length) %>% 
+        ordered(levels=ordered(.) %>% levels %>% rev)
+    )
+          
+    HeatData <- switch(by,
+      month=HeatData %>% 
+        left_join(object %>% select(Date, Value ) %>% 
+          mutate(Year=Date %>% year %>% factor, Date=Date %>% month(T) %>% factor(levels=levels(HeatData$Vert))),
+          by=c("Horiz"="Year", "Vert"="Date")),
+      site= HeatData %>% 
+        left_join(object %>% select(Date, Site, Value ) %>%
+          mutate(Date=format(Date,"%b-%y") %>% factor(levels=levels(HeatData$Horiz)), Site=ordered(Site,levels=levels(HeatData$Vert))), 
+          by=c("Horiz"="Date","Vert"="Site"))
+    )
+    
+    if(is.na(xname)) xname<-switch(by,
                           month="Year",
                           site="Date")
             
-            if(is.na(yname)) yname<-switch(by,
-                                           month="Month",
-                                           site="Site")
+    if(is.na(yname)) yname<-switch(by,
+                         month="Month",
+                         site="Site")
            
-           
-           if(all(is.na(labels))) labels<-switch(by,
-                                                 year=object$Date %>% year %>% unique,
-                                                 month=levels(HeatData$Vert),
-                                                 site=object$Site %>% unique,
-                                                 park=object$Park %>% unique)
-           
-            OutPlot<-ggplot(HeatData %>% group_by(Horiz,Vert) %>% 
-                              summarize(Value=mean(Value)),aes(x=Horiz,y=Vert,fill=Value)) +
-              geom_raster() +
-              scale_fill_gradientn(name="test",colors=c("blue","white","red")) +
-              labs(title=title,y=yname,x=xname)+
-              scale_y_discrete(labels=labels)+
-              theme_bw()+
-              theme(panel.grid = element_blank(), panel.background=element_rect(fill="grey",color="grey"),
-                    axis.text.x=element_text(angle=75,hjust=1))
+    if(all(is.na(labels))) labels<-switch(by,
+                           year=object$Date %>% year %>% unique,
+                           month=,site=levels(HeatData$Vert),
+                           #site=object$Site %>% unique,
+                           park=object$Park %>% unique)
+  #  return(HeatData$Vert)
+    
+    #### Make Graph ####
+      OutPlot<-ggplot(HeatData %>% group_by(Horiz,Vert) %>% 
+              summarize(Value=do.call(what=stat, args=list(x=Value, na.rm=T))),aes(x=Horiz,y=Vert,fill=Value)) +
+        geom_raster() +
+        scale_fill_gradientn(name=ltitle,colors=c("blue","white","red")) +
+        labs(title=title,y=yname,x=xname) +
+        scale_y_discrete(labels=labels) +
+        theme_bw() +
+        theme(panel.grid = element_blank(), panel.background=element_rect(fill="grey",color="grey"),
+              axis.text.x=element_text(angle=75,hjust=1))
             
-            if(webplot) return(ggplotly(OutPlot) %>% plotly::config(displaylogo=F)) else return(OutPlot)
+      if(webplot) return(ggplotly(OutPlot) %>% plotly::config(displaylogo=F)) else return(OutPlot)
 })
 
 
