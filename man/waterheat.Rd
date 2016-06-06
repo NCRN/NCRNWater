@@ -4,19 +4,21 @@
 \alias{waterheat}
 \title{waterheat}
 \usage{
-waterheat(object, charname, by = "site", yname = NA, xname = NA,
+waterheat(object, charname, by = "sitem", yname = NA, xname = NA,
   labels = NA, title = NULL, ltitle = NA, stat = "mean",
-  webplot = FALSE, ...)
+  siteorder = NA, webplot = FALSE, ...)
 }
 \arguments{
 \item{object}{Required. Either a \code{data.frame} that is the output of \code{getWData}, a \code{Characteristic} object a \code{Site} object, a \code{Park} object or a \code{list} of such objects.}
 
 \item{charname}{Required if \code{object} is not a \code{data.frame}. Name, in quotes, of a single \code{Characteristic} whose data should be graphed.}
 
-\item{by}{Indicates how the data for the boxplot should be grouped. A text variable in quotes. Choices are:
+\item{by}{Indicates how the data for the heatmnp should be grouped. A text variable in quotes. Choices are:
 \describe{
-\item{"month"}{ Will prodoce a boxplot for each month, combining data across years. That is all January data will be in one box, all February data in another, etc.}
-\item{"site}{If more than one site is included in the input object, this will produce a different box for each site.}
+\item{"month"}{ Will produce a heatmap where each row is a month and each column a year.}
+\item{"sitey}{Will provide a heatmap where each row corresponds to a site, and each column is a year.}
+\item{'sites}{will privde a heatmap where each row corresponds to a site and each column is a season-year combination sucah as Win-11. For this graph Winter is Dec-Feb, Spring is Mar-May, Summer is Jun-Aug and Fall is Sept-Nov}
+\item{"sitem}{Will provide a heatmap where each row corresponds ot a site and each column is month X year combination - such as Jan-11, Feb-11 etc.}
 }}
 
 \item{yname}{Text, defaults to \code{NA}. A label for the y-axis. The y-label will default to whatever is chosen in \code{by}. unless overwitten by the \code{yname} argument.}
@@ -30,6 +32,8 @@ waterheat(object, charname, by = "site", yname = NA, xname = NA,
 \item{ltitle}{The title for the legend in quotes. Defaults to \code{NA}. If left as \code{NA} and \code{object} is a \code{Park}, \code{Site}, or \code{Characteristic} object, the title will be the characteristic name and units.}
 
 \item{stat}{Used to determine cell values is more than one observation corresponds to a single cell. One of four options:"mean","median",min" or "max", corresponing to the mean (the default), the meidan, the minimum or the maximum of all values for that cell.}
+
+\item{siteorder}{The order in which sites should be displayed when \code{by} is "sitem" or "sitey". If left as \code{NA} then the order will be determined by the order in which \code{Park} objects are in \code{object}, and/or the order of the \code{Site} objects in each park.}
 
 \item{webplot}{If \code{TRUE} plot will be an interactive html plot by passing it to \code{\link{ggplotly}}? in the \code{plotly} package.}
 

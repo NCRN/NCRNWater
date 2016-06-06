@@ -84,10 +84,9 @@ setMethod(f="getWData", signature=c(object="Characteristic"),
         data.frame(c(getCharInfo(object,info="Data"), Characteristic= getCharInfo(object,info="CharName")), stringsAsFactors = FALSE)
        },
        error=function(e){
-         return(NULL)
+         return(data.frame())
        }
      )
-      
     if(!is.na(mindate)) OutData<-filter(OutData, Date>mindate)
     if(!is.na(maxdate)) OutData<-filter(OutData, Date<maxdate)
     if(all(!is.na(months)))  OutData<-filter(OutData, month(Date) %in% months)
