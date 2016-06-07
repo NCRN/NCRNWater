@@ -82,19 +82,18 @@ setMethod(f="waterheat", signature=c(object="data.frame"),
           month=object$Date %>% year %>% factor,
           sitem=seq(from=object$Date %>% min %>% floor_date("month"), to=object$Date %>% max, by="month") %>% 
             format("%b-%y") %>% factor(levels=unique(.)) %>% rep(.,times=object$Site %>% unique %>% length),
-          sites=seq(from=object$Date %>% min %>% floor_date("month"), to=object$Date %>% max, by="month") %>% MakeSeason %>% 
+          sites=seq(from=object$Date %>% min %>% floor_date("month"), to=object$Date %>% max, by="month") %>% MakeSeason %>% unique %>% 
             factor(ordered=T, levels=unique(.)) %>% rep(.,times=object$Site %>% unique %>% length),
           sitey=seq(object$Date %>% min %>% floor_date("year"),  to =object$Date %>% max, by="year") %>% 
             year %>% factor %>% rep(.,times=object$Site %>% unique %>% length)
     ))
     
-    
-
     HeatData$Vert=switch(by,
       month=object$Date %>% month(T) %>% factor(levels=rev(levels(.))),
       sitem=,sites=,sitey=rep(unique(object$Site), each=HeatData$Horiz %>% unique %>% length) %>% 
         factor(ordered=T, levels=siteorder)
     )
+    
     
     HeatData <- switch(by,
       month=HeatData %>% 
@@ -105,6 +104,10 @@ setMethod(f="waterheat", signature=c(object="data.frame"),
         left_join(object %>% select(Date, Site, Value ) %>%
           mutate(Date=format(Date,"%b-%y") %>% factor(levels=levels(HeatData$Horiz)), Site=factor(Site,levels=siteorder, ordered=T)), 
           by=c("Horiz"="Date","Vert"="Site")),
+      sites=HeatData %>% 
+        left_join(object %>% select(Date,Site,Value) %>% 
+        mutate(Date=MakeSeason(Date) %>% factor(levels=levels(HeatData$Horiz)), Site=factor(Site, levels=siteorder, ordered=T)),
+        by=c("Horiz"="Date", "Vert"="Site")),
       sitey=HeatData %>% 
         left_join(object %>% select(Date,Site,Value) %>% 
            mutate(Date=Date %>% year %>% factor(levels=levels(HeatData$Horiz)), Site=factor(Site, levels=siteorder, ordered=T)),
