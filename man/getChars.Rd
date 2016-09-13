@@ -4,7 +4,7 @@
 \alias{getChars}
 \title{getChars}
 \usage{
-getChars(object, sitecode = NA, charname = NA)
+getChars(object, parkcode = NA, sitecode = NA, charname = NA)
 }
 \arguments{
 \item{object}{One of a \code{Site} object, a \code{Park} object or a list of \code{Site} and/or \code{Park} objects.}

@@ -4,10 +4,12 @@
 \alias{getParkInfo}
 \title{getParkInfo}
 \usage{
-getParkInfo(object, info = "ParkShortName")
+getParkInfo(object, parkcode = NA, info = "ParkShortName")
 }
 \arguments{
 \item{object}{Either a \code{Park} object or a \code{list} of such objects.}
+
+\item{parkcode}{Code of one or more parks, in quotes. Only data from parks whose code is included in parkcode is returned.}
 
 \item{info}{Type of info to return. One of several, in quotes.
 \describe{
@@ -18,7 +20,7 @@ getParkInfo(object, info = "ParkShortName")
 }}
 }
 \value{
-A character vector with one or more park names.
+A character vector with the requested information.
 }
 \description{
 Retreives park information from an \code{Park} object or a \code{list} of such objects.

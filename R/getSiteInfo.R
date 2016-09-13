@@ -39,9 +39,12 @@ setMethod(f="getSiteInfo", signature=c(object="Park"),
     function(object,sitecode,info){
       switch(info,
         ParkCode=, ParkShortName=, ParkLongName=, Network =
-          return(getParkInfo(object, info=info) %>% rep(times=getSites(object=object, sitecode=sitecode) %>% length)), #info from Park Object
+          return(getParkInfo(object, info=info) %>% 
+                   rep(times=getSites(object=object, sitecode=sitecode) %>% 
+                   length)), #info from Park Object
       
-        return(sapply(getSites(object=object, sitecode = sitecode) %>% unname(), FUN=getSiteInfo, info=info)) #default - info from site object
+        return(sapply(getSites(object=object, sitecode = sitecode) %>% unname(), 
+                      FUN=getSiteInfo, info=info)) #default - info from site object
        )
 })
 

@@ -15,37 +15,40 @@
 #' 
 #' @export
 
-setGeneric(name="getChars",function(object,sitecode=NA,charname=NA) {standardGeneric("getChars")},signature=c("object") )
+setGeneric(name="getChars",function(object,parkcode=NA, sitecode=NA,charname=NA) {standardGeneric("getChars")},signature=c("object") )
 
 setMethod(f="getChars", signature=c(object="list"),
-          function(object,sitecode,charname){
+          function(object,parkcode, sitecode, charname){
             
-            return(lapply(object,getChars,sitecode=sitecode, charname=charname) %>% 
-                     unname %>% 
-                     unlist(recursive=F)
-            )
+            OutList<-lapply(object,getChars, parkcode=parkcode, sitecode=sitecode, charname=charname)# %>% 
+                  #   unlist(recursive=F)
+            if(all(sapply(OutList, is.null))) return() else
+              return(OutList[!sapply(OutList, is.null)])
+            
 })  
 
 
 setMethod(f="getChars", signature=c(object="Park"),
-          function(object,sitecode,charname){
-           
-            SiteList<-getSites(object=object, sitecode = sitecode) 
-            getChars(object=SiteList, sitecode=sitecode,charname=charname)
-})
+          function(object,parkcode,sitecode,charname){
+            
+            ParkUse<-getParks(object, parkcode=parkcode)
+            if (is.null(ParkUse) ) return() else 
+                 SitesUse<-getSites(ParkUse@Sites, sitecode=sitecode)
+                 if(all(sapply(SitesUse, is.null))) return() else
+                  return(getChars(SitesUse, sitecode=sitecode, charname=charname ))
+  })
 
 
 setMethod(f="getChars", signature=c(object="Site"),
-          function(object,charname){
-            
-            Chars<-names(object@Characteristics) %in% charname
-            
-            CharOut<-if(all(is.na(charname))) return(object@Characteristics) else {
-              if(all(!Chars)) return() else {
-                return(object@Characteristics[Chars]) 
-              }  
-            }
+          function(object,sitecode,charname){
+            SiteUse<-getSites(object, sitecode = sitecode)
+            if (is.null(SiteUse) ) return() else 
+              CharsOut<-getChars(SiteUse@Characteristics, charname=charname)
+            if(all(sapply(CharsOut,is.null))) return() else return(CharsOut)
 })
 
-
+setMethod(f="getChars", signature=c(object="Characteristic"),
+          function(object,charname){
+            if(is.na(charname) || getCharInfo(object, info="CharName") %in% charname ) return(object) else return()
+})
 

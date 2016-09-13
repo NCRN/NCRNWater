@@ -9,7 +9,7 @@ getSiteInfo(object, sitecode = NA, info)
 \arguments{
 \item{object}{Either a \code{Park} object or a \code{site} object or a \code{list} of such objects.}
 
-\item{sitecode}{Name of one or more sites, in quotes.}
+\item{sitecode}{Site code of one or more sites, in quotes.}
 
 \item{info}{Type of infromation to return. One of several options, in quotes.
 \describe{

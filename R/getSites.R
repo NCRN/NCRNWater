@@ -6,30 +6,32 @@
 #' @description Retrieves sites from a \code{Park} object or a \code{list} of such objects.
 #' 
 #' @param object Either a \code{Park} object or a \code{list} of such objects.
-#' @param sitecode Name of one or more sites, in quotes.
+#' @param parkcode Park code of one or more parks, in quotes.
+#' @param sitecode Site code of one or more sites, in quotes.
 
-#' @return  A list of one or more site objects. 
+#' @return  A list of one or more site objects. If \code{parkcode} and/or \code{sitecode} are specificed then only site which match those codes will be returned. If there are no such sites then the fuciton will return \code{NULL}
 #' 
 #' @export
 
-setGeneric(name="getSites",function(object,sitecode=NA){standardGeneric("getSites")},signature=c("object") )
-
+setGeneric(name="getSites",function(object,parkcode=NA, sitecode=NA){standardGeneric("getSites")},signature=c("object") )
 
 setMethod(f="getSites", signature=c(object="list"),
-          function(object,sitecode){
-            OutList<-lapply(object,FUN=getSites, sitecode) %>% unname
-            return(OutList[!sapply(OutList, is.null)] ) %>% unlist(recursive=FALSE)
+          function(object, parkcode, sitecode){
+            OutList<-lapply(object,FUN=getSites, parkcode=parkcode, sitecode=sitecode)
+            if(all(sapply(OutList,is.null))) return()
+            return(OutList[!sapply(OutList, is.null)])  
 })  
-            
-
 
 setMethod(f="getSites", signature=c(object="Park"),
-          function(object,sitecode){
-            OutSites<-names(object@Sites) %in% sitecode
+          function(object,parkcode,sitecode){
             
-            SiteOut<-if(all(is.na(sitecode))) return(object@Sites) else {
-              if(all(!OutSites)) return() else  {
-                return(object@Sites[OutSites]) 
-              }  
-            }
+            ParkUse<-getParks(object, parkcode=parkcode)
+            if (is.null(ParkUse) ) return() else 
+              SitesOut<-getSites(ParkUse@Sites, sitecode=sitecode)
+              if(all(sapply(SitesOut,is.null))) return() else return(SitesOut)
+})
+
+setMethod(f="getSites", signature=c(object="Site"),
+          function(object,parkcode, sitecode){
+            if(is.na(sitecode) || getSiteInfo(object, info="SiteCode") %in% sitecode ) return(object) else return()
 })

@@ -27,6 +27,7 @@ Collate:
     'getSites.R'
     'getCharInfo.R'
     'getChars.R'
+    'getParks.R'
     'getParkInfo.R'
     'getSiteInfo.R'
     'getWData.R'

@@ -9,9 +9,10 @@
 #' 
 #' @return Returns 11 \code{Park} objects, one for each park, as a \code{list}.
 #' 
-#' @importFrom dplyr rename select filter
+#' @importFrom dplyr rename select filter distinct
 #' @importFrom lubridate mdy
 #' @importFrom magrittr %>%
+#' @importFrom purrr update_list invoke_rows map map2
 #' 
 #' @export
 #' @export %>%
@@ -19,25 +20,122 @@
 
 
 importNCRNWater<-function(Dir){
-  importEnv<-new.env(parent=emptyenv())
+  #importEnv<-new.env(parent=emptyenv())
   OldDir<-getwd()
   setwd(Dir)
 
   
   Indata<-read.csv("Water Data.csv", header = T, as.is=T) %>% rename(SiteCode=StationID, Date=Visit.Start.Date,
                                                                      Value=Result.Value.Text, Characteristic=Local.Characteristic.Name)
+  MetaData<-read.csv("MetaData.csv", header=T, as.is=T)
   setwd(OldDir)
   
   Indata$Date<-mdy(Indata$Date)
   
   
-  ANTI<-new("Park",
-            ParkCode="ANTI",
-            ShortName="Antietam",
-            LongName="Antietam National Battlefield",
-            Network="NCRN"
-  )
-  ANTI<-addSite(park=ANTI,SiteCode="NCRN_ANTI_SHCK",SiteName = "Shaprsburg Creek",Coordinates=numeric(),Type="Stream")
+  MetaData$Data<-MetaData %>% 
+    by_row(..f=function(x) filter_(Indata, .dots=list(~SiteCode==x$SiteCode, ~Characteristic==x$DataName)), .labels=FALSE, .to="Data" ) %>% unlist(recursive=FALSE)
+
+    
+  MetaData$Characteristics<-invoke_rows(.d=MetaData %>% 
+                                         dplyr::select(CharacteristicName, DisplayName, Units, LowerPoint, UpperPoint, Data),
+                                        .f=new, Class="Characteristic", .labels=F)$.out
+  
+  names(MetaData$Characteristics)<-getCharInfo(MetaData$Characteristics, info="CharName")
+
+  
+  AllSites<-MetaData %>% group_by(ParkCode, SiteCode, SiteName,Type) %>% 
+    summarize(Characteristics=list(Characteristics)) %>% 
+    ungroup
+  
+ #return(AllSites) 
+  
+  
+  
+  #### Make New Park Objects ####
+
+  # Parks<-mapply(FUN=new, 
+  #   MoreArgs=list(Class="Park", Network="NCRN"),
+  #   ParkCode=c("ANTI","CATO","GREE","GWMP","HAFE","MANA","MONO","NACE","PRWI","ROCR","WOTR"), 
+  #   ShortName=c("Antietam","Catoctin","Greenbelt","GW Parkway","Harpers Ferry","Manassas","Monocacy","Nat.Cap.Parks - East",
+  #               "Prince William","Rock Creek"," Wolf Trap"), 
+  #   LongName=c("Antietam National Battlefield","Catoctin Mountain Park","Greenbelt Park","George Washington Memorial Parkway",
+  #                    "Harpers Ferry National Histroical Park","Manassas National Battlefield Park","Monocacy National Battlefield",
+  #                    "National Captial Parks-East","Prince William Forest Park","Rock Creek Park",
+  #                    "Wolf Trap National Park for the Performing Arts") 
+  # )
+  # 
+  #list2env(Parks,envir=environment())  #remove if update_list is used for all
+  
+  Parks<-invoke_rows(.d=distinct(.data=MetaData, Network, ParkCode, ShortName, LongName ), .f=new, 
+                     .labels=F, Class="Park")[[1]] %>% unlist
+  #return(Parks)
+  
+  ### Add Sites ####
+  #AllSites<-distinct(.data=MetaData, ParkCode, SiteCode, SiteName, Type ) #fix coordinates
+  AllSites<-MetaData %>% group_by(ParkCode, SiteCode, SiteName,Type) %>% 
+    summarize(Characteristics=list(Characteristics) %>% list) %>% 
+    ungroup
+  
+  
+  ####### ADD Names and data to Characterisitcs  #########################
+  
+  
+#return(AllSites)
+  
+  PSites<-map(Parks, function(Park){
+    SiteDf<-filter(AllSites, ParkCode==getParkInfo(Park, info="ParkCode") ) %>% dplyr::select(-ParkCode)
+    SiteList<-invoke_rows(.d=SiteDf,.f=mapply, FUN=new, Class="Site" )$.out %>% unlist
+  })
+  
+  Parks<-map2(.x=Parks, .y=PSites, .f=function(x,y) {x@Sites<-y
+  x} )
+  
+  return(Parks)
+  
+#### Add Characteristics ####
+  
+  #### get the site/characterisitc combos from the data
+  AllChars<-distinct(.data=MetaData, ParkCode, SiteCode, CharacteristicName, DisplayName, Units, LowerPoint, UpperPoint )
+  
+PSChars<-map(Parks, function(Park){
+    PSCode<-getSiteInfo(Park, info="SiteCode") %>% as.list
+    CharLs<-map(.x=PSCode, .f=function(pscode){
+      map_df(.x=pscode, .f=function(scode){
+        filter(AllChars, ParkCode ==getParkInfo(Park, info="ParkCode"), SiteCode %in% scode) %>% 
+        dplyr::select(-ParkCode,-SiteCode)
+      })
+    }) 
+      #filter(AllChars, ParkCode==getParkInfo(Park, info="ParkCode"), SiteCode %in% PSCode) %>% dplyr::select(-ParkCode, -SiteCode)
+    #CharList<-invoke_rows(.d=CharDf, .f=mapply, FUN=new, Class="Characteristic")$.out %>% unlist
+    
+
+    
+  }
+)# %>% map(flatten)
+
+# get to char level of list
+# do new char
+#assgn list correct names 
+# match up names to place? or add to park?
+
+
+#CharList <-at_depth(.x=PSChars, .depth=1, .f=invoke_rows, FUN=new, Class="Characteristic" )$.out %>% unlist
+
+
+  return(PSChars)
+  
+  
+  
+  #### ANTI #### 
+  
+  Parks<-update_list(Parks, ANTI=addSite(park=Parks$ANTI,SiteCode="NCRN_ANTI_SHCK",SiteName = "Shaprsburg Creek",Coordinates=numeric(),Type="Stream") )
+  
+  return(Parks)
+  # Filter the AllChar list for just NCNR_ANTI_SHCK. for each row do addChar, and use a lookup table for the Disaplay Name, CharaacdteristicName, units, lowerpoint and upperpoint. 
+  
+  
+ # ANTI<-addSite(park=ANTI,SiteCode="NCRN_ANTI_SHCK",SiteName = "Shaprsburg Creek",Coordinates=numeric(),Type="Stream")
   ANTI<-addChar(park=ANTI, site="NCRN_ANTI_SHCK", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                           Units="\u03bceq/l",
                           Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ANTI_SHCK",Characteristic=="ANC" ) %>% 
@@ -81,15 +179,15 @@ importNCRNWater<-function(Dir){
                             filter(SiteCode=="NCRN_ANTI_SHCK",Characteristic=="Water Temperature" ) %>% 
                             dplyr::select(Date,Value), 
                           UpperPoint=32)
-  
-  
-  CATO<-new("Park", 
-            ParkCode="CATO", 
-            ShortName="Catoctin", 
-            LongName="Catoctin Mountain Park", 
-            Network="NCRN"
-  ) 
-    CATO<-addSite(park=CATO,SiteCode="NCRN_CATO_BGHC",SiteName = "Big Hunting Creek", Coordinates=numeric(),Type="Stream")
+  #### CATO ####
+  # 
+  # CATO@Sites<-mapply(FUN=new, MoreArgs = list(Class="Site",Coordinates=numeric(), Type="Stream"),
+  #                    SiteCode=list("NCRN_CATO_BGHC","NCRN_CATO_OWCK","NCRN_CATO_WHST"),
+  #                    SiteName=list( "Big Hunting Creek","Owens Creek","Blue Blazes Creek")
+  # )
+  # names(CATO@Sites)<-getSiteInfo(CATO, info="SiteCode")
+  # 
+
       CATO<-addChar(park=CATO, site="NCRN_CATO_BGHC", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_BGHC",Characteristic=="ANC" ) %>% 
@@ -133,7 +231,7 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=20)
     
-    CATO<-addSite(park=CATO,SiteCode="NCRN_CATO_OWCK",SiteName = "Owens Creek", Coordinates=numeric(),Type="Stream")
+  #  CATO<-addSite(park=CATO,SiteCode="NCRN_CATO_OWCK",SiteName = "Owens Creek", Coordinates=numeric(),Type="Stream")
       CATO<-addChar(park=CATO, site="NCRN_CATO_OWCK", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_OWCK",Characteristic=="ANC" ) %>% 
@@ -175,7 +273,7 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=20)
     
-    CATO<-addSite(park=CATO,SiteCode="NCRN_CATO_WHST",SiteName = "Blue Blazes Creek", Coordinates=numeric(),Type="Stream")
+   # CATO<-addSite(park=CATO,SiteCode="NCRN_CATO_WHST",SiteName = "Blue Blazes Creek", Coordinates=numeric(),Type="Stream")
       CATO<-addChar(park=CATO, site="NCRN_CATO_WHST", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_CATO_WHST",Characteristic=="ANC" ) %>% 
@@ -217,12 +315,8 @@ importNCRNWater<-function(Dir){
                     filter(SiteCode=="NCRN_CATO_WHST",Characteristic=="Water Temperature" ) %>% 
                     dplyr::select(Date,Value), 
                   UpperPoint=20)
-  GREE<-new("Park", 
-                ParkCode="GREE", 
-                ShortName="Greenbelt", 
-                LongName="Greenbelt Park", 
-                Network="NCRN"
-  ) 
+  #### GREE ####
+
     GREE<-addSite(park=GREE,SiteCode="NCRN_NACE_STCK",SiteName = "Still Creek", Coordinates=numeric(),Type="Stream")
       GREE<-addChar(park=GREE, site="NCRN_NACE_STCK", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
@@ -265,14 +359,14 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
       
-  
-  GWMP<-new("Park", 
-            ParkCode="GWMP", 
-            ShortName="GW Parkway", 
-            LongName="George Washington Memorial Parkway", 
-            Network="NCRN"
-  )
-    GWMP<-addSite(park=GWMP,SiteCode="NCRN_GWMP_MICR",SiteName = "Minnehaha Creek", Coordinates=numeric(),Type="Stream")
+  #### GWMP ####
+      GWMP@Sites<-mapply(FUN=new, MoreArgs = list(Class="Site",Coordinates=numeric(), Type="Stream"),
+                         SiteCode=list("NCRN_GWMP_MICR","NCRN_GWMP_MIRU","NCRN_GWMP_PIRU","NCRN_GWMP_TURU"),
+                         SiteName=list("Minnehaha Creek","Mine Run","Pimmit Run","Turkey Run")
+      )
+      names(GWMP@Sites)<-getSiteInfo(GWMP, info="SiteCode")
+      
+#    GWMP<-addSite(park=GWMP,SiteCode="NCRN_GWMP_MICR",SiteName = "Minnehaha Creek", Coordinates=numeric(),Type="Stream")
       GWMP<-addChar(park=GWMP, site="NCRN_GWMP_MICR", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_MICR",Characteristic=="ANC" ) %>% 
@@ -314,7 +408,7 @@ importNCRNWater<-function(Dir){
                   UpperPoint=32)
     
     
-    GWMP<-addSite(park=GWMP,SiteCode="NCRN_GWMP_MIRU",SiteName = "Mine Run", Coordinates=numeric(),Type="Stream")
+    #GWMP<-addSite(park=GWMP,SiteCode="NCRN_GWMP_MIRU",SiteName = "Mine Run", Coordinates=numeric(),Type="Stream")
       GWMP<-addChar(park=GWMP, site="NCRN_GWMP_MIRU", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_MIRU",Characteristic=="ANC" ) %>% 
@@ -355,7 +449,7 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
 
-    GWMP<-addSite(park=GWMP,SiteCode="NCRN_GWMP_PIRU",SiteName = "Pimmit Run", Coordinates=numeric(),Type="Stream")
+   # GWMP<-addSite(park=GWMP,SiteCode="NCRN_GWMP_PIRU",SiteName = "Pimmit Run", Coordinates=numeric(),Type="Stream")
       GWMP<-addChar(park=GWMP, site="NCRN_GWMP_PIRU", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_PIRU",Characteristic=="ANC" ) %>% 
@@ -396,7 +490,7 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
     
-    GWMP<-addSite(park=GWMP,SiteCode="NCRN_GWMP_TURU",SiteName = "Turkey Run", Coordinates=numeric(),Type="Stream")
+   # GWMP<-addSite(park=GWMP,SiteCode="NCRN_GWMP_TURU",SiteName = "Turkey Run", Coordinates=numeric(),Type="Stream")
     GWMP<-addChar(park=GWMP, site="NCRN_GWMP_TURU", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_GWMP_TURU",Characteristic=="ANC" ) %>% 
@@ -437,12 +531,8 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
     
-  HAFE<-new("Park", 
-            ParkCode="HAFE", 
-            ShortName="Harpers Ferry", 
-            LongName="Harpers Ferry National Histroical Park", 
-            Network="NCRN"
-  )
+  #### HAFE ####
+
     HAFE<-addSite(park=HAFE,SiteCode="NCRN_HAFE_FLSP",SiteName = "Flowing Springs Run", Coordinates=numeric(),Type="Stream")
       HAFE<-addChar(park=HAFE, site="NCRN_HAFE_FLSP", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
@@ -483,13 +573,8 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_HAFE_FLSP",Characteristic=="Water Temperature" ) %>% 
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
+ #### MANA ####
 
-  MANA<-new("Park",
-            ParkCode="MANA",
-            ShortName="Manassas",
-            LongName="Manassas National Battlefield Park", 
-            Network="NCRN"
-  )
     MANA<-addSite(park=MANA,SiteCode="NCRN_MANA_YOBR",SiteName = "Young's Branch", Coordinates=numeric(),Type="Stream")
       MANA<-addChar(park=MANA, site="NCRN_MANA_YOBR", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
@@ -530,14 +615,14 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_MANA_YOBR",Characteristic=="Water Temperature" ) %>% 
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
-  
-  MONO<-new("Park",
-            ParkCode="MONO",
-            ShortName="Monocacy",
-            LongName="Monocacy National Battlefield", 
-            Network="NCRN"
-  )
-    MONO<-addSite(park=MONO,SiteCode="NCRN_MONO_BUCK",SiteName = "Bush Creek", Coordinates=numeric(),Type="Stream")
+ #### MONO #### 
+      MONO@Sites<-mapply(FUN=new, MoreArgs = list(Class="Site",Coordinates=numeric(), Type="Stream"),
+                         SiteCode=list("NCRN_MONO_BUCK","NCRN_MONO_GAMI"),
+                         SiteName=list("Bush Creek","Gambrill Mill Creek")
+      )
+      names(MONO@Sites)<-getSiteInfo(MONO, info="SiteCode")
+      
+   # MONO<-addSite(park=MONO,SiteCode="NCRN_MONO_BUCK",SiteName = "Bush Creek", Coordinates=numeric(),Type="Stream")
       MONO<-addChar(park=MONO, site="NCRN_MONO_BUCK", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_MONO_BUCK",Characteristic=="ANC" ) %>% 
@@ -578,7 +663,7 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
     
-    MONO<-addSite(park=MONO,SiteCode="NCRN_MONO_GAMI",SiteName = "Gambrill Mill Creek", Coordinates=numeric(),Type="Stream")
+   # MONO<-addSite(park=MONO,SiteCode="NCRN_MONO_GAMI",SiteName = "Gambrill Mill Creek", Coordinates=numeric(),Type="Stream")
       MONO<-addChar(park=MONO, site="NCRN_MONO_GAMI", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_MONO_GAMI",Characteristic=="ANC" ) %>% 
@@ -619,14 +704,16 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
     
+#### NACE ####
 
-  NACE<-new("Park",
-            ParkCode="NACE",
-            ShortName="Nat.Cap.Parks - East",
-            LongName="National Captial Parks-East", 
-            Network="NCRN"
-  )
-    NACE<-addSite(park=NACE,SiteCode="NCRN_NACE_HECR",SiteName = "Henson Creek", Coordinates=numeric(),Type="Stream")
+      NACE@Sites<-mapply(FUN=new, MoreArgs = list(Class="Site",Coordinates=numeric(), Type="Stream"),
+                         SiteCode=list("NCRN_NACE_HECR","NCRN_NACE_OXRU"),
+                         SiteName=list("Henson Creek","Oxon Run")
+      )
+      names(NACE@Sites)<-getSiteInfo(NACE, info="SiteCode")
+      
+
+    #NACE<-addSite(park=NACE,SiteCode="NCRN_NACE_HECR",SiteName = "Henson Creek", Coordinates=numeric(),Type="Stream")
       NACE<-addChar(park=NACE, site="NCRN_NACE_HECR", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_NACE_HECR",Characteristic=="ANC" ) %>% 
@@ -667,7 +754,7 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
     
-    NACE<-addSite(park=NACE,SiteCode="NCRN_NACE_OXRU",SiteName = "Oxon Run", Coordinates=numeric(),Type="Stream")
+  #  NACE<-addSite(park=NACE,SiteCode="NCRN_NACE_OXRU",SiteName = "Oxon Run", Coordinates=numeric(),Type="Stream")
       NACE<-addChar(park=NACE, site="NCRN_NACE_OXRU", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_NACE_OXRU",Characteristic=="ANC" ) %>% 
@@ -707,14 +794,16 @@ importNCRNWater<-function(Dir){
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_NACE_OXRU",Characteristic=="Water Temperature" ) %>% 
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
-
-  PRWI<-new("Park",
-            ParkCode="PRWI",
-            ShortName="Prince William",
-            LongName="Prince William Forest Park", 
-            Network="NCRN"
+#### PRWI ####
+      
+  PRWI@Sites<-mapply(FUN=new, MoreArgs = list(Class="Site",Coordinates=numeric(), Type="Stream"),
+    SiteCode=list("NCRN_PRWI_BONE","NCRN_PRWI_CARU","NCRN_PRWI_MARU","NCRN_PRWI_NFQC","NCRN_PRWI_ORRU","NCRN_PRWI_SFQC",
+                  "NCRN_PRWI_SORU","NCRN_PRWI_TARU"),
+    SiteName=list("Boneyard Run","Carters Run","Mawavi Run","Quantico Creek","Orenda Run","South Fork Quantico Creek","Sow Run","Taylor Run")
   )
-    PRWI<-addSite(park=PRWI,SiteCode="NCRN_PRWI_BONE",SiteName = "Boneyard Run", Coordinates=numeric(),Type="Stream")
+      names(PRWI@Sites)<-getSiteInfo(PRWI, info="SiteCode")
+
+#    PRWI<-addSite(park=PRWI,SiteCode="NCRN_PRWI_BONE",SiteName = "Boneyard Run", Coordinates=numeric(),Type="Stream")
      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_BONE", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_BONE",Characteristic=="ANC" ) %>% 
@@ -755,7 +844,7 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
     
-    PRWI<-addSite(park=PRWI,SiteCode="NCRN_PRWI_CARU",SiteName = "Carters Run", Coordinates=numeric(),Type="Stream")
+  #  PRWI<-addSite(park=PRWI,SiteCode="NCRN_PRWI_CARU",SiteName = "Carters Run", Coordinates=numeric(),Type="Stream")
      PRWI<-addChar(park=PRWI, site="NCRN_PRWI_CARU", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_CARU",Characteristic=="ANC" ) %>% 
@@ -796,7 +885,7 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
     
-    PRWI<-addSite(park=PRWI,SiteCode="NCRN_PRWI_MARU",SiteName = "Mawavi Run", Coordinates=numeric(),Type="Stream")
+    #PRWI<-addSite(park=PRWI,SiteCode="NCRN_PRWI_MARU",SiteName = "Mawavi Run", Coordinates=numeric(),Type="Stream")
       PRWI<-addChar(park=PRWI, site="NCRN_PRWI_MARU", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_MARU",Characteristic=="ANC" ) %>% 
@@ -837,7 +926,7 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
     
-    PRWI<-addSite(park=PRWI,SiteCode="NCRN_PRWI_NFQC",SiteName = "Quantico Creek", Coordinates=numeric(),Type="Stream")
+   # PRWI<-addSite(park=PRWI,SiteCode="NCRN_PRWI_NFQC",SiteName = "Quantico Creek", Coordinates=numeric(),Type="Stream")
       PRWI<-addChar(park=PRWI, site="NCRN_PRWI_NFQC", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_NFQC",Characteristic=="ANC" ) %>% 
@@ -878,7 +967,7 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
     
-    PRWI<-addSite(park=PRWI,SiteCode="NCRN_PRWI_ORRU",SiteName = "Orenda Run", Coordinates=numeric(),Type="Stream")
+    #PRWI<-addSite(park=PRWI,SiteCode="NCRN_PRWI_ORRU",SiteName = "Orenda Run", Coordinates=numeric(),Type="Stream")
       PRWI<-addChar(park=PRWI, site="NCRN_PRWI_ORRU", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_ORRU",Characteristic=="ANC" ) %>% 
@@ -919,7 +1008,7 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
     
-    PRWI<-addSite(park=PRWI,SiteCode="NCRN_PRWI_SFQC",SiteName = "South Fork Quantico Creek", Coordinates=numeric(),Type="Stream")
+   # PRWI<-addSite(park=PRWI,SiteCode="NCRN_PRWI_SFQC",SiteName = "South Fork Quantico Creek", Coordinates=numeric(),Type="Stream")
       PRWI<-addChar(park=PRWI, site="NCRN_PRWI_SFQC", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_SFQC",Characteristic=="ANC" ) %>% 
@@ -960,7 +1049,7 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
     
-    PRWI<-addSite(park=PRWI,SiteCode="NCRN_PRWI_SORU",SiteName = "Sow Run", Coordinates=numeric(),Type="Stream")
+   # PRWI<-addSite(park=PRWI,SiteCode="NCRN_PRWI_SORU",SiteName = "Sow Run", Coordinates=numeric(),Type="Stream")
       PRWI<-addChar(park=PRWI, site="NCRN_PRWI_SORU", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_SORU",Characteristic=="ANC" ) %>% 
@@ -1001,7 +1090,7 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
     
-    PRWI<-addSite(park=PRWI,SiteCode="NCRN_PRWI_TARU",SiteName = "Taylor Run", Coordinates=numeric(),Type="Stream")
+   # PRWI<-addSite(park=PRWI,SiteCode="NCRN_PRWI_TARU",SiteName = "Taylor Run", Coordinates=numeric(),Type="Stream")
       PRWI<-addChar(park=PRWI, site="NCRN_PRWI_TARU", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_PRWI_TARU",Characteristic=="ANC" ) %>% 
@@ -1042,14 +1131,17 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
 
-  
-  ROCR<-new("Park",
-            ParkCode="ROCR",
-            ShortName="Rock Creek",
-            LongName="Rock Creek Park", 
-            Network="NCRN"
-  )
-    ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_BAKE",SiteName = "Battery Kemble Creek", Coordinates=numeric(),Type="Stream")
+#### ROCR ####
+      
+      ROCR@Sites<-mapply(FUN=new, MoreArgs = list(Class="Site",Coordinates=numeric(), Type="Stream"),
+       SiteCode=list("NCRN_ROCR_BAKE","NCRN_ROCR_BRBR","NCRN_ROCR_DUOA","NCRN_ROCR_FEBR","NCRN_ROCR_HACR","NCRN_ROCR_KLVA",
+                     "NCRN_ROCR_LUBR","NCRN_ROCR_NOST","NCRN_ROCR_PHBR","NCRN_ROCR_ROC3","NCRN_ROCR_SVPS"),
+       SiteName=list("Battery Kemble Creek","Broad Branch","Dumbarton Oaks","Fenwick Branch","Hazen Creek","Klingle Valley",
+                     "Luzon Branch","Normanstone Branch","Pinehurst Branch","Rock Creek at Dumbarton Oaks","Soapstone Valley Stream")
+      )
+      names(ROCR@Sites)<-getSiteInfo(ROCR, info="SiteCode")
+      
+   # ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_BAKE",SiteName = "Battery Kemble Creek", Coordinates=numeric(),Type="Stream")
       ROCR<-addChar(park=ROCR, site="NCRN_ROCR_BAKE", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_BAKE",Characteristic=="ANC" ) %>% 
@@ -1090,7 +1182,7 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
     
-    ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_BRBR",SiteName = "Broad Branch", Coordinates=numeric(),Type="Stream")
+    #ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_BRBR",SiteName = "Broad Branch", Coordinates=numeric(),Type="Stream")
       ROCR<-addChar(park=ROCR, site="NCRN_ROCR_BRBR", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_BRBR",Characteristic=="ANC" ) %>% 
@@ -1131,7 +1223,7 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
     
-    ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_DUOA",SiteName = "Dumbarton Oaks", Coordinates=numeric(),Type="Stream")
+   # ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_DUOA",SiteName = "Dumbarton Oaks", Coordinates=numeric(),Type="Stream")
       ROCR<-addChar(park=ROCR, site="NCRN_ROCR_DUOA", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_DUOA",Characteristic=="ANC" ) %>% 
@@ -1172,7 +1264,7 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
   
-    ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_FEBR",SiteName = "Fenwick Branch", Coordinates=numeric(),Type="Stream")
+  #  ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_FEBR",SiteName = "Fenwick Branch", Coordinates=numeric(),Type="Stream")
       ROCR<-addChar(park=ROCR, site="NCRN_ROCR_FEBR", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_FEBR",Characteristic=="ANC" ) %>% 
@@ -1213,7 +1305,7 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
     
-    ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_HACR",SiteName = "Hazen Creek", Coordinates=numeric(),Type="Stream")
+    #ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_HACR",SiteName = "Hazen Creek", Coordinates=numeric(),Type="Stream")
     ROCR<-addChar(park=ROCR, site="NCRN_ROCR_HACR", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_HACR",Characteristic=="ANC" ) %>% 
@@ -1254,7 +1346,7 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
     
-    ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_KLVA",SiteName = "Klingle Valley", Coordinates=numeric(),Type="Stream")
+    #ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_KLVA",SiteName = "Klingle Valley", Coordinates=numeric(),Type="Stream")
       ROCR<-addChar(park=ROCR, site="NCRN_ROCR_KLVA", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_KLVA",Characteristic=="ANC" ) %>% 
@@ -1295,7 +1387,7 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
     
-    ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_LUBR",SiteName = "Luzon Branch", Coordinates=numeric(),Type="Stream")
+   # ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_LUBR",SiteName = "Luzon Branch", Coordinates=numeric(),Type="Stream")
       ROCR<-addChar(park=ROCR, site="NCRN_ROCR_LUBR", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_LUBR",Characteristic=="ANC" ) %>% 
@@ -1336,7 +1428,7 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
     
-    ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_NOST",SiteName = "Normanstone Branch", Coordinates=numeric(),Type="Stream")
+   # ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_NOST",SiteName = "Normanstone Branch", Coordinates=numeric(),Type="Stream")
      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_NOST", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_NOST",Characteristic=="ANC" ) %>% 
@@ -1377,7 +1469,7 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
     
-    ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_PHBR",SiteName = "Pinehurst Branch", Coordinates=numeric(),Type="Stream")
+   # ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_PHBR",SiteName = "Pinehurst Branch", Coordinates=numeric(),Type="Stream")
      ROCR<-addChar(park=ROCR, site="NCRN_ROCR_PHBR", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_PHBR",Characteristic=="ANC" ) %>% 
@@ -1418,7 +1510,7 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
     
-    ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_ROC3",SiteName = "Rock Creek at Dumbarton Oaks", Coordinates=numeric(),Type="Stream")
+   # ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_ROC3",SiteName = "Rock Creek at Dumbarton Oaks", Coordinates=numeric(),Type="Stream")
       ROCR<-addChar(park=ROCR, site="NCRN_ROCR_ROC3", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_ROC3",Characteristic=="ANC" ) %>% 
@@ -1459,7 +1551,7 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
     
-    ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_SVPS",SiteName = "Soapstone Valley Stream", Coordinates=numeric(),Type="Stream")
+   # ROCR<-addSite(park=ROCR,SiteCode="NCRN_ROCR_SVPS",SiteName = "Soapstone Valley Stream", Coordinates=numeric(),Type="Stream")
       ROCR<-addChar(park=ROCR, site="NCRN_ROCR_SVPS", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                   Units="\u03bceq/l",
                   Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_ROCR_SVPS",Characteristic=="ANC" ) %>% 
@@ -1500,14 +1592,15 @@ importNCRNWater<-function(Dir){
                     dplyr::select(Date,Value), 
                   UpperPoint=32)
   
-  
-  WOTR<-new("Park",
-            ParkCode="WOTR",
-            ShortName="Wolf Trap",
-            LongName="Wolf Trap National Park for the Performing Arts", 
-            Network="NCRN"
-  )
-    WOTR<-addSite(park=WOTR,SiteCode="NCRN_WOTR_CHCK",SiteName = "Courthouse Creek", Type="Stream")
+  #### WOTR ####
+
+      WOTR@Sites<-mapply(FUN=new, MoreArgs = list(Class="Site",Coordinates=numeric(), Type="Stream"),
+                         SiteCode=list("NCRN_WOTR_CHCK","NCRN_WOTR_WOTR"),
+                         SiteName=list("Courthouse Creek","Wolf Trap Creek")
+      )
+      names(WOTR@Sites)<-getSiteInfo(WOTR, info="SiteCode")
+      
+   # WOTR<-addSite(park=WOTR,SiteCode="NCRN_WOTR_CHCK",SiteName = "Courthouse Creek", Type="Stream")
       WOTR<-addChar(park=WOTR, site="NCRN_WOTR_CHCK", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                 Units="\u03bceq/l",
                 Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_WOTR_CHCK",Characteristic=="ANC" ) %>% 
@@ -1547,8 +1640,8 @@ importNCRNWater<-function(Dir){
                 Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_WOTR_CHCK",Characteristic=="Water Temperature" ) %>% 
                   dplyr::select(Date,Value), 
                 UpperPoint=32)
-  
-    WOTR<-addSite(park=WOTR,SiteCode="NCRN_WOTR_WOTR",SiteName = "Wolf Trap Creek", Coordinates=numeric(),Type="Stream")
+      
+    #WOTR<-addSite(park=WOTR,SiteCode="NCRN_WOTR_WOTR",SiteName = "Wolf Trap Creek", Coordinates=numeric(),Type="Stream")
       WOTR<-addChar(park=WOTR, site="NCRN_WOTR_WOTR", CharacteristicName="ANC", DisplayName="Acid Neutralizing Capacity",
                 Units="\u03bceq/l",
                 Data=get("Indata", sys.frame(1)) %>% filter(SiteCode=="NCRN_WOTR_WOTR",Characteristic=="ANC" ) %>% 

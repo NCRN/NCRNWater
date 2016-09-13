@@ -23,7 +23,6 @@
     )
   )
 
-  names(XSite)<-SiteCode
   park@Sites<-c(park@Sites,XSite)
   return(park)
    
