@@ -23,7 +23,7 @@ setMethod(f="getChars", signature=c(object="list"),
             OutList<-lapply(object,getChars, parkcode=parkcode, sitecode=sitecode, charname=charname)# %>% 
                   #   unlist(recursive=F)
             if(all(sapply(OutList, is.null))) return() else
-              return(OutList[!sapply(OutList, is.null)])
+              return(OutList[!sapply(OutList, is.null)] %>% unlist)
             
 })  
 
@@ -35,7 +35,7 @@ setMethod(f="getChars", signature=c(object="Park"),
             if (is.null(ParkUse) ) return() else 
                  SitesUse<-getSites(ParkUse@Sites, sitecode=sitecode)
                  if(all(sapply(SitesUse, is.null))) return() else
-                  return(getChars(SitesUse, sitecode=sitecode, charname=charname ))
+                  return(getChars(SitesUse, sitecode=sitecode, charname=charname ) %>% unlist)
   })
 
 

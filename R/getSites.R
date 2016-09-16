@@ -19,6 +19,9 @@ setMethod(f="getSites", signature=c(object="list"),
           function(object, parkcode, sitecode){
             OutList<-lapply(object,FUN=getSites, parkcode=parkcode, sitecode=sitecode)
             if(all(sapply(OutList,is.null))) return()
+            
+            if(any(lapply(OutList,FUN=class)=="list")) return(OutList[!sapply(OutList, is.null)] %>% 
+                                                            unlist) else
             return(OutList[!sapply(OutList, is.null)])  
 })  
 

@@ -9,10 +9,10 @@
 #' 
 #' @return Returns 11 \code{Park} objects, one for each park, as a \code{list}.
 #' 
-#' @importFrom dplyr rename select filter distinct
+#' @importFrom dplyr rename select filter distinct filter_
 #' @importFrom lubridate mdy
 #' @importFrom magrittr %>%
-#' @importFrom purrr update_list invoke_rows map map2
+#' @importFrom purrr update_list invoke_rows map map2 by_row
 #' 
 #' @export
 #' @export %>%
