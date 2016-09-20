@@ -1,6 +1,7 @@
 #' @include NCRNWater_Park_Class_def.R 
 #' @include NCRNWater_Site_Class_def.R
 #' @include getSites.R
+#' @include getParkInfo.R
 #' @importFrom magrittr %>%
 #' 
 #' @title getSiteInfo
@@ -11,9 +12,10 @@
 #' @param object Either a \code{Park} object or a \code{site} object or a \code{list} of such objects.
 #' @param info Type of infromation to return. One of several options, in quotes.
 #' \describe{
-#' \item{"SiteCode"}{ The default. Returns the site code.}
+#' \item{"SiteCode"}{The default. Returns the site code.}
 #' \item{"SiteName"}{Returns the name of the site.}
-#' \item{"coords"}{Returns the latitude and longitude of the site as a length 2 vector.}
+#' \item{"lat"}{Returns the latitude of the site.}
+#' \item{"long}{Rerturns the longitude of the site.}
 #' \item{"type"}{Returns the type of the site.}
 #'\item{"ParkCode"}{Returns the park code for the park the site is in.}
 #' \item{"ParkShortName"}{ The default. Returns the short name of the park the site is in.}
@@ -55,7 +57,8 @@ setMethod(f="getSiteInfo", signature=c(object="Site"),
             switch(info,
                    SiteCode = return(object@SiteCode),
                    SiteName = return(object@SiteName),
-                   coords = return(object@Coordinates),
+                   lat = return(object@Lat),
+                   long = return(object@Long),
                    type = return(object@Type),
                    ParkCode=, ParkShortName=, ParkLongName=, Network = return('No Park object provided, cannot retrieve information'),
                    stop("Unrecognized info in getSiteInfo")

@@ -1,5 +1,6 @@
 #' @include NCRNWater_Park_Class_def.R 
 #' @include NCRNWater_Site_Class_def.R
+#' @include getParks.R
 #' @importFrom magrittr %>%
 #' @title getSites
 #' 

@@ -38,14 +38,14 @@
 #' 
 #' @export
 
-setGeneric(name="getWData",function(object,sitecode=NA,charname=NA,mindate=NA,maxdate=NA,months=NA,years=NA,wyears=NA,
+setGeneric(name="getWData",function(object,parkcode=NA,sitecode=NA,charname=NA,mindate=NA,maxdate=NA,months=NA,years=NA,wyears=NA,
                                     minvalue=NA,maxvalue=NA,minobs=0){standardGeneric("getWData")},signature=c("object") )
 
 
 #### Given a list, break it down and feed it back to getWData ####
 setMethod(f="getWData", signature=c(object="list"),
-          function(object,sitecode,charname,mindate,maxdate,months,years,wyears,minvalue,maxvalue,minobs){
-            lapply(object,FUN=getWData, sitecode=sitecode, charname=charname, mindate=mindate, maxdate=maxdate,months=months,years=years, wyears=wyears,minvalue=minvalue,maxvalue=maxvalue,minobs=minobs) %>% 
+          function(object,parkcode,sitecode,charname,mindate,maxdate,months,years,wyears,minvalue,maxvalue,minobs){
+            lapply(object,FUN=getWData, parkcode=parkcode, sitecode=sitecode, charname=charname, mindate=mindate, maxdate=maxdate,months=months,years=years, wyears=wyears,minvalue=minvalue,maxvalue=maxvalue,minobs=minobs) %>% 
             bind_rows() %>% 
             as.data.frame %>% 
             return
@@ -53,8 +53,8 @@ setMethod(f="getWData", signature=c(object="list"),
 
 #### Given one park get the sites and run again ####
 setMethod(f="getWData", signature=c(object="Park"),
-     function(object,sitecode,charname,mindate,maxdate,months,years,wyears,minvalue,maxvalue,minobs){
-        getSites(object, sitecode=sitecode) %>% 
+     function(object,parkcode,sitecode,charname,mindate,maxdate,months,years,wyears,minvalue,maxvalue,minobs){
+        getSites(object, parkcode=parkcode, sitecode=sitecode) %>% 
         lapply(getWData, charname=charname, mindate=mindate, maxdate=maxdate, months=months,years=years,wyears=wyears,
                minvalue=minvalue,maxvalue=maxvalue,minobs=minobs) %>% 
         bind_rows() %>% 
@@ -81,7 +81,9 @@ setMethod(f="getWData", signature=c(object="Site"),
 setMethod(f="getWData", signature=c(object="Characteristic"),
   function(object,mindate,maxdate, months,years,wyears,minvalue,maxvalue,minobs){
      OutData<-tryCatch({    ### tryCatch is here if there data slot is empty 
-        data.frame(c(getCharInfo(object,info="Data"), Characteristic= getCharInfo(object,info="CharName")), stringsAsFactors = FALSE)
+        data.frame(c(
+          getCharInfo(object,info="Data"), Characteristic= getCharInfo(object,info="CharName")), 
+                     stringsAsFactors = FALSE)
        },
        error=function(e){
          return(data.frame())

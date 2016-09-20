@@ -4,14 +4,16 @@
 \alias{getWData}
 \title{getWData}
 \usage{
-getWData(object, sitecode = NA, charname = NA, mindate = NA,
-  maxdate = NA, months = NA, years = NA, wyears = NA, minvalue = NA,
-  maxvalue = NA, minobs = 0)
+getWData(object, parkcode = NA, sitecode = NA, charname = NA,
+  mindate = NA, maxdate = NA, months = NA, years = NA, wyears = NA,
+  minvalue = NA, maxvalue = NA, minobs = 0)
 }
 \arguments{
 \item{object}{Either a \code{Characteristic} object a \code{Site} object, a \code{Park} object or a \code{list} of such objects.}
 
-\item{sitecode}{One of more sitecodes, in quotes. If \code{object} is a \code{Park} object or a \code{list} of \code{Park} objects, then the site code argument can be used to select which sites should be ssued}
+\item{parkcode}{One or more parkcodes, in quotes.  If \code{object} is a \code{Park} object or a \code{list} of \code{Park} objects, then the \code{parkcode} argument can be used to select which sites should be used.}
+
+\item{sitecode}{One or more sitecodes, in quotes. If \code{object} is a \code{Park} object or a \code{list} of \code{Park} or \code{Site} objects, then the \code{sitcode} argument can be used to select which sites should be used.}
 
 \item{charname}{Name of one or more characteristics, in quotes.}
 

@@ -15,7 +15,7 @@
 #' @export
  
 
- addSite<-function(park,SiteCode,SiteName,Coordinates,Type){
+ addSite<-function(park,SiteCode,SiteName,Lat,Long,Type){
   XCall<-match.call() #figure out what args user put in.
   XSite<-list(
     do.call("new", 

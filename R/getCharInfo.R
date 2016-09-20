@@ -1,7 +1,10 @@
 #' @include NCRNWater_Park_Class_def.R 
 #' @include NCRNWater_Site_Class_def.R
 #' @include NCRNWater_Characteristic_Class_def.R
+#' @include getParkInfo.R
 #' @include getSites.R
+#' @include getSiteInfo.R
+#' @include getChars.R
 #' @importFrom magrittr %>%
 #' 
 #' @title getCharInfo

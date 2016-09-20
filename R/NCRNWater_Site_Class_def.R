@@ -23,7 +23,8 @@ setClass(Class="Site",
          
          prototype = list(SiteCode=character(),
                           SiteName=character(),
-                          Coordinates=numeric(),
+                          Lat=numeric(),
+                          Long=numeric(),
                           Type=character(),
                           Characteristics=list()
            

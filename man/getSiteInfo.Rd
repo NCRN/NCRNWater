@@ -13,9 +13,10 @@ getSiteInfo(object, sitecode = NA, info)
 
 \item{info}{Type of infromation to return. One of several options, in quotes.
 \describe{
-\item{"SiteCode"}{ The default. Returns the site code.}
+\item{"SiteCode"}{The default. Returns the site code.}
 \item{"SiteName"}{Returns the name of the site.}
-\item{"coords"}{Returns the latitude and longitude of the site as a length 2 vector.}
+\item{"lat"}{Returns the latitude of the site.}
+\item{"long}{Rerturns the longitude of the site.}
 \item{"type"}{Returns the type of the site.}
 \item{"ParkCode"}{Returns the park code for the park the site is in.}
 \item{"ParkShortName"}{ The default. Returns the short name of the park the site is in.}

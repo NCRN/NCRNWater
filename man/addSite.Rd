@@ -4,7 +4,7 @@
 \alias{addSite}
 \title{addSite}
 \usage{
-addSite(park, SiteCode, SiteName, Coordinates, Type)
+addSite(park, SiteCode, SiteName, Lat, Long, Type)
 }
 \arguments{
 \item{park}{A \code{Park} object}
@@ -13,9 +13,9 @@ addSite(park, SiteCode, SiteName, Coordinates, Type)
 
 \item{SiteName}{A name for the site. Stored as a length 1 character \code{vector}.}
 
-\item{Coordinates}{A length 2 numeric \code{vector} containing the latitude and longitude of the site in WGS84 coordinates.}
-
 \item{Type}{The type of water body at the site - e.g. Stream, River, Lake, Ocean etc. Stored as a length 1 character \code{vector}.}
+
+\item{Coordinates}{A length 2 numeric \code{vector} containing the latitude and longitude of the site in WGS84 coordinates.}
 }
 \value{
 Returns the park object with the site added.
