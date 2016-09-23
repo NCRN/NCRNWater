@@ -1,5 +1,5 @@
+#' @include NCRNWater_NCRNWaterObj_Class_def.R 
 #' @include getWData.R
-#' @include waterbox.R
 #' @importFrom magrittr %>% 
 #' @importFrom lubridate year month
 #' @importFrom ggplot2 ggplot aes geom_point labs theme_bw theme element_blank geom_hline geom_line scale_color_discrete scale_shape_manual scale_x_continuous

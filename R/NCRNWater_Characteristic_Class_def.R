@@ -1,6 +1,7 @@
 
 setClassUnion(name="Num_or_DF",members= c("numeric","data.frame"))
-
+#' @include NCRNWater_Park_Class_def.R
+#' @include NCRNWater_Site_Class_def.R
 #' @title S4 Class Definition for Characteristic object in  NCRNWater
 #' 
 #' @description An S4 class that contains the data from water monitoring for a single water quality characteristic as a single site in a single park.   

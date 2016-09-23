@@ -1,5 +1,5 @@
+#' @include NCRNWater_NCRNWaterObj_Class_def.R 
 #' @include getWData.R
-#' @include waterbox.R
 #' @importFrom magrittr %>% 
 #' @importFrom lubridate year month floor_date
 #' @importFrom dplyr left_join select mutate group_by summarize

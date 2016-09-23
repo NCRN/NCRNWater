@@ -9,7 +9,7 @@
 #' 
 #' @description Retrieves one or more \code{Characteristic} objects from a \code{Site} object or a \code{list} of such objects. The \code{Site} object can be contained within a \code{Park} object.
 #' 
-#' @param object One of a \code{Site} object, a \code{Park} object or a list of \code{Site} and/or \code{Park} objects.
+#' @param object One of a \code{Characteristic} object, a \code{Site} object, a \code{Park} object or a list of such objects.
 #' @param parkcode One or more parkcodes, in quotes.  If \code{object} is a \code{Park} object or a \code{list} of \code{Park} objects, then the \code{parkcode} argument can be used to select which sites should be used.
 #' @param sitecode One or more sitecodes, in quotes. If \code{object} is a \code{Park} object or a \code{list} of \code{Park} or \code{Site} objects, then the \code{sitcode} argument can be used to select which sites should be used. 
 #' @param charname Name of one or more characteristics, in quotes.

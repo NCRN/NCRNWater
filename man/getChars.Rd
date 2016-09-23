@@ -7,7 +7,7 @@
 getChars(object, parkcode = NA, sitecode = NA, charname = NA)
 }
 \arguments{
-\item{object}{One of a \code{Site} object, a \code{Park} object or a list of \code{Site} and/or \code{Park} objects.}
+\item{object}{One of a \code{Characteristic} object, a \code{Site} object, a \code{Park} object or a list of such objects.}
 
 \item{parkcode}{One or more parkcodes, in quotes.  If \code{object} is a \code{Park} object or a \code{list} of \code{Park} objects, then the \code{parkcode} argument can be used to select which sites should be used.}
 

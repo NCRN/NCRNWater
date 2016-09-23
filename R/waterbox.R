@@ -1,3 +1,4 @@
+#' @include NCRNWater_NCRNWaterObj_Class_def.R 
 #' @include getWData.R
 #' @importFrom magrittr %>% 
 #' @importFrom lubridate year month
@@ -33,10 +34,8 @@
 #' 
 #' @export
 
+
 setGeneric(name="waterbox",function(object,charname, by="year",points=TRUE,yname=NA,xname=NA,labels=NA,title=NULL,webplot=FALSE,...){standardGeneric("waterbox")},signature=c("object") )
-
-setClassUnion(name="NCRNWaterObj", members=c("Park","Site","Characteristic","list"))
-
 
 setMethod(f="waterbox", signature=c(object="NCRNWaterObj"),
   function(object,charname,by,points,yname,xname,labels,title,webplot,...){

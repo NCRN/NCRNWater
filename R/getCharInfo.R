@@ -62,8 +62,11 @@ setMethod(f="getCharInfo", signature=c(object="Park"),
                  rep(times=getChars(object=object, sitecode=sitecode,charname=charname) %>% length)), 
         
         SiteCode=,SiteName=,coords=,type= 
-          return(getSiteInfo(object, sitecode=sitecode, info=info) %>% 
-                   rep(times=getChars(object=object, charname=charname) %>% length)), #info from Site Object
+          return(lapply(X=getSites(object, parkcode=parkcode, sitecode=sitecode),
+                        FUN=function(X) {
+                          getSiteInfo(X, info=info) %>% 
+                            rep(getChars(X, parkcode=parkcode, sitecode=sitecode,charname=charname) %>% length)})
+                   ) %>% unname %>% unlist, #info from Site Object
         Data=
           return(lapply(getChars(object=object,parkcode=parkcode, sitecode=sitecode,charname=charname) %>% unname(),FUN=getCharInfo,info=info)),#data returns a list
           return(lapply(getChars(object=object, parkcode=parkcode, sitecode = sitecode, charname=charname) %>% unname(), FUN=getCharInfo, info=info) %>% unlist) #default - info from site object
@@ -77,7 +80,7 @@ setMethod(f="getCharInfo", signature=c(object="Park"),
               SiteCode=,SiteName=,coords=,type= 
         return(getSiteInfo(object, info=info) %>% rep(times=getChars(object=object, charname=charname) %>% length)), #info from Site Object
         Data=return(lapply(getChars(object=object,charname=charname) , FUN=getCharInfo,info=info)), #data returns a list
-        return(sapply(getChars(object=object,charname=charname) %>% unname(), FUN=getCharInfo,info=info)) #default-info from Characteristic object
+        return(sapply(getChars(object=object,charname=charname), FUN=getCharInfo,info=info)) #default-info from Characteristic object
       )
  })
 

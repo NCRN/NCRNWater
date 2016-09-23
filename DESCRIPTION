@@ -1,7 +1,7 @@
 Package: NCRNWater
 Type: Package
 Title: Data analysis and visualization for NCRN water monitoring.
-Version: 0.18
+Version: 0.19
 Date: 2016-09-20
 Author: John Paul Schmit
 Maintainer: John Paul Schmit <john_schmit@nps.gov>
@@ -20,9 +20,10 @@ Imports:
     purrr
 RoxygenNote: 5.0.1
 Collate:
-    'NCRNWater_Characteristic_Class_def.R'
     'NCRNWater_Park_Class_def.R'
     'NCRNWater_Site_Class_def.R'
+    'NCRNWater_Characteristic_Class_def.R'
+    'NCRNWater_NCRNWaterObj_Class_def.R'
     'addChar.R'
     'addSite.R'
     'getParks.R'
@@ -32,8 +33,9 @@ Collate:
     'getSiteInfo.R'
     'getCharInfo.R'
     'getWData.R'
+    'waterseries.R'
+    'exceed.R'
     'importNCRNWater.R'
     'waterbox.R'
     'waterheat.R'
-    'waterseries.R'
     'wcosinor.R'

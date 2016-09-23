@@ -1,6 +1,7 @@
 #' @include NCRNWater_Park_Class_def.R 
 #' @include NCRNWater_Site_Class_def.R
 #' @include NCRNWater_Characteristic_Class_def.R
+#' @include NCRNWater_NCRNWaterObj_Class_def.R 
 #' @include getWData.R
 #' @importFrom season cosinor yrfraction
 #' @title wcosinor
