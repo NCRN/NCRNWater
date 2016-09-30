@@ -12,7 +12,7 @@
 #' @importFrom dplyr rename select filter distinct filter_ ungroup
 #' @importFrom lubridate mdy
 #' @importFrom magrittr %>%
-#' @importFrom purrr update_list invoke_rows map map2 by_row
+#' @importFrom purrr invoke_rows map map2 by_row
 #' 
 #' @export
 #' @export %>%
@@ -34,9 +34,14 @@ importNCRNWater<-function(Dir){
   
   Indata$Date<-mdy(Indata$Date)
 
+  #### Create Data part of each charactersitic ####
   MetaData$Data<-MetaData %>% 
     by_row(..f=function(x) filter_(Indata, .dots=list(~SiteCode==x$SiteCode, ~Characteristic==x$DataName)) %>% 
              dplyr::select(Date,Value), .labels=FALSE, .to="Data" ) %>% unlist(recursive=FALSE)
+  
+  #### Change numeric data to numeric, but the leave the rest as character ####
+  NumDat<-MetaData$DataType=="numeric"
+  MetaData[NumDat,]$Data<-MetaData[NumDat,"Data"] %>% map(.f=function(x) mutate(x,Value = as.numeric(Value) )) 
     
 #### Create Characteristic objects ####
   MetaData$Characteristics<-invoke_rows(.d=MetaData %>% 
@@ -48,10 +53,7 @@ importNCRNWater<-function(Dir){
     summarize(Characteristics=list(Characteristics)) %>% 
     ungroup
 
- #### Create Park objects ####
-  
-  Parks<-invoke_rows(.d=distinct(.data=MetaData, Network, ParkCode, ShortName, LongName ), .f=new, 
-                     .labels=F, Class="Park")[[1]] %>% unlist
+
 
 #### Make Site list for each Park ####
 
@@ -59,6 +61,12 @@ importNCRNWater<-function(Dir){
     summarize(Characteristics=list(Characteristics) %>% list) %>%
     ungroup
 
+  
+  #### Create Park objects ####
+  
+  Parks<-invoke_rows(.d=distinct(.data=MetaData, Network, ParkCode, ShortName, LongName ), .f=new, 
+                     .labels=F, Class="Park")[[1]] %>% unlist
+  
   
   PSites<-map(Parks, function(Park){
     SiteDf<-filter(AllSites, ParkCode==getParkInfo(Park, info="ParkCode") ) %>% dplyr::select(-ParkCode)

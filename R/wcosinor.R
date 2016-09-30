@@ -85,7 +85,7 @@ setMethod(f="wcosinor", signature=c(object="data.frame"),
      Reg3<-lm(NewMeas~Date, data=object, na.action=na.exclude)
      CosOut$Analysis<-Reg3
      CosOut$CDates<-object[!is.na(object$NewMeas),"Date"]
-     CosOut$Outliers<-object[obejct$Outie==TRUE,c("Date","Value")]
+     CosOut$Outliers<-object[object$Outie==TRUE,c("Date","Value")]
      return(CosOut)
    }
 

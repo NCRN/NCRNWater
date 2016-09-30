@@ -106,7 +106,7 @@ setMethod(f="getWData", signature=c(object="Characteristic"),
                    stringsAsFactors = FALSE)
      },
     error=function(e){
-       return(NULL)#################
+       return(NULL)
     })
     
     if(is.null(OutData)) return(NULL) #### NULL does not work in filter
@@ -125,7 +125,7 @@ setMethod(f="getWData", signature=c(object="Characteristic"),
     if(!is.na(minvalue)) OutData<-filter(OutData, Value>=minvalue)
     if(!is.na(maxvalue)) OutData<-filter(OutData, Value<=maxvalue)
     
-    if(is.null(OutData) || nrow(OutData)<minobs) return(NULL)######################
+    if(is.null(OutData) || nrow(OutData)<minobs) return(NULL)
     
     if(output=="list") return(list(OutData)) else return(OutData)
 })

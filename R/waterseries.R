@@ -30,7 +30,7 @@
 #' 
 #' @return Creates a boxplot
 #' 
-#' @details  The \code{points} argument determines if lines representing the assessment points should be drawn on the graph. If \code{FALSE} then no lines will be drawn. If \code{TRUE}, the default, then the upper and lower points indicated in \code{object}'s \code{Character} objects will be used to draw the lines. Note that if there are multiple assessemnt points, for example if diffrernt parks have different points, or if htere is both an upper and lower point, they will all be drawn. If a \code{vector} of numbers is passed to \code{points} instead then those will serve as the assessment points and lines will be drawn accordingly. Note that if \code{obejct} is a \code{data.frame} then the only way to draw assessment points is by passing a \code{numeric vector} to \code{points}.
+#' @details  The \code{points} argument determines if lines representing the assessment points should be drawn on the graph. If \code{FALSE} then no lines will be drawn. If \code{TRUE}, the default, then the upper and lower points indicated in \code{object}'s \code{Character} objects will be used to draw the lines. Note that if there are multiple assessemnt points, for example if diffrernt parks have different points, or if there is both an upper and lower point, they will all be drawn. If a \code{vector} of numbers is passed to \code{points} instead then those will serve as the assessment points and lines will be drawn accordingly. Note that if \code{obejct} is a \code{data.frame} then the only way to draw assessment points is by passing a numeric \code{vector} to \code{points}.
 #' 
 #' @export
 
@@ -52,8 +52,11 @@ setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
             )
             
             if(points) points<-c(getCharInfo(object=object,charname=charname, 
-                                             info="LowerPoint"),getCharInfo(object=object,charname=charname, info="UpperPoint")) %>% unlist %>% unique
-            waterseries(object=PlotData,by=by,points=points,yname=yname,xname=xname,labels=labels,title=title,webplot=webplot)
+                info="LowerPoint"),getCharInfo(object=object,charname=charname, info="UpperPoint")) %>% unlist %>% unique
+            
+            points<-points[!is.na(points)] # needed if there is no upper or lower point.
+            #waterseries
+            callGeneric(object=PlotData,points=points,yname=yname,xname=xname,labels=labels,title=title,webplot=webplot)
           })
 
 setMethod(f="waterseries", signature=c(object="data.frame"),
