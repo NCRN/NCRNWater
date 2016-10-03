@@ -4,36 +4,34 @@
 \alias{waterseries}
 \title{waterseries}
 \usage{
-waterseries(object, charname, by = "none", points = TRUE, yname = NA,
-  xname = NA, labels = NA, title = NULL, webplot = FALSE, ...)
+waterseries(object, charname, by = "none", points = TRUE, xname = NA,
+  yname = NA, labels = NA, title = NULL, webplot = FALSE, ...)
 }
 \arguments{
-\item{object}{Either a \code{data.frame} that is the output of \code{getWData}, a \code{Characteristic} object a \code{Site} object, a \code{Park} object or a \code{list} of such objects.}
+\item{object}{Either a \code{data.frame} that is the output of \code{getWData}, a \code{Characteristic} object, a \code{Site} object, a \code{Park} object or a \code{list} of such objects.}
 
-\item{charname}{Required if \code{object} is not a \code{data.frame}. Name, in quotes, of a single \code{Characteristic} whose data should be graphed.}
+\item{charname}{Required if \code{object} is not a \code{data.frame}. Name(s), in quotes, of one or more \code{Characteristic}s whose data should be graphed.}
 
-\item{by}{Indicates how the data for the boxplot should be grouped. A text variable in quotes. Choices are:
+\item{by}{Indicates how the data for the plot should be grouped. A text variable in quotes. Choices are:
 \describe{
-\item{"year"}{The default. Will prodice a boxplot for each year in the data}
-\item{"month"}{ Will prodoce a boxplot for each month, combining data across years. That is all January data will be in one box, all February data in another, etc.}
-\item{"site}{If more than one site is included in the input object, this will produce a different box for each site.}
-\item{"park"}{If more than one park is included int he input object, theis will prodice a different box for each park}
+\item{"site}{If more than one site is included in the input object, this will produce a different line for each site.}
+\item{"park"}{If more than one park is included int he input object, theis will prodice a different line for each park}
 }}
 
-\item{points}{Vector indicating if assesment points will be maked on the graph. See details below.}
-
-\item{yname}{Text, defaults to \code{NA}. A label for the y-axis. If an \code{Characteristic}, \code{Site}, or \code{Park} object is passed to \code{object}, then the y-label will default to the Display Name and Units for the Charecteristic, unless overwitten by the \code{yname} argument. If a \code{data.frame} is passed then the y-label will either be the text from \code{yname} or blank if \code{yname} is left as \code{NA}.}
+\item{points}{Vector indicating if assesment points will be marked on the graph. See details below.}
 
 \item{xname}{Text, defaults to \code{NA}. A label for the x-axis. If a \code{Characteristic}, \code{Site}, or \code{Park} object is passed to \code{object}, then the x-label will default to whatever is indicated in \code{by}.unless overwitten by the \code{xname} argument. If a \code{data.frame} is passed then the x-label will either be the text from \code{xname} or blank if \code{xname} is left as \code{NA}.}
 
-\item{labels}{A character vector indicating the labels for the bars, defaults to NA. If labels are provided (one for each bar) they will be printed. If \code{object} is a \code{data.frame} and \code{labels} is \code{NA} then no labels will be printed. If \code{object} is a \code{Characteristic}, \code{Site}, or \code{Park} object, and \code{labels} is \code{NA} then the default will depend on the \code{gropby} argument. "year" will be labeled with 4 digit years, "month" with 3 letter months (Jan,Feb, etc), "site" with the site name from the \code{Site}'s \code{Display Name} slot and "park" with the \code{Park}'s short name from the \code{ShortName} slot.}
+\item{yname}{Text, defaults to \code{NA}. A label for the y-axis. If an \code{Characteristic}, \code{Site}, or \code{Park} object is passed to \code{object}, then the y-label will default to the Display Name and Units for the Charecteristic, unless overwitten by the \code{yname} argument. If a \code{data.frame} is passed then the y-label will either be the text from \code{yname} or blank if \code{yname} is left as \code{NA}.}
+
+\item{labels}{A character vector indicating the labels for the data series, defaults to NA. If labels are provided (one for each series) they will be printed. If \code{object} is a \code{data.frame} and \code{labels} is \code{NA} then no labels will be printed. If \code{object} is a \code{Characteristic}, \code{Site}, or \code{Park} object, and \code{labels} is \code{NA} then the default will depend on the \code{by} argument. "site" willbe labled with the site name from the \code{Site}'s \code{Display Name} slot and "park" with the \code{Park}'s short name from the \code{ShortName} slot.}
 
 \item{title}{A title in the graph in quotes. Defauls to \code{NULL}, which indicates no title should be used.}
 
 \item{...}{Additional arguments used to select and filter data passed to \code{\link{getWData}}}
 }
 \value{
-Creates a boxplot
+Creates a time series plot.
 }
 \description{
 Produces a time series plot from water data.

@@ -9,10 +9,11 @@
 #' 
 #' @return Returns 11 \code{Park} objects, one for each park, as a \code{list}.
 #' 
-#' @importFrom dplyr rename select filter distinct filter_ ungroup
+#' @importFrom dplyr mutate rename select filter distinct filter_ ungroup
 #' @importFrom lubridate mdy
 #' @importFrom magrittr %>%
 #' @importFrom purrr invoke_rows map map2 by_row
+#' @importFrom readr read_csv
 #' 
 #' @export
 #' @export %>%
@@ -25,10 +26,12 @@ importNCRNWater<-function(Dir){
   setwd(Dir)
 
   
-  Indata<-read.csv("Water Data.csv", header = T, as.is=T) %>% rename(SiteCode=StationID, Date=Visit.Start.Date,
-                                                                     Value=Result.Value.Text, Characteristic=Local.Characteristic.Name)
-  MetaData<-read.csv("MetaData.csv", header=T, as.is=T)
+  Indata<-read_csv("Water Data.csv", col_types="ccccc") %>% 
+    rename(SiteCode=StationID, Date=`Visit Start Date`,Value=`Result Value/Text`, Characteristic=`Local Characteristic Name`)
+  
+  MetaData<-read_csv("MetaData.csv")
   setwd(OldDir)
+  
   
   #### Get data ready to make into objects ####
   
@@ -38,11 +41,10 @@ importNCRNWater<-function(Dir){
   MetaData$Data<-MetaData %>% 
     by_row(..f=function(x) filter_(Indata, .dots=list(~SiteCode==x$SiteCode, ~Characteristic==x$DataName)) %>% 
              dplyr::select(Date,Value), .labels=FALSE, .to="Data" ) %>% unlist(recursive=FALSE)
-  
+
   #### Change numeric data to numeric, but the leave the rest as character ####
   NumDat<-MetaData$DataType=="numeric"
-  MetaData[NumDat,]$Data<-MetaData[NumDat,"Data"] %>% map(.f=function(x) mutate(x,Value = as.numeric(Value) )) 
-    
+  MetaData[NumDat,]$Data<-MetaData[NumDat,]$Data %>% map(.f=function(x) mutate(x,Value = as.numeric(Value) )) 
 #### Create Characteristic objects ####
   MetaData$Characteristics<-invoke_rows(.d=MetaData %>% 
                                          dplyr::select(CharacteristicName, DisplayName, Units, LowerPoint, UpperPoint, Data),
