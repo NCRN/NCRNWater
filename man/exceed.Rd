@@ -5,7 +5,7 @@
 \title{exceed}
 \usage{
 exceed(object, parkcode = NA, sitecode = NA, charname = NA,
-  points = "both", lower = NA, upper = NA, ...)
+  points = "both", lower = NA, upper = NA, all = F, ...)
 }
 \arguments{
 \item{object}{One of a \code{Characteristic} object, a \code{Site} object, a \code{Park} object or a list of such objects.}
@@ -24,6 +24,8 @@ exceed(object, parkcode = NA, sitecode = NA, charname = NA,
 }}
 
 \item{lower, upper}{The lower and uppers assessment points. Either a number specified by the user, or if \code{NA}, the default, the assessment point is determined by the \code{LowerPoint} and \code{UpperPoint} slots in the \code{Characteristic} objects.}
+
+\item{all}{Logical, defaults to \code{FALSE}. Not used when \code{object} is a \code{data.frame}. If \code{all} is \code{FALSE} characteristics without uppoer or lower references points will not be incldued in the reults. If \code{all} is \code{TRUE} such characteristics will be included.}
 }
 \description{
 Determines if water data contains observtions that exceed a upper and/or lower assessment points.
