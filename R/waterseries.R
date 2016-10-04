@@ -15,8 +15,11 @@
 #' @param by Indicates how the data for the plot should be grouped. A text variable in quotes. Choices are:
 #' \describe{
 #' \item{"site}{If more than one site is included in the input object, this will produce a different line for each site.}
-#' \item{"park"}{If more than one park is included int he input object, theis will prodice a different line for each park}
+#' \item{"park"}{If more than one park is included in the input object, this will produce a different line for each park}
+#' \item{"char"}{If more than one characteristic is included in the input object, this will produce a different line for each one} 
+#' \item{"none}{All data will be displayed as a single ine. Used if you only have data from a single charactersitic from a single site}
 #' }
+#' 
 #' @param points Vector indicating if assesment points will be marked on the graph. See details below.
 #' @param yname Text, defaults to \code{NA}. A label for the y-axis. If an \code{Characteristic}, \code{Site}, or \code{Park} object is passed to \code{object}, then the y-label will default to the Display Name and Units for the Charecteristic, unless overwitten by the \code{yname} argument. If a \code{data.frame} is passed then the y-label will either be the text from \code{yname} or blank if \code{yname} is left as \code{NA}.
 #' @param xname Text, defaults to \code{NA}. A label for the x-axis. If a \code{Characteristic}, \code{Site}, or \code{Park} object is passed to \code{object}, then the x-label will default to whatever is indicated in \code{by}.unless overwitten by the \code{xname} argument. If a \code{data.frame} is passed then the x-label will either be the text from \code{xname} or blank if \code{xname} is left as \code{NA}.
@@ -40,34 +43,31 @@ setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
             PlotData<-getWData(object=object,charname=charname,...)
             if(is.na(yname)) yname<-paste0(getCharInfo(object=object, charname=charname, info="DisplayName")," (",
                                            getCharInfo(object=object, charname=charname, info="Units"),")") %>% unique
-            if(is.na(xname)) xname<-switch(by,
-                                           none="",
-                                           year="Month",
-                                           month="Year",
-                                           site="Date",
-                                           park="Date"
+            if(is.na(xname)) xname<-"Date"
+            if(is.na(labels)) labels<-switch(by,
+                                             none="",
+                                             char=getCharInfo(object,charname=charname, info="DisplayName"),
+                                             park=getParkInfo(object, info="ParkShortName"),
+                                             site=getSiteInfo(object, info="SiteName")
             )
             if(points) points<-c(getCharInfo(object=object,charname=charname, 
                 info="LowerPoint"),getCharInfo(object=object,charname=charname, info="UpperPoint")) %>% unlist %>% unique
             
             points<-points[!is.na(points)] # needed if there is no upper or lower point.
-            callGeneric(object=PlotData, by=by, points=points, xname=xname, yname=yname, title=title, webplot=webplot, ...)
+            callGeneric(object=PlotData, by=by, points=points, xname=xname, yname=yname,labels=labels, title=title, webplot=webplot, ...)
           })
 
 setMethod(f="waterseries", signature=c(object="data.frame"),
           function(object,by,points,xname,yname,labels,title,webplot,...){
             Grouper<-switch(by,
-                            none=factor(1),
-                           # year=object$Date %>% year %>% factor,
-                            #month=object$Date %>% month(label=T) %>% factor,
+                            none="",
                             char=object$Characteristic %>% factor,
                             site=object$Site %>% factor,
                             park=object$Park %>% factor)
-            if(is.na(yname)) yname<-""
+            if(all(is.na(yname))) yname<-""
             if(all(is.na(xname))) xname<-""
             if(all(is.na(labels))) labels<-switch(by,
-                                                  #year=object$Date %>% year %>% unique,
-                                                  #month=object$Date %>% month(label=T) %>% unique %>% sort %>% as.character,
+                                                  none="",
                                                   char=object$Characteristic %>% unique,
                                                   site=object$Site %>% unique,
                                                   park=object$Park %>% unique)

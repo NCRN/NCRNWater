@@ -15,7 +15,9 @@ waterseries(object, charname, by = "none", points = TRUE, xname = NA,
 \item{by}{Indicates how the data for the plot should be grouped. A text variable in quotes. Choices are:
 \describe{
 \item{"site}{If more than one site is included in the input object, this will produce a different line for each site.}
-\item{"park"}{If more than one park is included int he input object, theis will prodice a different line for each park}
+\item{"park"}{If more than one park is included in the input object, this will produce a different line for each park}
+\item{"char"}{If more than one characteristic is included in the input object, this will produce a different line for each one} 
+\item{"none}{All data will be displayed as a single ine. Used if you only have data from a single charactersitic from a single site}
 }}
 
 \item{points}{Vector indicating if assesment points will be marked on the graph. See details below.}
