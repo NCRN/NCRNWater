@@ -50,7 +50,7 @@ setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
                                              park=getParkInfo(object, info="ParkShortName"),
                                              site=getSiteInfo(object, info="SiteName")
             )
-            if(points) points<-c(getCharInfo(object=object,charname=charname, 
+            if(is.logical(points) & points) points<-c(getCharInfo(object=object,charname=charname, 
                 info="LowerPoint"),getCharInfo(object=object,charname=charname, info="UpperPoint")) %>% unlist %>% unique
             
             points<-points[!is.na(points)] # needed if there is no upper or lower point.

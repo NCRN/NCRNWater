@@ -3,6 +3,7 @@
 #' @include getWData.R
 #' @include waterseries.R
 #' @importFrom purrr pmap
+#' @importFrom dplyr filter
 #' 
 #' @title exceed
 #' 
@@ -17,15 +18,16 @@
 #' \item{"both"}{The default. Assess the data against both reference points}
 #' }
 #' @param lower,upper The lower and uppers assessment points. Either a number specified by the user, or if \code{NA}, the default, the assessment point is determined by the \code{LowerPoint} and \code{UpperPoint} slots in the \code{Characteristic} objects. 
+#' @param all Logical, defaults to \code{FALSE}. Not used when \code{object} is a \code{data.frame}. If \code{all} is \code{FALSE} characteristics without uppoer or lower references points will not be incldued in the reults. If \code{all} is \code{TRUE} such characteristics will be included.
 #' 
 #' @export
 
-setGeneric(name="exceed",function(object, parkcode=NA, sitecode=NA, charname=NA, points="both", lower=NA, upper=NA,...){standardGeneric("exceed")},signature=c("object") )
+setGeneric(name="exceed",function(object, parkcode=NA, sitecode=NA, charname=NA, points="both", lower=NA, upper=NA,all=F,...){standardGeneric("exceed")},signature=c("object") )
 
 
 
 setMethod(f="exceed", signature=c(object="NCRNWaterObj"),
-  function(object,parkcode, sitecode, charname,points,lower,upper,...){       
+  function(object,parkcode, sitecode, charname,points,lower,upper,all, ...){       
     DataUse<-getWData(object,parkcode=parkcode, sitecode=sitecode, charname=charname,output="list",...)
     NotNull<-!sapply(DataUse, is.null)  ### to filter out NULL data
     lower<-if((points=="lower" |points=="both") & is.na(lower)){
@@ -34,9 +36,8 @@ setMethod(f="exceed", signature=c(object="NCRNWaterObj"),
       getCharInfo(object,parkcode,sitecode,charname, info='UpperPoint')} else upper
     
     pmap(.l=list(object=DataUse[NotNull],lower=lower[NotNull],upper=upper[NotNull]), .f=exceed ) %>% 
-      bind_rows()
-
-
+      bind_rows() %>% 
+      if (!all) filter(.,!(is.na(TooLow)&is.na(TooHigh))) else .
             
 })
 
