@@ -17,35 +17,37 @@
 #' \item{"lat"}{Returns the latitude of the site.}
 #' \item{"long}{Rerturns the longitude of the site.}
 #' \item{"type"}{Returns the type of the site.}
-#'\item{"ParkCode"}{Returns the park code for the park the site is in.}
+#' \item{"ParkCode"}{Returns the park code for the park the site is in.}
 #' \item{"ParkShortName"}{ The default. Returns the short name of the park the site is in.}
 #' \item{"ParkLongName"}{Returns the long name of the park the site is in.}
 #' \item{"Network}{Returns the network code for the network the site is in.}
 #' } 
 #' 
-#' @return Either a vector or a list with information for each site. Only the "coords" option returns a list.
+#' @return A vector of information for each site. 
 #' 
+#' @details   If \code{object} is a \code{list} or a \code{Park} object, then the list is filtered using both the \code{parkcode} and \code{sitecode} arguments. If \code{object} is a \code{Site} then both \code{parkcode} and \code{sitecode} are ignored.
+#'  
 #' @export
 
-setGeneric(name="getSiteInfo",function(object,sitecode=NA,info){standardGeneric("getSiteInfo")},signature=c("object") )
+setGeneric(name="getSiteInfo",function(object,parkcode=NA,sitecode=NA,info){standardGeneric("getSiteInfo")},signature=c("object") )
 
 
 setMethod(f="getSiteInfo", signature=c(object="list"),
-          function(object,sitecode, info){
-            lapply(object,FUN=getSiteInfo, sitecode=sitecode, info=info) %>% unname %>% unlist(recursive=F)
+          function(object, parkcode, sitecode, info){
+            lapply(object,FUN=getSiteInfo, parkcode=parkcode, sitecode=sitecode, info=info) %>% unname %>% unlist
 })  
 
 
 #### Given one park get the sites and run again ####
 setMethod(f="getSiteInfo", signature=c(object="Park"),
-    function(object,sitecode,info){
+    function(object, parkcode, sitecode, info){
       switch(info,
         ParkCode=, ParkShortName=, ParkLongName=, Network =
           return(getParkInfo(object, info=info) %>% 
-                   rep(times=getSites(object=object, sitecode=sitecode) %>% 
+                   rep(times=getSites(object=object, parkcode=parkcode, sitecode=sitecode) %>% 
                    length)), #info from Park Object
       
-        return(sapply(getSites(object=object, sitecode = sitecode) %>% unname(), 
+        return(sapply(getSites(object=object, parkcode=parkcode, sitecode = sitecode) %>% unname, 
                       FUN=getSiteInfo, info=info)) #default - info from site object
        )
 })

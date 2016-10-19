@@ -4,10 +4,12 @@
 \alias{getSiteInfo}
 \title{getSiteInfo}
 \usage{
-getSiteInfo(object, sitecode = NA, info)
+getSiteInfo(object, parkcode = NA, sitecode = NA, info)
 }
 \arguments{
 \item{object}{Either a \code{Park} object or a \code{site} object or a \code{list} of such objects.}
+
+\item{parkcode}{Park code of one or more parks, in quotes.}
 
 \item{sitecode}{Site code of one or more sites, in quotes.}
 
@@ -25,9 +27,12 @@ getSiteInfo(object, sitecode = NA, info)
 }}
 }
 \value{
-Either a vector or a list with information for each site. Only the "coords" option returns a list.
+A vector of information for each site.
 }
 \description{
 Retreives the metadata from a \code{Site} object or a \code{list} of such objects.
+}
+\details{
+If \code{object} is a \code{list} or a \code{Park} object, then the list is filtered using both the \code{parkcode} and \code{sitecode} arguments. If \code{object} is a \code{Site} then both \code{parkcode} and \code{sitecode} are ignored.
 }
 
