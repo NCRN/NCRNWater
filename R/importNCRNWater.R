@@ -47,8 +47,9 @@ importNCRNWater<-function(Dir){
   MetaData[NumDat,]$Data<-MetaData[NumDat,]$Data %>% map(.f=function(x) mutate(x,Value = as.numeric(Value) )) 
 #### Create Characteristic objects ####
   MetaData$Characteristics<-invoke_rows(.d=MetaData %>% 
-                                         dplyr::select(CharacteristicName, DisplayName, Units, LowerPoint, UpperPoint, Data),
-                                        .f=new, Class="Characteristic", .labels=F)$.out
+    dplyr::select(CharacteristicName, DisplayName, Units, LowerPoint, UpperPoint, LowerDescription, 
+              UpperDescription, AssessmentDetails, Data),
+              .f=new, Class="Characteristic", .labels=F)$.out
 
   #### Create Site objects with correct Characteristic objects ####
   AllSites<-MetaData %>% group_by(ParkCode, SiteCode, SiteName,Type) %>% 
