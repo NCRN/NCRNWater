@@ -5,8 +5,8 @@
 \title{waterseries}
 \usage{
 waterseries(object, parkcode = NA, sitecode = NA, charname, by = "none",
-  points = TRUE, xname = NA, yname = NA, labels = NA, title = NULL,
-  webplot = FALSE, ...)
+  points = TRUE, layers = c("points", "line"), xname = NA, yname = NA,
+  labels = NA, title = NULL, webplot = FALSE, ...)
 }
 \arguments{
 \item{object}{Either a \code{data.frame} that is the output of \code{getWData}, a \code{Characteristic} object, a \code{Site} object, a \code{Park} object or a \code{list} of such objects.}
@@ -26,6 +26,8 @@ waterseries(object, parkcode = NA, sitecode = NA, charname, by = "none",
 }}
 
 \item{points}{Vector indicating if assesment points will be marked on the graph. See details below.}
+
+\item{layers}{Defaults to c("points","line") Indicates which layers you wish to see on the plot.}
 
 \item{xname}{Text, defaults to \code{NA}. A label for the x-axis. If a \code{Characteristic}, \code{Site}, or \code{Park} object is passed to \code{object}, then the x-label will default to whatever is indicated in \code{by}.unless overwitten by the \code{xname} argument. If a \code{data.frame} is passed then the x-label will either be the text from \code{xname} or blank if \code{xname} is left as \code{NA}.}
 

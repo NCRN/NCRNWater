@@ -24,6 +24,7 @@
 #' }
 #' 
 #' @param points Vector indicating if assesment points will be marked on the graph. See details below.
+#' @param layers Defaults to c("points","line") Indicates which layers you wish to see on the plot. 
 #' @param yname Text, defaults to \code{NA}. A label for the y-axis. If an \code{Characteristic}, \code{Site}, or \code{Park} object is passed to \code{object}, then the y-label will default to the Display Name and Units for the Charecteristic, unless overwitten by the \code{yname} argument. If a \code{data.frame} is passed then the y-label will either be the text from \code{yname} or blank if \code{yname} is left as \code{NA}.
 #' @param xname Text, defaults to \code{NA}. A label for the x-axis. If a \code{Characteristic}, \code{Site}, or \code{Park} object is passed to \code{object}, then the x-label will default to whatever is indicated in \code{by}.unless overwitten by the \code{xname} argument. If a \code{data.frame} is passed then the x-label will either be the text from \code{xname} or blank if \code{xname} is left as \code{NA}.
 #' 
@@ -38,7 +39,7 @@
 #' 
 #' @export
 
-setGeneric(name="waterseries",function(object,parkcode=NA, sitecode=NA,charname, by="none",points=TRUE,xname=NA,yname=NA,labels=NA,title=NULL,webplot=FALSE,...){standardGeneric("waterseries")},signature=c("object") )
+setGeneric(name="waterseries",function(object,parkcode=NA, sitecode=NA,charname, by="none",points=TRUE,layers=c("points","line"), xname=NA,yname=NA,labels=NA,title=NULL,webplot=FALSE,...){standardGeneric("waterseries")},signature=c("object") )
 
 
 setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
@@ -58,7 +59,7 @@ setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
                                                info="UpperPoint")) %>% unlist %>% unique
             
             points<-points[!is.na(points)] # needed if there is no upper or lower point.
-            callGeneric(object=PlotData, by=by, points=points, xname=xname, yname=yname,labels=labels, title=title, webplot=webplot, ...)
+            callGeneric(object=PlotData, by=by, points=points, layers=layers, xname=xname, yname=yname,labels=labels, title=title, webplot=webplot, ...)
           })
 
 setMethod(f="waterseries", signature=c(object="data.frame"),
@@ -79,8 +80,8 @@ setMethod(f="waterseries", signature=c(object="data.frame"),
             Xaxis<-if(by=="year") month(object$Date,label=F) else object$Date
         
             OutPlot<-ggplot(object,aes(Xaxis,Value,color=Grouper,shape=Grouper)) +
-              geom_point( size=1.75) +
-              geom_line(size=.8) +
+              {if ("points" %in% layers) geom_point( size=1.75) }+
+              {if ("line" %in% layers) geom_line(size=.8)} +
               scale_color_discrete(name="legend",labels=labels) +
               scale_shape_manual(name="legend",values=1:nlevels(Grouper), labels=labels) +
               {if(by=="year") scale_x_continuous(name=xname,labels=Xaxis %>% unique %>% sort %>% month(T) %>% as.character, breaks=1:12)} +
