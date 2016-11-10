@@ -10,7 +10,10 @@
 #' 
 #' @description Produces a time series plot from water data. 
 #' 
+#' @inheritParams getChars
+#' 
 #' @param object Either a \code{data.frame} that is the output of \code{getWData}, a \code{Characteristic} object, a \code{Site} object, a \code{Park} object or a \code{list} of such objects.
+#' 
 #' @param charname Required if \code{object} is not a \code{data.frame}. Name(s), in quotes, of one or more \code{Characteristic}s whose data should be graphed.
 #' @param by Indicates how the data for the plot should be grouped. A text variable in quotes. Choices are:
 #' \describe{
@@ -35,12 +38,12 @@
 #' 
 #' @export
 
-setGeneric(name="waterseries",function(object,charname, by="none",points=TRUE,xname=NA,yname=NA,labels=NA,title=NULL,webplot=FALSE,...){standardGeneric("waterseries")},signature=c("object") )
+setGeneric(name="waterseries",function(object,parkcode=NA, sitecode=NA,charname, by="none",points=TRUE,xname=NA,yname=NA,labels=NA,title=NULL,webplot=FALSE,...){standardGeneric("waterseries")},signature=c("object") )
 
 
 setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
-          function(object,charname,by,points,xname,yname,labels,title,webplot,...){
-            PlotData<-getWData(object=object,charname=charname,...)
+          function(object,parkcode, sitecode, charname,by,points,xname,yname,labels,title,webplot,...){
+            PlotData<-getWData(object=object,parkcode=parkcode, sitecode=sitecode, charname=charname,...)
             if(is.na(yname)) yname<-paste0(getCharInfo(object=object, charname=charname, info="DisplayName")," (",
                                            getCharInfo(object=object, charname=charname, info="Units"),")") %>% unique
             if(is.na(xname)) xname<-"Date"
@@ -50,8 +53,9 @@ setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
                                              park=getParkInfo(object, info="ParkShortName"),
                                              site=getSiteInfo(object, info="SiteName")
             )
-            if(is.logical(points) & points) points<-c(getCharInfo(object=object,charname=charname, 
-                info="LowerPoint"),getCharInfo(object=object,charname=charname, info="UpperPoint")) %>% unlist %>% unique
+            if(is.logical(points) & points) points<-c(getCharInfo(object=object,parkcode=parkcode, sitecode=sitecode, charname=charname, 
+                info="LowerPoint"),getCharInfo(object=object,parkcode=parkcode, sitecode=sitecode, charname=charname,
+                                               info="UpperPoint")) %>% unlist %>% unique
             
             points<-points[!is.na(points)] # needed if there is no upper or lower point.
             callGeneric(object=PlotData, by=by, points=points, xname=xname, yname=yname,labels=labels, title=title, webplot=webplot, ...)

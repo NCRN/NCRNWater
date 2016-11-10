@@ -4,11 +4,16 @@
 \alias{waterseries}
 \title{waterseries}
 \usage{
-waterseries(object, charname, by = "none", points = TRUE, xname = NA,
-  yname = NA, labels = NA, title = NULL, webplot = FALSE, ...)
+waterseries(object, parkcode = NA, sitecode = NA, charname, by = "none",
+  points = TRUE, xname = NA, yname = NA, labels = NA, title = NULL,
+  webplot = FALSE, ...)
 }
 \arguments{
 \item{object}{Either a \code{data.frame} that is the output of \code{getWData}, a \code{Characteristic} object, a \code{Site} object, a \code{Park} object or a \code{list} of such objects.}
+
+\item{parkcode}{One or more parkcodes, in quotes.  If \code{object} is a \code{Park} object or a \code{list} of \code{Park} objects, then the \code{parkcode} argument can be used to select which sites should be used.}
+
+\item{sitecode}{One or more sitecodes, in quotes. If \code{object} is a \code{Park} object or a \code{list} of \code{Park} or \code{Site} objects, then the \code{sitcode} argument can be used to select which sites should be used.}
 
 \item{charname}{Required if \code{object} is not a \code{data.frame}. Name(s), in quotes, of one or more \code{Characteristic}s whose data should be graphed.}
 
