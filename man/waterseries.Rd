@@ -5,8 +5,9 @@
 \title{waterseries}
 \usage{
 waterseries(object, parkcode = NA, sitecode = NA, charname, by = "none",
-  points = TRUE, layers = c("points", "line"), xname = NA, yname = NA,
-  labels = NA, title = NULL, webplot = FALSE, ...)
+  assessment = TRUE, layers = c("points", "line"), xname = NA,
+  yname = NA, labels = NA, title = NULL, colors = c("blue", "black",
+  "red"), webplot = FALSE, ...)
 }
 \arguments{
 \item{object}{Either a \code{data.frame} that is the output of \code{getWData}, a \code{Characteristic} object, a \code{Site} object, a \code{Park} object or a \code{list} of such objects.}
@@ -25,8 +26,6 @@ waterseries(object, parkcode = NA, sitecode = NA, charname, by = "none",
 \item{"none}{All data will be displayed as a single ine. Used if you only have data from a single charactersitic from a single site}
 }}
 
-\item{points}{Vector indicating if assesment points will be marked on the graph. See details below.}
-
 \item{layers}{Defaults to c("points","line") Indicates which layers you wish to see on the plot.}
 
 \item{xname}{Text, defaults to \code{NA}. A label for the x-axis. If a \code{Characteristic}, \code{Site}, or \code{Park} object is passed to \code{object}, then the x-label will default to whatever is indicated in \code{by}.unless overwitten by the \code{xname} argument. If a \code{data.frame} is passed then the x-label will either be the text from \code{xname} or blank if \code{xname} is left as \code{NA}.}
@@ -37,7 +36,11 @@ waterseries(object, parkcode = NA, sitecode = NA, charname, by = "none",
 
 \item{title}{A title in the graph in quotes. Defauls to \code{NULL}, which indicates no title should be used.}
 
+\item{colors}{a length 3 character vector with the colors for the points, line connecting the points and assessment lines.}
+
 \item{...}{Additional arguments used to select and filter data passed to \code{\link{getWData}}}
+
+\item{assesment}{Vector indicating if assesment lines will be marked on the graph. See details below.}
 }
 \value{
 Creates a time series plot.
@@ -46,6 +49,6 @@ Creates a time series plot.
 Produces a time series plot from water data.
 }
 \details{
-The \code{points} argument determines if lines representing the assessment points should be drawn on the graph. If \code{FALSE} then no lines will be drawn. If \code{TRUE}, the default, then the upper and lower points indicated in \code{object}'s \code{Character} objects will be used to draw the lines. Note that if there are multiple assessemnt points, for example if diffrernt parks have different points, or if there is both an upper and lower point, they will all be drawn. If a \code{vector} of numbers is passed to \code{points} instead then those will serve as the assessment points and lines will be drawn accordingly. Note that if \code{obejct} is a \code{data.frame} then the only way to draw assessment points is by passing a numeric \code{vector} to \code{points}.
+The \code{assessment} argument determines if lines representing the assessment values should be drawn on the graph. If \code{FALSE} then no lines will be drawn. If \code{TRUE}, the default, then the upper and lower points indicated in \code{object}'s \code{Character} objects will be used to draw the lines. Note that if there are multiple assessemnt points, for example if diffrernt parks have different points, or if there is both an upper and lower point, they will all be drawn. If a \code{vector} of numbers is passed to \code{assessemnt} instead then those will serve as the assessment values and lines will be drawn accordingly. Note that if \code{obejct} is a \code{data.frame} then the only way to draw assessment lines is by passing a numeric \code{vector} to \code{assessment}.
 }
 

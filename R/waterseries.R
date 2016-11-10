@@ -23,27 +23,28 @@
 #' \item{"none}{All data will be displayed as a single ine. Used if you only have data from a single charactersitic from a single site}
 #' }
 #' 
-#' @param points Vector indicating if assesment points will be marked on the graph. See details below.
+#' @param assesment Vector indicating if assesment lines will be marked on the graph. See details below.
 #' @param layers Defaults to c("points","line") Indicates which layers you wish to see on the plot. 
 #' @param yname Text, defaults to \code{NA}. A label for the y-axis. If an \code{Characteristic}, \code{Site}, or \code{Park} object is passed to \code{object}, then the y-label will default to the Display Name and Units for the Charecteristic, unless overwitten by the \code{yname} argument. If a \code{data.frame} is passed then the y-label will either be the text from \code{yname} or blank if \code{yname} is left as \code{NA}.
 #' @param xname Text, defaults to \code{NA}. A label for the x-axis. If a \code{Characteristic}, \code{Site}, or \code{Park} object is passed to \code{object}, then the x-label will default to whatever is indicated in \code{by}.unless overwitten by the \code{xname} argument. If a \code{data.frame} is passed then the x-label will either be the text from \code{xname} or blank if \code{xname} is left as \code{NA}.
 #' 
 #' @param labels A character vector indicating the labels for the data series, defaults to NA. If labels are provided (one for each series) they will be printed. If \code{object} is a \code{data.frame} and \code{labels} is \code{NA} then no labels will be printed. If \code{object} is a \code{Characteristic}, \code{Site}, or \code{Park} object, and \code{labels} is \code{NA} then the default will depend on the \code{by} argument. "site" willbe labled with the site name from the \code{Site}'s \code{Display Name} slot and "park" with the \code{Park}'s short name from the \code{ShortName} slot. 
 #' @param title A title in the graph in quotes. Defauls to \code{NULL}, which indicates no title should be used. 
+#' @param colors a length 3 character vector with the colors for the points, line connecting the points and assessment lines. 
 #' 
 #' @param ... Additional arguments used to select and filter data passed to \code{\link{getWData}}
 #' 
 #' @return Creates a time series plot.
 #' 
-#' @details  The \code{points} argument determines if lines representing the assessment points should be drawn on the graph. If \code{FALSE} then no lines will be drawn. If \code{TRUE}, the default, then the upper and lower points indicated in \code{object}'s \code{Character} objects will be used to draw the lines. Note that if there are multiple assessemnt points, for example if diffrernt parks have different points, or if there is both an upper and lower point, they will all be drawn. If a \code{vector} of numbers is passed to \code{points} instead then those will serve as the assessment points and lines will be drawn accordingly. Note that if \code{obejct} is a \code{data.frame} then the only way to draw assessment points is by passing a numeric \code{vector} to \code{points}.
+#' @details  The \code{assessment} argument determines if lines representing the assessment values should be drawn on the graph. If \code{FALSE} then no lines will be drawn. If \code{TRUE}, the default, then the upper and lower points indicated in \code{object}'s \code{Character} objects will be used to draw the lines. Note that if there are multiple assessemnt points, for example if diffrernt parks have different points, or if there is both an upper and lower point, they will all be drawn. If a \code{vector} of numbers is passed to \code{assessemnt} instead then those will serve as the assessment values and lines will be drawn accordingly. Note that if \code{obejct} is a \code{data.frame} then the only way to draw assessment lines is by passing a numeric \code{vector} to \code{assessment}.
 #' 
 #' @export
 
-setGeneric(name="waterseries",function(object,parkcode=NA, sitecode=NA,charname, by="none",points=TRUE,layers=c("points","line"), xname=NA,yname=NA,labels=NA,title=NULL,webplot=FALSE,...){standardGeneric("waterseries")},signature=c("object") )
+setGeneric(name="waterseries",function(object,parkcode=NA, sitecode=NA,charname, by="none",assessment=TRUE,layers=c("points","line"), xname=NA,yname=NA,labels=NA,title=NULL,colors=c("blue","black","red"),webplot=FALSE,...){standardGeneric("waterseries")},signature=c("object") )
 
 
 setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
-          function(object,parkcode, sitecode, charname,by,points,xname,yname,labels,title,webplot,...){
+          function(object,parkcode, sitecode, charname,by,assessment,xname,yname,labels,title,colors, webplot,...){
             PlotData<-getWData(object=object,parkcode=parkcode, sitecode=sitecode, charname=charname,...)
             if(is.na(yname)) yname<-paste0(getCharInfo(object=object, charname=charname, info="DisplayName")," (",
                                            getCharInfo(object=object, charname=charname, info="Units"),")") %>% unique
@@ -54,16 +55,17 @@ setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
                                              park=getParkInfo(object, info="ParkShortName"),
                                              site=getSiteInfo(object, info="SiteName")
             )
-            if(is.logical(points) & points) points<-c(getCharInfo(object=object,parkcode=parkcode, sitecode=sitecode, charname=charname, 
-                info="LowerPoint"),getCharInfo(object=object,parkcode=parkcode, sitecode=sitecode, charname=charname,
-                                               info="UpperPoint")) %>% unlist %>% unique
+            if(is.logical(assessment) & assessment) assessment<-c(getCharInfo(object=object,parkcode=parkcode, sitecode=sitecode, 
+              charname=charname, info="LowerPoint"),getCharInfo(object=object,parkcode=parkcode, sitecode=sitecode, 
+              charname=charname, info="UpperPoint")) %>% unlist %>% unique
             
-            points<-points[!is.na(points)] # needed if there is no upper or lower point.
-            callGeneric(object=PlotData, by=by, points=points, layers=layers, xname=xname, yname=yname,labels=labels, title=title, webplot=webplot, ...)
+            assessment<-assessment[!is.na(assessment)] # needed if there is no upper or lower assessment.
+            callGeneric(object=PlotData, by=by, assessment=assessment, layers=layers, xname=xname, yname=yname,labels=labels, 
+                        title=title,colors=colors, webplot=webplot, ...)
           })
 
 setMethod(f="waterseries", signature=c(object="data.frame"),
-          function(object,by,points,xname,yname,labels,title,webplot,...){
+          function(object,by,assessment,xname,yname,labels,title,colors, webplot,...){
             Grouper<-switch(by,
                             none="",
                             char=object$Characteristic %>% factor,
@@ -80,12 +82,12 @@ setMethod(f="waterseries", signature=c(object="data.frame"),
             Xaxis<-if(by=="year") month(object$Date,label=F) else object$Date
         
             OutPlot<-ggplot(object,aes(Xaxis,Value,color=Grouper,shape=Grouper)) +
-              {if ("points" %in% layers) geom_point( size=1.75) }+
-              {if ("line" %in% layers) geom_line(size=.8)} +
+              {if ("points" %in% layers) geom_point( size=2, pch=16,col=colors[1]) }+
+              {if ("line" %in% layers) geom_line(size=.8, col=colors[2])} +
               scale_color_discrete(name="legend",labels=labels) +
               scale_shape_manual(name="legend",values=1:nlevels(Grouper), labels=labels) +
               {if(by=="year") scale_x_continuous(name=xname,labels=Xaxis %>% unique %>% sort %>% month(T) %>% as.character, breaks=1:12)} +
-              {if (is.numeric(points)) geom_hline(yintercept=points,color="red",linetype="dashed",size=1.1)} +
+              {if (is.numeric(assessment)) geom_hline(yintercept=assessment,color=colors[3],linetype="dashed",size=1.1)} +
               labs(title=title,y=yname,x=xname) +
               theme_bw() +
               theme(panel.grid = element_blank(), legend.title=element_blank(),legend.position=if(by=="none") "none" else "bottom")
