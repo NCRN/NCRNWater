@@ -7,7 +7,7 @@
 waterseries(object, parkcode = NA, sitecode = NA, charname, by = "none",
   assessment = TRUE, layers = c("points", "line"), xname = NA,
   yname = NA, labels = NA, title = NULL, colors = c("blue", "black",
-  "red"), webplot = FALSE, ...)
+  "red"), sizes = c(3, 0.8, 1.1), webplot = FALSE, ...)
 }
 \arguments{
 \item{object}{Either a \code{data.frame} that is the output of \code{getWData}, a \code{Characteristic} object, a \code{Site} object, a \code{Park} object or a \code{list} of such objects.}
@@ -37,6 +37,8 @@ waterseries(object, parkcode = NA, sitecode = NA, charname, by = "none",
 \item{title}{A title in the graph in quotes. Defauls to \code{NULL}, which indicates no title should be used.}
 
 \item{colors}{a length 3 character vector with the colors for the points, line connecting the points and assessment lines.}
+
+\item{sizes}{a length 3 numeric vector with the sizes for the points, line connecting the points and assessment lines.}
 
 \item{...}{Additional arguments used to select and filter data passed to \code{\link{getWData}}}
 
