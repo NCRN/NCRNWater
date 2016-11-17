@@ -83,8 +83,8 @@ setMethod(f="waterseries", signature=c(object="data.frame"),
             Xaxis<-if(by=="year") month(object$Date,label=F) else object$Date
         
             OutPlot<-ggplot(object,aes(Xaxis,Value,color=Grouper,shape=Grouper)) +
-              {if ("points" %in% layers) geom_point(size=sizes[1],pch=16,col=colors[1]) }+
-              {if ("line" %in% layers) geom_line(size=sizes[2], color=colors[2])} +
+              {if ("points" %in% layers) geom_point(aes(color=colors[1]), size=sizes[1],pch=16) }+
+              {if ("line" %in% layers) geom_line(color=colors[2], size=sizes[2])} +
               scale_color_discrete(name="legend",labels=labels) +
               scale_shape_manual(name="legend",values=1:nlevels(Grouper), labels=labels) +
               {if(by=="year") scale_x_continuous(name=xname,labels=Xaxis %>% unique %>% sort %>% month(T) %>% as.character, breaks=1:12)} +
