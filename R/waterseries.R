@@ -4,6 +4,7 @@
 #' @importFrom lubridate year month
 #' @importFrom ggplot2 ggplot aes geom_point labs theme_bw theme element_blank geom_hline geom_line scale_color_discrete scale_shape_manual scale_x_continuous
 #' @importFrom plotly ggplotly config
+#' @importFrom viridis scale_color_viridis
 
 #' 
 #' @title waterseries
@@ -30,7 +31,8 @@
 #' 
 #' @param labels A character vector indicating the labels for the data series, defaults to NA. If labels are provided (one for each series) they will be printed. If \code{object} is a \code{data.frame} and \code{labels} is \code{NA} then no labels will be printed. If \code{object} is a \code{Characteristic}, \code{Site}, or \code{Park} object, and \code{labels} is \code{NA} then the default will depend on the \code{by} argument. "site" willbe labled with the site name from the \code{Site}'s \code{Display Name} slot and "park" with the \code{Park}'s short name from the \code{ShortName} slot. 
 #' @param title A title in the graph in quotes. Defaults to \code{NULL}, which indicates no title should be used. 
-#' @param colors a length 3 character vector with the colors for the points, line connecting the points and assessment lines. 
+#' @param colors a character vector with the colors for the points and lines. 
+#' @param assesscolor a length one charactter vector with the color for the assessment lines.
 #' @param sizes a length 3 numeric vector with the sizes for the points, line connecting the points and assessment lines.
 #' 
 #' @param ... Additional arguments used to select and filter data passed to \code{\link{getWData}}
@@ -41,11 +43,11 @@
 #' 
 #' @export
 
-setGeneric(name="waterseries",function(object,parkcode=NA, sitecode=NA,charname, by="none",assessment=TRUE,layers=c("points","line"), xname=NA,yname=NA,labels=NA,title=NULL,colors=c("blue","black","red"), sizes=c(3, 0.8, 1.1), webplot=FALSE,...){standardGeneric("waterseries")},signature=c("object") )
+setGeneric(name="waterseries",function(object,parkcode=NA, sitecode=NA,charname, by="char",assessment=TRUE,layers=c("points","line"), xname=NA,yname=NA,labels=NA,title=NULL,colors=NA, assesscolor="red", sizes=c(3, 0.8, 1.1), webplot=FALSE,...){standardGeneric("waterseries")},signature=c("object") )
 
 
 setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
-          function(object,parkcode, sitecode, charname,by,assessment,xname,yname,labels,title,colors,sizes, webplot,...){
+          function(object,parkcode, sitecode, charname,by,assessment,xname,yname,labels,title,colors, assesscolor,sizes, webplot,...){
             PlotData<-getWData(object=object,parkcode=parkcode, sitecode=sitecode, charname=charname,...)
             if(is.na(yname)) yname<-paste0(getCharInfo(object=object, charname=charname, info="DisplayName")," (",
                                            getCharInfo(object=object, charname=charname, info="Units"),")") %>% unique
@@ -62,11 +64,11 @@ setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
             
             assessment<-assessment[!is.na(assessment)] # needed if there is no upper or lower assessment.
             callGeneric(object=PlotData, by=by, assessment=assessment, layers=layers, xname=xname, yname=yname,labels=labels, 
-                        title=title,colors=colors, sizes=sizes, webplot=webplot, ...)
+                        title=title,colors=colors, assesscolor=assesscolor, sizes=sizes, webplot=webplot)
           })
 
 setMethod(f="waterseries", signature=c(object="data.frame"),
-          function(object,by,assessment,xname,yname,labels,title,colors,sizes, webplot,...){
+          function(object,by,assessment,layers, xname,yname,labels,title,colors,assesscolor, sizes, webplot){
             Grouper<-switch(by,
                             none="",
                             char=object$Characteristic %>% factor,
@@ -80,15 +82,19 @@ setMethod(f="waterseries", signature=c(object="data.frame"),
                                                   site=object$Site %>% unique,
                                                   park=object$Park %>% unique)
             
-            Xaxis<-if(by=="year") month(object$Date,label=F) else object$Date
+           Xaxis<- object$Date#if(by=="year") month(object$Date,label=F) else object$Date
         
-            OutPlot<-ggplot(object,aes(Xaxis,Value,color=Grouper,shape=Grouper)) +
-              {if ("points" %in% layers) geom_point(aes(color=colors[1]), size=sizes[1],pch=16) }+
-              {if ("line" %in% layers) geom_line(color=colors[2], size=sizes[2])} +
-              scale_color_discrete(name="legend",labels=labels) +
-              scale_shape_manual(name="legend",values=1:nlevels(Grouper), labels=labels) +
-              {if(by=="year") scale_x_continuous(name=xname,labels=Xaxis %>% unique %>% sort %>% month(T) %>% as.character, breaks=1:12)} +
-              {if (is.numeric(assessment)) geom_hline(yintercept=assessment,color=colors[3],linetype="dashed",size=sizes[3])} +
+            OutPlot<-ggplot(object,aes(Xaxis,Value,#color=Grouper,
+                                       shape=Grouper)) +
+              {if ("points" %in% layers) geom_point(aes(color=Grouper), size=sizes[1],pch=16) }+
+              {if ("line" %in% layers) geom_line(#color=colors, 
+                aes(color=Grouper),size=sizes[2])} +
+            {if (is.na(colors)) scale_color_viridis(name="legend",labels=labels, discrete = T)}+
+              {if (!is.na(colors))scale_color_manual(name="legend",labels=labels, values=colors)}+
+            #, values=colors) +
+              scale_shape_manual(name="legend",values=1:nlevels(Grouper),labels=labels) +
+           #   {if(by=="year") scale_x_continuous(name=xname,labels=Xaxis %>% unique %>% sort %>% month(T) %>% as.character, breaks=1:12)} +
+              {if (is.numeric(assessment)) geom_hline(yintercept=assessment,color=assesscolor,linetype="dashed",size=sizes[3])} +
               labs(title=title,y=yname,x=xname) +
               theme_bw() +
               theme(panel.grid = element_blank(), legend.title=element_blank(),legend.position=if(by=="none") "none" else "bottom")
