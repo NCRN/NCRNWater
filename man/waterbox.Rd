@@ -4,11 +4,17 @@
 \alias{waterbox}
 \title{waterbox}
 \usage{
-waterbox(object, charname, by = "year", points = TRUE, yname = NA,
-  xname = NA, labels = NA, title = NULL, webplot = FALSE, ...)
+waterbox(object, parkcode = NA, sitecode = NA, charname, by = "year",
+  assessment = TRUE, yname = NA, xname = NA, labels = NA,
+  title = NULL, assesscolor = "red", outliercolor = "blue", sizes = c(2,
+  0.5, 1), webplot = FALSE, ...)
 }
 \arguments{
 \item{object}{Either a \code{data.frame} that is the output of \code{getWData}, a \code{Characteristic} object a \code{Site} object, a \code{Park} object or a \code{list} of such objects.}
+
+\item{parkcode}{One or more parkcodes, in quotes.  If \code{object} is a \code{Park} object or a \code{list} of \code{Park} objects, then the \code{parkcode} argument can be used to select which sites should be used.}
+
+\item{sitecode}{One or more sitecodes, in quotes. If \code{object} is a \code{Park} object or a \code{list} of \code{Park} or \code{Site} objects, then the \code{sitcode} argument can be used to select which sites should be used.}
 
 \item{charname}{Required if \code{object} is not a \code{data.frame}. Name, in quotes, of a single \code{Characteristic} whose data should be graphed.}
 
@@ -20,8 +26,6 @@ waterbox(object, charname, by = "year", points = TRUE, yname = NA,
 \item{"park"}{If more than one park is included int he input object, theis will prodice a different box for each park}
 }}
 
-\item{points}{Vector indicating if assesment points will be maked on the graph. See details below.}
-
 \item{yname}{Text, defaults to \code{NA}. A label for the y-axis. If an \code{Characteristic}, \code{Site}, or \code{Park} object is passed to \code{object}, then the y-label will default to the Display Name and Units for the Charecteristic, unless overwitten by the \code{yname} argument. If a \code{data.frame} is passed then the y-label will either be the text from \code{yname} or blank if \code{yname} is left as \code{NA}.}
 
 \item{xname}{Text, defaults to \code{NA}. A label for the x-axis. If a \code{Characteristic}, \code{Site}, or \code{Park} object is passed to \code{object}, then the x-label will default to whatever is indicated in \code{by}.unless overwitten by the \code{xname} argument. If a \code{data.frame} is passed then the x-label will either be the text from \code{xname} or blank if \code{xname} is left as \code{NA}.}
@@ -30,7 +34,17 @@ waterbox(object, charname, by = "year", points = TRUE, yname = NA,
 
 \item{title}{A title in the graph in quotes. Defauls to \code{NULL}, which indicates no title should be used.}
 
+\item{assesscolor}{a length one character vector with the color for the assessment lines.}
+
+\item{outliercolor}{a length one character vector with the color for the outlier points.}
+
+\item{sizes}{a length 3 numeric vector with the sizes for the outlier points, lines of the boxplot and assessment lines.}
+
+\item{webplot}{If TRUE, the plot is produced using ggploty from the ploty package. Will produce a html plot with interactive features.}
+
 \item{...}{Additional arguments used to select and filter data passed to \code{\link{getWData}}}
+
+\item{assessmemt}{Vector indicating if assessment points will be maked on the graph. See details below.}
 }
 \value{
 Creates a boxplot
@@ -39,6 +53,6 @@ Creates a boxplot
 Produces box plots from water data.
 }
 \details{
-The \code{points} argument determines if lines representing the assessment points should be drawn on the graph. If \code{FALSE} then no lines will be drawn. If \code{TRUE}, the default, then the upper and lower points indicated in \code{object}'s \code{Character} objects will be used to draw the lines. Note that if there are multiple assessemnt points, for example if diffrernt parks have different points, or if htere is both an upper and lower point, they will all be drawn. If a \code{vector} of numbers is passed to \code{points} instead then those will serve as the assessment points and lines will be drawn accordingly. Note that if \code{obejct} is a \code{data.frame} then the only way to draw assessment points is by passing a \code{numeric vector} to \code{points}.
+The \code{assessment} argument determines if lines representing the assessment points should be drawn on the graph. If \code{FALSE} then no lines will be drawn. If \code{TRUE}, the default, then the upper and lower assessment points indicated in \code{object}'s \code{Character} objects will be used to draw the lines. Note that if there are multiple assessemnt points, for example if diffrerent sites have different points, or if there is both an upper and lower point, they will all be drawn. If a \code{vector} of numbers is passed to \code{assessment} instead then those will serve as the assessment points and lines will be drawn accordingly. Note that if \code{obejct} is a \code{data.frame} then the only way to draw assessment points is by passing a \code{numeric vector} to \code{assessment}.
 }
 
