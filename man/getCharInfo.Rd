@@ -45,4 +45,3 @@ Either a vector or a list with information for each character. Only the data opt
 \description{
 Retreives the metadata from a \code{Site} object or a \code{list} of such objects.
 }
-

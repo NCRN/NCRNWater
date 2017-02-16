@@ -19,4 +19,3 @@ A list of one or more site objects. If \code{parkcode} and/or \code{sitecode} ar
 \description{
 Retrieves sites from a \code{Park} object or a \code{list} of such objects.
 }
-

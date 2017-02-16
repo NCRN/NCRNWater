@@ -46,4 +46,3 @@ This function adds a water quality characteristic to an existing \code{Site} obj
 \details{
 This command can be used to add a \code{Characteristic} object to the list of existing characteristics in an exisitng \code{Site} object. The \code{CharacteristicName} will be used to name the characteristeic in the list. If a \code{park} object is provided \code{addCharacteristic} will look for the site in that park.
 }
-

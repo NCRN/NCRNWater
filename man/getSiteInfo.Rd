@@ -35,4 +35,3 @@ Retreives the metadata from a \code{Site} object or a \code{list} of such object
 \details{
 If \code{object} is a \code{list} or a \code{Park} object, then the list is filtered using both the \code{parkcode} and \code{sitecode} arguments. If \code{object} is a \code{Site} then both \code{parkcode} and \code{sitecode} are ignored.
 }
-

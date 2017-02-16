@@ -6,8 +6,10 @@
 #' @description This function imports data from a .csv files exporterd from NPStoret and saves it as \code{Park} objects. 
 #' 
 #' @param Dir The directory where the data is found
+#' @param Data The data file. Defaults to "Water Data.csv"
+#' @param MetaData The metadata file. Defaults to "MetaData.csv"
 #' 
-#' @return Returns 11 \code{Park} objects, one for each park, as a \code{list}.
+#' @return Returns \code{Park} objects, one for each park, as a \code{list}.
 #' 
 #' @importFrom dplyr mutate rename select filter distinct filter_ ungroup
 #' @importFrom lubridate mdy
@@ -19,17 +21,17 @@
 #' @export %>%
 
 
-importNCRNWater<-function(Dir){
+importNCRNWater<-function(Dir, Data="Water Data.csv", MetaData="MetaData.csv"){
   #### Read in Data ####
   
   OldDir<-getwd()
   setwd(Dir)
 
   
-  Indata<-read_csv("Water Data.csv", col_types="ccccc") %>% 
+  Indata<-read_csv(Data, col_types="ccccc") %>% 
     rename(SiteCode=StationID, Date=`Visit Start Date`,Value=`Result Value/Text`, Characteristic=`Local Characteristic Name`)
   
-  MetaData<-read_csv("MetaData.csv")
+  MetaData<-read_csv(MetaData)
   setwd(OldDir)
   
   

@@ -30,4 +30,3 @@ exceed(object, parkcode = NA, sitecode = NA, charname = NA,
 \description{
 Determines if water data contains observtions that exceed a upper and/or lower assessment points.
 }
-

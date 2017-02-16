@@ -25,4 +25,3 @@ A character vector with the requested information.
 \description{
 Retreives park information from an \code{Park} object or a \code{list} of such objects.
 }
-

@@ -4,15 +4,18 @@
 \alias{importNCRNWater}
 \title{importNCRNWater}
 \usage{
-importNCRNWater(Dir)
+importNCRNWater(Dir, Data = "Water Data.csv", MetaData = "MetaData.csv")
 }
 \arguments{
 \item{Dir}{The directory where the data is found}
+
+\item{Data}{The data file. Defaults to "Water Data.csv"}
+
+\item{MetaData}{The metadata file. Defaults to "MetaData.csv"}
 }
 \value{
-Returns 11 \code{Park} objects, one for each park, as a \code{list}.
+Returns \code{Park} objects, one for each park, as a \code{list}.
 }
 \description{
 This function imports data from a .csv files exporterd from NPStoret and saves it as \code{Park} objects.
 }
-

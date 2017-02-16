@@ -45,4 +45,3 @@ Creates a heatmap
 \description{
 Produces heat maps from water data.
 }
-

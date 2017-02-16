@@ -17,4 +17,3 @@ The results of a cosinor analysis.
 \description{
 Does a cosinor analytsis on water quality data .
 }
-

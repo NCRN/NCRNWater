@@ -50,4 +50,3 @@ This fuction is intended to be the primary method for accessing water data. Data
    
    If an \code{Characteristic} object has an empty data slot, or the filtering options are such that no data meets the criteria, then the funciotn returns \code{NULL}. \code{NULL} is also returned if after filtering there are fewer observatiosn than \code{minobs}. This can be useful when getting data for analysis or graphics and you only wish to use datasets with sufficient observations.
 }
-

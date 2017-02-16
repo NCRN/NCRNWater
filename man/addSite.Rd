@@ -26,4 +26,3 @@ This function adds a site to an existing \code{Park} object.
 \details{
 This command can be used to add a \code{Site} object to the list of existing sites in an exisitng \code{Park} object. The \code{SiteCode} will be used to name the Site in the list. \code{addCharacteristic} can be used to add a charactersitic to the site.
 }
-

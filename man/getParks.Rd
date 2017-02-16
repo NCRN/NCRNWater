@@ -17,4 +17,3 @@ A list of one or more park objects. If \code{parkcode} is specified, only parks 
 \description{
 Retrieves one or more parks from a \code{list} of such objects.
 }
-

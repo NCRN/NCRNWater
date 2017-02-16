@@ -21,4 +21,3 @@ A list of one or more \code{Characteristic} objects.
 \description{
 Retrieves one or more \code{Characteristic} objects from a \code{Site} object or a \code{list} of such objects. The \code{Site} object can be contained within a \code{Park} object.
 }
-
