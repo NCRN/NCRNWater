@@ -15,7 +15,9 @@ one o more S4 objects in each site object. Site objects are themselves stored as
 
 \item{\code{SiteName}}{A name for the site. Stored as a length 1 character \code{vector}.}
 
-\item{\code{Coordinates}}{A length 2 numeric \code{vector} containing the latitude and longitude of the site in WGS84 coordinates.}
+\item{\code{Lat}}{A length 1 numeric \code{vector} containing the latitude of the site in WGS84 coordinates.}
+
+\item{\code{Long}}{A length 1 numeric \code{vector} containing the longitude of the site in WGS84 coordinates.}
 
 \item{\code{Type}}{The type of water body at the site - e.g. Stream, River, Lake, Ocean etc. Stored as a length 1 character \code{vector}.}
 

@@ -54,15 +54,14 @@ importNCRNWater<-function(Dir, Data="Water Data.csv", MetaData="MetaData.csv"){
               .f=new, Class="Characteristic", .labels=F)$.out
 
   #### Create Site objects with correct Characteristic objects ####
-  AllSites<-MetaData %>% group_by(ParkCode, SiteCode, SiteName,Type) %>% 
+  AllSites<-MetaData %>% group_by(ParkCode, SiteCode, SiteName,Lat,Long,Type) %>% 
     summarize(Characteristics=list(Characteristics)) %>% 
     ungroup
 
 
-
 #### Make Site list for each Park ####
 
-  AllSites<-MetaData %>% group_by(ParkCode, SiteCode, SiteName,Type) %>%
+  AllSites<-MetaData %>% group_by(ParkCode, SiteCode, SiteName,Lat,Long,Type) %>%
     summarize(Characteristics=list(Characteristics) %>% list) %>%
     ungroup
 
