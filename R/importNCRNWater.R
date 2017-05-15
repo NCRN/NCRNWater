@@ -14,8 +14,9 @@
 #' @importFrom dplyr mutate rename select filter distinct filter_ ungroup
 #' @importFrom lubridate mdy
 #' @importFrom magrittr %>%
-#' @importFrom purrr invoke_rows map map2 by_row
+#' @importFrom purrr  map map2
 #' @importFrom readr read_csv
+#' @importFrom purrrlyr by_row invoke_rows
 #' 
 #' @export
 #' @export %>%
