@@ -16,8 +16,12 @@ Imports:
     dplyr,
     ggplot2,
     lubridate,
+    magrittr,
     plotly,
-    purrr
+    purrr,
+    readr,
+    season,
+    viridis
 RoxygenNote: 6.0.1
 Collate:
     'NCRNWater_Park_Class_def.R'

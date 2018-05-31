@@ -16,7 +16,7 @@
 #' @importFrom magrittr %>%
 #' @importFrom purrr  map map2
 #' @importFrom readr read_csv
-#' @importFrom purrrlyr by_row invoke_rows
+#' @importFrom purrrlyr invoke_rows
 #' 
 #' @export
 #' @export %>%
@@ -41,10 +41,11 @@ importNCRNWater<-function(Dir, Data="Water Data.csv", MetaData="MetaData.csv"){
   Indata$Date<-mdy(Indata$Date)
 
   #### Create Data part of each charactersitic ####
-  MetaData$Data<-MetaData %>% 
-    by_row(..f=function(x) filter_(Indata, .dots=list(~SiteCode==x$SiteCode, ~Characteristic==x$DataName)) %>% 
-             dplyr::select(Date,Value), .labels=FALSE, .to="Data" ) %>% unlist(recursive=FALSE)
-
+  MetaData$Data<-MetaData %>% select(SiteCode, DataName) %>% 
+    pmap(.f=function(SiteCode, DataName) {
+    filter(Indata, SiteCode==!!SiteCode, Characteristic==DataName) %>% 
+              dplyr::select(Date,Value)  })
+  return(MetaData)
   #### Change numeric data to numeric, but the leave the rest as character ####
   NumDat<-MetaData$DataType=="numeric"
   MetaData[NumDat,]$Data<-MetaData[NumDat,]$Data %>% map(.f=function(x) mutate(x,Value = as.numeric(Value) )) 
