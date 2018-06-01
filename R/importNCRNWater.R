@@ -23,17 +23,12 @@
 
 
 importNCRNWater<-function(Dir, Data="Water Data.csv", MetaData="MetaData.csv"){
+  
   #### Read in Data ####
-  
-  OldDir<-getwd()
-  setwd(Dir)
-
-  
-  Indata<-read_csv(Data, col_types="ccccc") %>% 
+  Indata<-read_csv(paste(Dir,Data, sep="/"), col_types="ccccc") %>% 
     rename(SiteCode=StationID, Date=`Visit Start Date`,Value=`Result Value/Text`, Characteristic=`Local Characteristic Name`)
   
-  MetaData<-read_csv(MetaData)
-  setwd(OldDir)
+  MetaData<-read_csv(paste(Dir,MetaData, sep="/"))
   
   
   #### Get data ready to make into objects ####
