@@ -11,73 +11,67 @@
 #' 
 #' @return Returns \code{Park} objects, one for each park, as a \code{list}.
 #' 
-#' @importFrom dplyr mutate rename select filter distinct filter_ ungroup
+#' @importFrom dplyr distinct mutate filter rename select ungroup
 #' @importFrom lubridate mdy
 #' @importFrom magrittr %>%
-#' @importFrom purrr  map map2
+#' @importFrom purrr  map map2 pmap
 #' @importFrom readr read_csv
-#' @importFrom purrrlyr by_row invoke_rows
 #' 
 #' @export
 #' @export %>%
 
 
 importNCRNWater<-function(Dir, Data="Water Data.csv", MetaData="MetaData.csv"){
-  #### Read in Data ####
   
-  OldDir<-getwd()
-  setwd(Dir)
-
-  
-  Indata<-read_csv(Data, col_types="ccccc") %>% 
+#### Read in Data ####
+  Indata<-read_csv(paste(Dir,Data, sep="/"), col_types="ccccc") %>% 
     rename(SiteCode=StationID, Date=`Visit Start Date`,Value=`Result Value/Text`, Characteristic=`Local Characteristic Name`)
   
-  MetaData<-read_csv(MetaData)
-  setwd(OldDir)
+  MetaData<-read_csv(paste(Dir,MetaData, sep="/"))
   
   
-  #### Get data ready to make into objects ####
+#### Get data ready to make into objects ####
   
   Indata$Date<-mdy(Indata$Date)
 
-  #### Create Data part of each charactersitic ####
-  MetaData$Data<-MetaData %>% 
-    by_row(..f=function(x) filter_(Indata, .dots=list(~SiteCode==x$SiteCode, ~Characteristic==x$DataName)) %>% 
-             dplyr::select(Date,Value), .labels=FALSE, .to="Data" ) %>% unlist(recursive=FALSE)
+#### Create Data part of each charactersitic ####
+  MetaData$Data<-MetaData %>% dplyr::select(SiteCode, DataName) %>% 
+    pmap(.f=function(SiteCode, DataName) {
+    filter(Indata, SiteCode==!!SiteCode, Characteristic==DataName) %>% 
+              dplyr::select(Date,Value)  })
 
-  #### Change numeric data to numeric, but the leave the rest as character ####
+#### Change numeric data to numeric, but the leave the rest as character ####
   NumDat<-MetaData$DataType=="numeric"
   MetaData[NumDat,]$Data<-MetaData[NumDat,]$Data %>% map(.f=function(x) mutate(x,Value = as.numeric(Value) )) 
+
 #### Create Characteristic objects ####
-  MetaData$Characteristics<-invoke_rows(.d=MetaData %>% 
+  MetaData$Characteristics<-MetaData %>% 
     dplyr::select(CharacteristicName, DisplayName, Units, LowerPoint, UpperPoint, LowerDescription, 
-              UpperDescription, AssessmentDetails, Data),
-              .f=new, Class="Characteristic", .labels=F)$.out
-
-  #### Create Site objects with correct Characteristic objects ####
-  AllSites<-MetaData %>% group_by(ParkCode, SiteCode, SiteName,Lat,Long,Type) %>% 
-    summarize(Characteristics=list(Characteristics)) %>% 
-    ungroup
+          UpperDescription, AssessmentDetails, Data) %>% 
+    pmap(.f=new, Class="Characteristic")
 
 
-#### Make Site list for each Park ####
+#### Create a df of sites with correct Characteristic objects ####
 
   AllSites<-MetaData %>% group_by(ParkCode, SiteCode, SiteName,Lat,Long,Type) %>%
     summarize(Characteristics=list(Characteristics) %>% list) %>%
     ungroup
 
   
-  #### Create Park objects ####
+#### Create Park objects ####
   
-  Parks<-invoke_rows(.d=distinct(.data=MetaData, Network, ParkCode, ShortName, LongName ), .f=new, 
-                     .labels=F, Class="Park")[[1]] %>% unlist
+   Parks<-MetaData %>% dplyr::select(Network, ParkCode, ShortName, LongName) %>% distinct() %>% 
+    pmap(.f=new, Class="Park")
+
   
-  
+###### Make a list of sites with each park a nested list
   PSites<-map(Parks, function(Park){
     SiteDf<-filter(AllSites, ParkCode==getParkInfo(Park, info="ParkCode") ) %>% dplyr::select(-ParkCode)
-    SiteList<-invoke_rows(.d=SiteDf,.f=mapply, FUN=new, Class="Site" )$.out %>% unlist
+    SiteList<-pmap(.l=SiteDf, .f=new, Class="Site" )
   })
   
+  
+### Join Park objects with the sites  
   Parks<-map2(.x=Parks, .y=PSites, .f=function(x,y) {x@Sites<-y
   x} )
   
