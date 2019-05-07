@@ -43,7 +43,7 @@ setClass(Class="Characteristic",
                  AssessmentDetails="character"
                 ),
          
-          prototype=list(ChacateristicName=character(), 
+          prototype=list(CharacteristicName=character(), 
                         DisplayName=character(),
                         Substrate=character(), 
                         SampleFraction=character(),
