@@ -14,8 +14,8 @@
 #' @importFrom dplyr distinct mutate filter rename select ungroup
 #' @importFrom lubridate mdy
 #' @importFrom magrittr %>%
-#' @importFrom purrr  map map2 pmap
-#' @importFrom readr read_csv
+#' @importFrom purrr map map2 pmap
+#' @importFrom readr cols read_csv
 #' 
 #' @export
 #' @export %>%
@@ -24,8 +24,10 @@
 importNCRNWater<-function(Dir, Data="Water Data.csv", MetaData="MetaData.csv"){
   
 #### Read in Data ####
-  Indata<-read_csv(paste(Dir,Data, sep="/"), col_types="ccccc") %>% 
-    rename(SiteCode=StationID, Date=`Visit Start Date`,Value=`Result Value/Text`, Characteristic=`Local Characteristic Name`)
+  Indata<-read_csv(paste(Dir,Data, sep="/"), col_types=cols(.default="c")) %>% 
+    rename(SiteCode=StationID, Date=`Visit Start Date`,Characteristic=`Local Characteristic Name`,
+           Value=`Result Value/Text` ) %>% 
+    mutate(TextValue=Value)
   
   MetaData<-read_csv(paste(Dir,MetaData, sep="/"))
   
@@ -38,7 +40,7 @@ importNCRNWater<-function(Dir, Data="Water Data.csv", MetaData="MetaData.csv"){
   MetaData$Data<-MetaData %>% dplyr::select(SiteCode, DataName) %>% 
     pmap(.f=function(SiteCode, DataName) {
     filter(Indata, SiteCode==!!SiteCode, Characteristic==DataName) %>% 
-              dplyr::select(Date,Value)  })
+              dplyr::select(Date,Value,TextValue)  })
 
 #### Change numeric data to numeric, but the leave the rest as character ####
   NumDat<-MetaData$DataType=="numeric"
@@ -46,7 +48,7 @@ importNCRNWater<-function(Dir, Data="Water Data.csv", MetaData="MetaData.csv"){
 
 #### Create Characteristic objects ####
   MetaData$Characteristics<-MetaData %>% 
-    dplyr::select(CharacteristicName, DisplayName, Units, LowerPoint, UpperPoint, LowerDescription, 
+    dplyr::select(CharacteristicName, DisplayName, Units, Category, LowerPoint, UpperPoint, LowerDescription, 
           UpperDescription, AssessmentDetails, Data) %>% 
     pmap(.f=new, Class="Characteristic")
 
