@@ -6,8 +6,8 @@
 \usage{
 waterbox(object, parkcode = NA, sitecode = NA, charname, by = "year",
   assessment = TRUE, yname = NA, xname = NA, labels = NA,
-  title = NULL, assesscolor = "red", outliercolor = "blue", sizes = c(2,
-  0.5, 1), webplot = FALSE, ...)
+  title = NULL, assesscolor = "red", outliercolor = "blue",
+  sizes = c(2, 0.5, 1), webplot = FALSE, ...)
 }
 \arguments{
 \item{object}{Either a \code{data.frame} that is the output of \code{getWData}, a \code{Characteristic} object a \code{Site} object, a \code{Park} object or a \code{list} of such objects.}
