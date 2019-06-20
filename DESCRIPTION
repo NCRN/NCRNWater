@@ -1,10 +1,11 @@
 Package: NCRNWater
 Type: Package
 Title: Data analysis and visualization for NCRN water monitoring.
-Version: 0.23.6
-Date: 2019-07-07
+Version: 0.24.0
+Date: 2019-6-20
 Author: John Paul Schmit
 Maintainer: John Paul Schmit <john_schmit@nps.gov>
+Encoding: UTF-8
 Description: This pacakge is designed to analyze and visualize data from the
     National Park Service, National Capital Region Inventory and Monitoring
     Network.
@@ -22,7 +23,7 @@ Imports:
     readr,
     season,
     viridis
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
 Collate:
     'NCRNWater_Park_Class_def.R'
     'NCRNWater_Site_Class_def.R'

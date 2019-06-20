@@ -5,8 +5,9 @@
 \title{addChar}
 \usage{
 addChar(park, site, CharacteristicName, DisplayName, Substrate,
-  SampleFraction = NA, Category, Details, Units, Data, LowerPoint, LowerType,
-  LowerDescription, UpperPoint, UpperType, UpperDescription, AssessmentDetails)
+  SampleFraction = NA, Category, Details, Units, Data, LowerPoint,
+  LowerType, LowerDescription, UpperPoint, UpperType, UpperDescription,
+  AssessmentDetails)
 }
 \arguments{
 \item{park}{A \code{Park} object}
