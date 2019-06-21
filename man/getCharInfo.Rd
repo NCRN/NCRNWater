@@ -14,7 +14,7 @@ getCharInfo(object, parkcode = NA, sitecode = NA, charname = NA,
 
 \item{sitecode}{One or more sitecodes, in quotes. If \code{object} is a \code{Park} object or a \code{list} of \code{Park} or \code{Site} objects, then the \code{sitcode} argument can be used to select which sites should be used.}
 
-\item{charname}{Name of one or more characteristics, in quotes.}
+\item{charname}{Name of one or more characteristics, in quotes. Only those characteristics will be returned.}
 
 \item{info}{Type of information to return. One of several options, in quotes.
 \describe{
