@@ -13,7 +13,7 @@
 #' @param parkcode One or more parkcodes, in quotes.  If \code{object} is a \code{Park} object or a \code{list} of \code{Park} objects, then the \code{parkcode} argument can be used to select which sites should be used.
 #' @param sitecode One or more sitecodes, in quotes. If \code{object} is a \code{Park} object or a \code{list} of \code{Park} or \code{Site} objects, then the \code{sitcode} argument can be used to select which sites should be used. 
 #' @param charname Name of one or more characteristics, in quotes. Only those characteristics will be returned. 
-#' @param cateogory One or more categories of characteristics, in quotes. Only those categories of charateristics will be returned. 
+#' @param category One or more categories of characteristics, in quotes. Only those categories of charateristics will be returned. 
 
 #' @return  A list of one or more \code{Characteristic} objects. 
 #' 
