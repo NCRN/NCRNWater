@@ -22,18 +22,17 @@
 #' 
 #' @export
 
-setGeneric(name="exceed",function(object, parkcode=NA, sitecode=NA, charname=NA, points="both", lower=NA, upper=NA,all=F,...){standardGeneric("exceed")},signature=c("object") )
-
-
+setGeneric(name="exceed",function(object, parkcode=NA, sitecode=NA, charname=NA, category=NA, 
+              points="both", lower=NA, upper=NA,all=F,...){standardGeneric("exceed")},signature=c("object") )
 
 setMethod(f="exceed", signature=c(object="NCRNWaterObj"),
-  function(object,parkcode, sitecode, charname,points,lower,upper,all, ...){       
-    DataUse<-getWData(object,parkcode=parkcode, sitecode=sitecode, charname=charname,output="list",...)
+  function(object,parkcode, sitecode, charname, category, points,lower,upper,all, ...){       
+    DataUse<-getWData(object,parkcode=parkcode, sitecode=sitecode, charname=charname, category=category, output="list",...)
     NotNull<-!sapply(DataUse, is.null)  ### to filter out NULL data
     lower<-if((points=="lower" |points=="both") & is.na(lower)){
-      getCharInfo(object,parkcode,sitecode,charname, info='LowerPoint') }else lower
+      getCharInfo(object=object,parkcode=parkcode,sitecode=sitecode,charname=charname,category=category, info='LowerPoint') }else lower
     upper<-if((points=="upper" |points=="both") & is.na(upper)) {
-      getCharInfo(object,parkcode,sitecode,charname, info='UpperPoint')} else upper
+      getCharInfo(object=object,parkcode=parkcode,sitecode=sitecode,charname=charname,category=category, info='UpperPoint')} else upper
     
     pmap(.l=list(object=DataUse[NotNull],lower=lower[NotNull],upper=upper[NotNull]), .f=exceed ) %>% 
       bind_rows() %>% 
@@ -46,13 +45,14 @@ setMethod(f="exceed", signature=c(object="data.frame"),
             Park<-if(exists("Park",object)) unique(object$Park) else NA
             Site<-if(exists("Site", object)) unique(object$Site) else NA
             Characteristic<-if(exists("Characteristic",object)) unique(object$Characteristic) else NA
+            Category<-if(exists("Category",object)) unique(object$Category) else NA
             Total<-nrow(object)
             Missing<-sum(is.na(object$Value))
             TooLow<-if(is.na(lower)) NA else sum(object$Value<lower)
             TooHigh<-if(is.na(upper)) NA else sum(object$Value>upper)
             AllExceed<-sum(TooLow,TooHigh, na.rm=T)
             Acceptable=Total-Missing-AllExceed
-            OutVec<-data.frame(Park, Site, Characteristic,Total,Acceptable,TooLow,TooHigh, AllExceed, stringsAsFactors=F)
+            OutVec<-data.frame(Park, Site, Characteristic,Category, Total,Acceptable,TooLow,TooHigh, AllExceed, stringsAsFactors=F)
             return(OutVec)
             
           })

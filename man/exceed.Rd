@@ -5,7 +5,8 @@
 \title{exceed}
 \usage{
 exceed(object, parkcode = NA, sitecode = NA, charname = NA,
-  points = "both", lower = NA, upper = NA, all = F, ...)
+  category = NA, points = "both", lower = NA, upper = NA,
+  all = F, ...)
 }
 \arguments{
 \item{object}{One of a \code{Characteristic} object, a \code{Site} object, a \code{Park} object or a list of such objects.}
@@ -15,6 +16,8 @@ exceed(object, parkcode = NA, sitecode = NA, charname = NA,
 \item{sitecode}{One or more sitecodes, in quotes. If \code{object} is a \code{Park} object or a \code{list} of \code{Park} or \code{Site} objects, then the \code{sitcode} argument can be used to select which sites should be used.}
 
 \item{charname}{Name of one or more characteristics, in quotes. Only those characteristics will be returned.}
+
+\item{category}{One or more categories of characteristics, in quotes. Only those categories of charateristics will be returned.}
 
 \item{points}{What assessemnt points to use when determining if there are exceedences. There are three options
 \describe{
