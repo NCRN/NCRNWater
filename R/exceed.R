@@ -3,7 +3,7 @@
 #' @include getWData.R
 #' @include waterseries.R
 #' @importFrom purrr pmap
-#' @importFrom dplyr filter
+#' @importFrom dplyr filter group_by summarize
 #' 
 #' @title exceed
 #' 
@@ -17,13 +17,17 @@
 #' \item{"upper"}{Only assess the data against the upper reference point}
 #' \item{"both"}{The default. Assess the data against both reference points}
 #' }
-#' @param lower,upper The lower and uppers assessment points. Either a number specified by the user, or if \code{NA}, the default, the assessment point is determined by the \code{LowerPoint} and \code{UpperPoint} slots in the \code{Characteristic} objects. 
-#' @param all Logical, defaults to \code{FALSE}. Not used when \code{object} is a \code{data.frame}. If \code{all} is \code{FALSE} characteristics without uppoer or lower references points will not be incldued in the reults. If \code{all} is \code{TRUE} such characteristics will be included.
+#' @param lower,upper The lower and uppers assessment points. Either a number specified by the user, or if \code{NA}, the default,
+#'  the assessment point is determined by the \code{LowerPoint} and \code{UpperPoint} slots in the \code{Characteristic} objects. 
+#' @param all Logical, defaults to \code{FALSE}. Not used when \code{object} is a \code{data.frame}. If \code{all} is \code{FALSE} 
+#' characteristics without uppoer or lower references points will not be incldued in the reults. If \code{all} is \code{TRUE} such characteristics will be included.
+#' @param catsum Logical, defaults to \code{False}. When true sumamrizes by catgegory rather than a characteristic. Not used if 
+#' \code{object} is a \code{data.frame}
 #' 
 #' @export
 
 setGeneric(name="exceed",function(object, parkcode=NA, sitecode=NA, charname=NA, category=NA, 
-              points="both", lower=NA, upper=NA,all=F,...){standardGeneric("exceed")},signature=c("object") )
+              points="both", lower=NA, upper=NA,all=F, catsum=F,...){standardGeneric("exceed")},signature=c("object") )
 
 setMethod(f="exceed", signature=c(object="NCRNWaterObj"),
   function(object,parkcode, sitecode, charname, category, points,lower,upper,all, ...){       
@@ -34,9 +38,14 @@ setMethod(f="exceed", signature=c(object="NCRNWaterObj"),
     upper<-if((points=="upper" |points=="both") & is.na(upper)) {
       getCharInfo(object=object,parkcode=parkcode,sitecode=sitecode,charname=charname,category=category, info='UpperPoint')} else upper
     
-    pmap(.l=list(object=DataUse[NotNull],lower=lower[NotNull],upper=upper[NotNull]), .f=exceed ) %>% 
+    X<-pmap(.l=list(object=DataUse[NotNull],lower=lower[NotNull],upper=upper[NotNull]), .f=exceed ) %>% 
       bind_rows() %>% 
-      if (!all) filter(.,!(is.na(TooLow)&is.na(TooHigh))) else .
+      {if (!all) filter(.,!(is.na(TooLow)&is.na(TooHigh))) else .}
+    
+    X<-{if(catsum) X %>% group_by(Park, Site,  Category) %>% summarize(Total=sum(Total), Acceptable=sum(Acceptable),
+                                      TooLow=sum(TooLow), TooHigh=sum(TooHigh), AllExceed=sum(AllExceed)) else X}
+    
+    return (X)
             
 })
 
