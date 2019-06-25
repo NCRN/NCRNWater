@@ -52,7 +52,7 @@ setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
             if(is.na(yname)) yname<-paste0(getCharInfo(object=object, charname=charname, info="DisplayName")," (",
                                            getCharInfo(object=object, charname=charname, info="Units"),")") %>% unique
             if(is.na(xname)) xname<-"Date"
-            if(is.na(labels)) labels<-switch(by,
+            if(all(is.na(labels))) labels<-switch(by,
                                              none="",
                                              char=getCharInfo(object,charname=charname, info="DisplayName"),
                                              park=getParkInfo(object, info="ParkShortName"),
