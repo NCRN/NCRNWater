@@ -4,11 +4,11 @@
 \alias{waterseries}
 \title{waterseries}
 \usage{
-waterseries(object, parkcode = NA, sitecode = NA, charname,
-  by = "char", assessment = TRUE, layers = c("points", "line"),
-  xname = NA, yname = NA, labels = NA, title = NULL, colors = NA,
-  assesscolor = "red", sizes = c(3, 0.8, 1.1), legend = "bottom",
-  webplot = FALSE, ...)
+waterseries(object, parkcode = NA, sitecode = NA, charname = NA,
+  category = NA, by = "char", assessment = TRUE,
+  layers = c("points", "line"), xname = NA, yname = NA,
+  labels = NA, title = NULL, colors = NA, assesscolor = "red",
+  sizes = c(3, 0.8, 1.1), legend = "bottom", webplot = FALSE, ...)
 }
 \arguments{
 \item{object}{Either a \code{data.frame} that is the output of \code{getWData}, a \code{Characteristic} object, a \code{Site} object, a \code{Park} object or a \code{list} of such objects.}
@@ -17,24 +17,37 @@ waterseries(object, parkcode = NA, sitecode = NA, charname,
 
 \item{sitecode}{One or more sitecodes, in quotes. If \code{object} is a \code{Park} object or a \code{list} of \code{Park} or \code{Site} objects, then the \code{sitcode} argument can be used to select which sites should be used.}
 
-\item{charname}{Required if \code{object} is not a \code{data.frame}. Name(s), in quotes, of one or more \code{Characteristic}s whose data should be graphed.}
+\item{charname}{Required if \code{object} is not a \code{data.frame}. Name(s), in quotes, of one or more \code{Characteristic}s 
+whose data should be graphed.}
+
+\item{category}{One or more categories of characteristics, in quotes. Only those categories of charateristics will be returned.}
 
 \item{by}{Indicates how the data for the plot should be grouped. A text variable in quotes. Choices are:
 \describe{
-\item{"site}{If more than one site is included in the input object, this will produce a different line for each site.}
-\item{"park"}{If more than one park is included in the input object, this will produce a different line for each park}
-\item{"char"}{The defauls. If more than one characteristic is included in the input object, this will produce a different line for each one} 
+\item{"park"}{If more than one park is included in the graph, this will produce a different line for each park.}
+\item{"site}{If more than one site is included in the graph, this will produce a different line for each site.}
+\item{"category"}{If more than one category is included in the graph, this will prodice a different line for each category.}
+\item{"char"}{The default. If more than one characteristic is included in the graph, this will produce a different line for 
+each one.} 
 }}
 
 \item{assessment}{Vector indicating if assesment lines will be marked on the graph. See details below.}
 
 \item{layers}{Defaults to c("points","line") Indicates which layers you wish to see on the plot.}
 
-\item{xname}{Text, defaults to \code{NA}. A label for the x-axis. If a \code{Characteristic}, \code{Site}, or \code{Park} object is passed to \code{object}, then the x-label will default to whatever is indicated in \code{by}, unless overwitten by the \code{xname} argument. If a \code{data.frame} is passed then the x-label will either be the text from \code{xname} or blank if \code{xname} is left as \code{NA}.}
+\item{xname}{Text, defaults to \code{NA}. A label for the x-axis. If a \code{Characteristic}, \code{Site}, or \code{Park} 
+object is passed to \code{object}, then the x-label will default to whatever is indicated in \code{by}, 
+unless overwitten by the \code{xname} argument. If a \code{data.frame} is passed then the x-label will either be the text 
+from \code{xname} or blank if \code{xname} is left as \code{NA}.}
 
-\item{yname}{Text, defaults to \code{NA}. A label for the y-axis. If an \code{Characteristic}, \code{Site}, or \code{Park} object is passed to \code{object}, then the y-label will default to the Display Name and Units for the Charecteristic, unless overwitten by the \code{yname} argument. If a \code{data.frame} is passed then the y-label will either be the text from \code{yname} or blank if \code{yname} is left as \code{NA}.}
+\item{yname}{Text, defaults to \code{NA}. A label for the y-axis. If an \code{Characteristic}, \code{Site}, or \code{Park} object 
+is passed to \code{object}, then the y-label will default to the Display Name and Units for the Charecteristic, unless overwitten by the \code{yname} argument. If a \code{data.frame} is passed then the y-label will either be the text from \code{yname} or blank if \code{yname} is left as \code{NA}.}
 
-\item{labels}{A character vector indicating the labels for the data series, defaults to NA. If labels are provided (one for each series) they will be printed. If \code{object} is a \code{data.frame} and \code{labels} is \code{NA} then no labels will be printed. If \code{object} is a \code{Characteristic}, \code{Site}, or \code{Park} object, and \code{labels} is \code{NA} then the default will depend on the \code{by} argument. "site" willbe labeled with the site name from the \code{Site}'s \code{Display Name} slot and "park" with the \code{Park}'s short name from the \code{ShortName} slot.}
+\item{labels}{A character vector indicating the labels for the data series, defaults to \code{NA}. If labels are provided 
+(one for each series) they will be printed. If \code{object} is a \code{data.frame} and \code{labels} is \code{NA} then no labels 
+will be printed. If \code{object} is a \code{Characteristic}, \code{Site}, or \code{Park} object, and \code{labels} is \code{NA} 
+then the default will depend on the \code{by} argument. "site" will be labeled with the site name from the \code{Site}'s 
+\code{Display Name} slot and "park" with the \code{Park}'s short name from the \code{ShortName} slot.}
 
 \item{title}{A title in the graph in quotes. Defaults to \code{NULL}, which indicates no title should be used.}
 
@@ -44,9 +57,11 @@ waterseries(object, parkcode = NA, sitecode = NA, charname,
 
 \item{sizes}{a length 3 numeric vector with the sizes for the points, line connecting the points and assessment lines.}
 
-\item{legend}{a vector indicating where the legend position. Can be: "none","left","right","top","bottom" or a two element numeric vector.}
+\item{legend}{a vector indicating where the legend position. Can be: "none","left","right","top","bottom" or a two element 
+numeric vector.}
 
-\item{webplot}{If TRUE, the plot is produced using ggploty from the ploty package. Will produce a html plot with interactive features.}
+\item{webplot}{If TRUE, the plot is produced using ggploty from the ploty package. Will produce a html plot with interactive
+features.}
 
 \item{...}{Additional arguments used to select and filter data passed to \code{\link{getWData}}}
 }
