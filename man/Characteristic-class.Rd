@@ -20,6 +20,8 @@ An S4 class that contains the data from water monitoring for a single water qual
 
 \item{\code{Category}}{The category for the characteristic. Stored as a length 1 character vector.}
 
+\item{\code{CategoryDispaly}}{The display name for the category, sutiable for graphs, tables etc.}
+
 \item{\code{Details}}{A description of the characteristic as needed. Stored as a length 1 character vector.}
 
 \item{\code{Units}}{The units of measurement of the characteristic. Stored as a length 1 character vector.}

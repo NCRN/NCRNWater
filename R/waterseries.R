@@ -15,26 +15,39 @@
 #' 
 #' @param object Either a \code{data.frame} that is the output of \code{getWData}, a \code{Characteristic} object, a \code{Site} object, a \code{Park} object or a \code{list} of such objects.
 #' 
-#' @param charname Required if \code{object} is not a \code{data.frame}. Name(s), in quotes, of one or more \code{Characteristic}s whose data should be graphed.
+#' @param charname Required if \code{object} is not a \code{data.frame}. Name(s), in quotes, of one or more \code{Characteristic}s 
+#' whose data should be graphed.
 #' @param by Indicates how the data for the plot should be grouped. A text variable in quotes. Choices are:
 #' \describe{
-#' \item{"site}{If more than one site is included in the input object, this will produce a different line for each site.}
-#' \item{"park"}{If more than one park is included in the input object, this will produce a different line for each park}
-#' \item{"char"}{The defauls. If more than one characteristic is included in the input object, this will produce a different line for each one} 
+#' \item{"park"}{If more than one park is included in the graph, this will produce a different line for each park.}
+#' \item{"site}{If more than one site is included in the graph, this will produce a different line for each site.}
+#' \item{"category"}{If more than one category is included in the graph, this will prodice a different line for each category.}
+#' \item{"char"}{The default. If more than one characteristic is included in the graph, this will produce a different line for 
+#' each one.} 
 #' }
 #' 
 #' @param assessment Vector indicating if assesment lines will be marked on the graph. See details below.
 #' @param layers Defaults to c("points","line") Indicates which layers you wish to see on the plot. 
-#' @param yname Text, defaults to \code{NA}. A label for the y-axis. If an \code{Characteristic}, \code{Site}, or \code{Park} object is passed to \code{object}, then the y-label will default to the Display Name and Units for the Charecteristic, unless overwitten by the \code{yname} argument. If a \code{data.frame} is passed then the y-label will either be the text from \code{yname} or blank if \code{yname} is left as \code{NA}.
-#' @param xname Text, defaults to \code{NA}. A label for the x-axis. If a \code{Characteristic}, \code{Site}, or \code{Park} object is passed to \code{object}, then the x-label will default to whatever is indicated in \code{by}, unless overwitten by the \code{xname} argument. If a \code{data.frame} is passed then the x-label will either be the text from \code{xname} or blank if \code{xname} is left as \code{NA}.
+#' @param yname Text, defaults to \code{NA}. A label for the y-axis. If an \code{Characteristic}, \code{Site}, or \code{Park} object 
+#' is passed to \code{object}, then the y-label will default to the Display Name and Units for the Charecteristic, unless overwitten by the \code{yname} argument. If a \code{data.frame} is passed then the y-label will either be the text from \code{yname} or blank if \code{yname} is left as \code{NA}.
+#' @param xname Text, defaults to \code{NA}. A label for the x-axis. If a \code{Characteristic}, \code{Site}, or \code{Park} 
+#' object is passed to \code{object}, then the x-label will default to whatever is indicated in \code{by}, 
+#' unless overwitten by the \code{xname} argument. If a \code{data.frame} is passed then the x-label will either be the text 
+#' from \code{xname} or blank if \code{xname} is left as \code{NA}.
 #' 
-#' @param labels A character vector indicating the labels for the data series, defaults to NA. If labels are provided (one for each series) they will be printed. If \code{object} is a \code{data.frame} and \code{labels} is \code{NA} then no labels will be printed. If \code{object} is a \code{Characteristic}, \code{Site}, or \code{Park} object, and \code{labels} is \code{NA} then the default will depend on the \code{by} argument. "site" willbe labeled with the site name from the \code{Site}'s \code{Display Name} slot and "park" with the \code{Park}'s short name from the \code{ShortName} slot. 
+#' @param labels A character vector indicating the labels for the data series, defaults to \code{NA}. If labels are provided 
+#' (one for each series) they will be printed. If \code{object} is a \code{data.frame} and \code{labels} is \code{NA} then no labels 
+#' will be printed. If \code{object} is a \code{Characteristic}, \code{Site}, or \code{Park} object, and \code{labels} is \code{NA} 
+#' then the default will depend on the \code{by} argument. "site" will be labeled with the site name from the \code{Site}'s 
+#' \code{Display Name} slot and "park" with the \code{Park}'s short name from the \code{ShortName} slot. 
 #' @param title A title in the graph in quotes. Defaults to \code{NULL}, which indicates no title should be used. 
 #' @param colors a character vector with the colors for the points and lines. 
 #' @param assesscolor a length one charactter vector with the color for the assessment lines.
 #' @param sizes a length 3 numeric vector with the sizes for the points, line connecting the points and assessment lines.
-#' @param legend  a vector indicating where the legend position. Can be: "none","left","right","top","bottom" or a two element numeric vector.
-#' @param webplot  If TRUE, the plot is produced using ggploty from the ploty package. Will produce a html plot with interactive features.
+#' @param legend  a vector indicating where the legend position. Can be: "none","left","right","top","bottom" or a two element 
+#' numeric vector.
+#' @param webplot  If TRUE, the plot is produced using ggploty from the ploty package. Will produce a html plot with interactive
+#'  features.
 #' @param ... Additional arguments used to select and filter data passed to \code{\link{getWData}}
 #' 
 #' @return Creates a time series plot.
@@ -43,24 +56,28 @@
 #' 
 #' @export
 
-setGeneric(name="waterseries",function(object,parkcode=NA, sitecode=NA,charname, by="char",assessment=TRUE,layers=c("points","line"), xname=NA,yname=NA,labels=NA,title=NULL,colors=NA, assesscolor="red", sizes=c(3, 0.8, 1.1), legend="bottom",webplot=FALSE,...){standardGeneric("waterseries")},signature=c("object") )
+setGeneric(name="waterseries",function(object,parkcode=NA, sitecode=NA,charname=NA, category=NA, by="char",assessment=TRUE,
+              layers=c("points","line"), xname=NA,yname=NA,labels=NA,title=NULL,colors=NA, assesscolor="red", sizes=c(3, 0.8, 1.1),
+              legend="bottom",webplot=FALSE,...){standardGeneric("waterseries")},signature=c("object") )
 
 
 setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
-  function(object,parkcode, sitecode, charname,by,assessment,xname,yname,labels,title,colors, assesscolor,sizes,legend, webplot,...){
-          PlotData<-getWData(object=object,parkcode=parkcode, sitecode=sitecode, charname=charname,...)
-            if(is.na(yname)) yname<-paste0(getCharInfo(object=object, charname=charname, info="DisplayName")," (",
-                                           getCharInfo(object=object, charname=charname, info="Units"),")") %>% unique
+  function(object,parkcode, sitecode, charname,category, by,assessment,xname,yname,labels,title,colors, assesscolor,sizes,legend, webplot,...){
+          
+    PlotData<-getWData(object=object,parkcode=parkcode, sitecode=sitecode, charname=charname,category=category,...) 
+            if(is.na(yname)) yname<-paste0(getCharInfo(object=object, charname=charname, category=category, info="DisplayName")," (",
+                                        getCharInfo(object=object, charname=charname, category=category, info="Units"),")") %>% unique
             if(is.na(xname)) xname<-"Date"
             if(all(is.na(labels))) labels<-switch(by,
                                              none="",
-                                             char=getCharInfo(object,charname=charname, info="DisplayName"),
+                                             char=getCharInfo(object,charname=charname,category=category, info="DisplayName") %>% unique,
                                              park=getParkInfo(object, info="ParkShortName"),
-                                             site=getSiteInfo(object, info="SiteName")
+                                             site=getSiteInfo(object, info="SiteName"),
+                                             category=getCharInfo(object,charname = charname, category = category, info="CategoryName" ) %>% unique
             )
             if(is.logical(assessment) & assessment) assessment<-c(getCharInfo(object=object,parkcode=parkcode, sitecode=sitecode, 
-              charname=charname, info="LowerPoint"),getCharInfo(object=object,parkcode=parkcode, sitecode=sitecode, 
-              charname=charname, info="UpperPoint")) %>% unlist %>% unique
+              charname=charname, category = category, info="LowerPoint"),getCharInfo(object=object,parkcode=parkcode, sitecode=sitecode, 
+              charname=charname, category=category, info="UpperPoint")) %>% unlist %>% unique
             
             assessment<-assessment[!is.na(assessment)] # needed if there is no upper or lower assessment.
             callGeneric(object=PlotData, by=by, assessment=assessment, layers=layers, xname=xname, yname=yname,labels=labels, 
