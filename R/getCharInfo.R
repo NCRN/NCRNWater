@@ -20,6 +20,7 @@
 #' \item{"Substrate"}{"The substrate of the characteristic.}
 #' \item{"SampleFraction}{SampleFraction The sample fraction of the characteristic. Stored as a length 1 character vector.}
 #' \item{"Category"}{The category for the charactersitic. Stored as a length 1 character vector.}
+#' \item{"CategoryDispaly}{The display name for the category of the characteristic.}
 #' \item{"Details"}{A description of the characteristic as needed. Stored as a length 1 character vector.}
 #' \item{"Units"}{The units of measurement of the characteristic. Stored as a length 1 character vector.}
 #' \item{"Data'}{A \code{data.frame} containing the water quality data. Should have cloumns representing the date, measurment, any QAQC flags etc. for each measurement.}

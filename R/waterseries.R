@@ -1,9 +1,11 @@
 #' @include NCRNWater_NCRNWaterObj_Class_def.R 
 #' @include getWData.R
-#' @importFrom magrittr %>% 
-#' @importFrom lubridate year month
+#' @importFrom dplyr arrange pull
 #' @importFrom ggplot2 ggplot aes geom_point geom_line scale_color_manual scale_shape_manual geom_hline labs theme_bw theme element_blank
+#' @importFrom lubridate year month
+#' @importFrom magrittr %>% 
 #' @importFrom plotly ggplotly config
+#' @importFrom purrr map_chr
 #' @importFrom viridis scale_color_viridis
 
 #' 
@@ -52,7 +54,13 @@
 #' 
 #' @return Creates a time series plot.
 #' 
-#' @details  The \code{assessment} argument determines if lines representing the assessment values should be drawn on the graph. If \code{FALSE} then no lines will be drawn. If \code{TRUE}, the default, then the upper and lower points indicated in \code{object}'s \code{Character} objects will be used to draw the lines. Note that if there are multiple assessment points, for example if diffrerent parks have different points, or if there is both an upper and lower point, they will all be drawn. If a \code{vector} of numbers is passed to \code{assessemnt} instead then those will serve as the assessment values and lines will be drawn accordingly. Note that if \code{obejct} is a \code{data.frame} then the only way to draw assessment lines is by passing a numeric \code{vector} to \code{assessment}.
+#' @details  The \code{assessment} argument determines if lines representing the assessment values should be drawn on the graph. 
+#' If \code{FALSE} then no lines will be drawn. If \code{TRUE}, the default, then the upper and lower points indicated in 
+#' \code{object}'s \code{Character} objects will be used to draw the lines. Note that if there are multiple assessment points, 
+#' for example if diffrerent parks have different points, or if there is both an upper and lower point, they will all be drawn. 
+#' If a \code{vector} of numbers is passed to \code{assessemnt} instead then those will serve as the assessment values and lines will 
+#' be drawn accordingly. Note that if \code{obejct} is a \code{data.frame} then the only way to draw assessment lines is by passing a 
+#' numeric \code{vector} to \code{assessment}.
 #' 
 #' @export
 
@@ -64,16 +72,17 @@ setGeneric(name="waterseries",function(object,parkcode=NA, sitecode=NA,charname=
 setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
   function(object,parkcode, sitecode, charname,category, by,assessment,xname,yname,labels,title,colors, assesscolor,sizes,legend, webplot,...){
           
-    PlotData<-getWData(object=object,parkcode=parkcode, sitecode=sitecode, charname=charname,category=category,...) 
+    PlotData<-getWData(object=object,parkcode=parkcode, sitecode=sitecode, charname=charname,category=category,...) %>% arrange(Date)
             if(is.na(yname)) yname<-paste0(getCharInfo(object=object, charname=charname, category=category, info="DisplayName")," (",
                                         getCharInfo(object=object, charname=charname, category=category, info="Units"),")") %>% unique
             if(is.na(xname)) xname<-"Date"
             if(all(is.na(labels))) labels<-switch(by,
-                                             none="",
-                                             char=getCharInfo(object,charname=charname,category=category, info="DisplayName") %>% unique,
-                                             park=getParkInfo(object, info="ParkShortName"),
-                                             site=getSiteInfo(object, info="SiteName"),
-                                             category=getCharInfo(object,charname = charname, category = category, info="CategoryName" ) %>% unique
+                none="",
+                char=unique(PlotData$Characteristic) %>% map_chr( ~unique(getCharInfo(object,charname=.x,info="DisplayName")))
+                %>% factor(.,levels=unique(.)),
+                park=getParkInfo(object, info="ParkShortName"),
+                site=getSiteInfo(object, info="SiteName"),
+                category=getCharInfo(object,charname = charname, category = category, info="CategoryDisplay" ) %>% unique
             )
             if(is.logical(assessment) & assessment) assessment<-c(getCharInfo(object=object,parkcode=parkcode, sitecode=sitecode, 
               charname=charname, category = category, info="LowerPoint"),getCharInfo(object=object,parkcode=parkcode, sitecode=sitecode, 
@@ -86,8 +95,9 @@ setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
 
 setMethod(f="waterseries", signature=c(object="data.frame"),
           function(object,by,assessment,layers, xname,yname,labels,title,colors,assesscolor, sizes,legend, webplot){
+            
             Grouper<-switch(by,
-                            char=object$Characteristic %>% factor,
+                            char=object %>% arrange(Date) %>%  pull(Characteristic) %>% factor(.,levels=unique(.)),
                             site=object$Site %>% factor,
                             park=object$Park %>% factor)
             if(all(is.na(yname))) yname<-""
