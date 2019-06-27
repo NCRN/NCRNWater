@@ -78,17 +78,24 @@ setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
             if(is.na(xname)) xname<-"Date"
             if(all(is.na(labels))) labels<-switch(by,
                 none="",
-                char=unique(PlotData$Characteristic) %>% map_chr( ~unique(getCharInfo(object,charname=.x,info="DisplayName")))
-                %>% factor(.,levels=unique(.)),
-                park=getParkInfo(object, info="ParkShortName"),
-                site=getSiteInfo(object, info="SiteName"),
-                category=getCharInfo(object,charname = charname, category = category, info="CategoryDisplay" ) %>% unique
+                char=unique(PlotData$Characteristic) %>% map_chr( ~unique(getCharInfo(object,charname=.x,info="DisplayName"))) %>% 
+                  factor(.,levels=unique(.)),
+                park=unique(PlotData$Park) %>% map_chr(~unique(getParkInfo(object, parkcode=.x, info="ParkShortName"))) %>%
+                  `[`(order(unique(PlotData$Site))) %>% factor(.,levels=unique(.)),
+               
+                site=unique(PlotData$Site) %>% map_chr(~unique(getSiteInfo(object, sitecode=.x, info="SiteName"))) %>% 
+                  `[`(order(unique(PlotData$Site))) %>% factor(.,levels=unique(.)),
+                
+                category=unique(PlotData$Category) %>% map_chr(~unique(getCharInfo(object, category=.x, info="CategoryDisplay"))) %>% 
+                  `[`(order(unique(PlotData$Category))) %>% factor(.,levels=unique(.))
             )
+            
             if(is.logical(assessment) & assessment) assessment<-c(getCharInfo(object=object,parkcode=parkcode, sitecode=sitecode, 
               charname=charname, category = category, info="LowerPoint"),getCharInfo(object=object,parkcode=parkcode, sitecode=sitecode, 
               charname=charname, category=category, info="UpperPoint")) %>% unlist %>% unique
             
             assessment<-assessment[!is.na(assessment)] # needed if there is no upper or lower assessment.
+            
             callGeneric(object=PlotData, by=by, assessment=assessment, layers=layers, xname=xname, yname=yname,labels=labels, 
                         title=title,colors=colors, assesscolor=assesscolor, sizes=sizes,legend=legend, webplot=webplot)
           })
@@ -97,9 +104,12 @@ setMethod(f="waterseries", signature=c(object="data.frame"),
           function(object,by,assessment,layers, xname,yname,labels,title,colors,assesscolor, sizes,legend, webplot){
             
             Grouper<-switch(by,
-                            char=object %>% arrange(Date) %>%  pull(Characteristic) %>% factor(.,levels=unique(.)),
-                            site=object$Site %>% factor,
-                            park=object$Park %>% factor)
+                            char=object %>% pull(Characteristic) %>% factor(., levels=unique(.)),
+                            site=object %>% pull(Site) %>% factor(., levels=unique(sort(.))),
+                            park=object %>% pull(Park) %>% factor(., levels=unique(sort(.))),
+                            category=object %>% pull(Category) %>% factor(., levels=unique(sort(.)))
+                            )
+            
             if(all(is.na(yname))) yname<-""
             if(all(is.na(xname))) xname<-""
             if(all(is.na(labels))) labels<-switch(by,
