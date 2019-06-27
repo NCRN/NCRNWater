@@ -23,7 +23,7 @@ setGeneric(name="getParkInfo",function(object,parkcode=NA,info="ParkShortName"){
 setMethod(f="getParkInfo", signature=c(object="list"),
           function(object,parkcode, info){
             OutPark<-sapply(object, FUN=getParkInfo, parkcode=parkcode, info=info)
-            return(OutPark[!sapply(OutPark, is.null) ])
+            return( unlist (OutPark[!sapply(OutPark, is.null) ]))
 })  
 
 
