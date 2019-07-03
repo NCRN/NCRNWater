@@ -5,7 +5,8 @@
 \title{exceed}
 \usage{
 exceed(object, parkcode = NA, sitecode = NA, charname = NA,
-  points = "both", lower = NA, upper = NA, all = F, ...)
+  category = NA, points = "both", lower = NA, upper = NA,
+  all = F, catsum = F, ...)
 }
 \arguments{
 \item{object}{One of a \code{Characteristic} object, a \code{Site} object, a \code{Park} object or a list of such objects.}
@@ -14,7 +15,9 @@ exceed(object, parkcode = NA, sitecode = NA, charname = NA,
 
 \item{sitecode}{One or more sitecodes, in quotes. If \code{object} is a \code{Park} object or a \code{list} of \code{Park} or \code{Site} objects, then the \code{sitcode} argument can be used to select which sites should be used.}
 
-\item{charname}{Name of one or more characteristics, in quotes.}
+\item{charname}{Name of one or more characteristics, in quotes. Only those characteristics will be returned.}
+
+\item{category}{One or more categories of characteristics, in quotes. Only those categories of charateristics will be returned.}
 
 \item{points}{What assessemnt points to use when determining if there are exceedences. There are three options
 \describe{
@@ -23,9 +26,14 @@ exceed(object, parkcode = NA, sitecode = NA, charname = NA,
 \item{"both"}{The default. Assess the data against both reference points}
 }}
 
-\item{lower, upper}{The lower and uppers assessment points. Either a number specified by the user, or if \code{NA}, the default, the assessment point is determined by the \code{LowerPoint} and \code{UpperPoint} slots in the \code{Characteristic} objects.}
+\item{lower, upper}{The lower and uppers assessment points. Either a number specified by the user, or if \code{NA}, the default,
+the assessment point is determined by the \code{LowerPoint} and \code{UpperPoint} slots in the \code{Characteristic} objects.}
 
-\item{all}{Logical, defaults to \code{FALSE}. Not used when \code{object} is a \code{data.frame}. If \code{all} is \code{FALSE} characteristics without uppoer or lower references points will not be incldued in the reults. If \code{all} is \code{TRUE} such characteristics will be included.}
+\item{all}{Logical, defaults to \code{FALSE}. Not used when \code{object} is a \code{data.frame}. If \code{all} is \code{FALSE} 
+characteristics without uppoer or lower references points will not be incldued in the reults. If \code{all} is \code{TRUE} such characteristics will be included.}
+
+\item{catsum}{Logical, defaults to \code{False}. When true sumamrizes by catgegory rather than a characteristic. Not used if 
+\code{object} is a \code{data.frame}}
 }
 \description{
 Determines if water data contains observtions that exceed a upper and/or lower assessment points.

@@ -10,7 +10,8 @@ setClassUnion(name="Num_or_DF",members= c("numeric","data.frame"))
 #' @slot DisplayName A name for the characteristic suitable for dispaly on graphs, tables etc. Stored as a length 1 character vector.
 #' @slot Substrate The substrate of the characteristic, stored as a length 1 character vector. 
 #' @slot SampleFraction The sample fraction of the characteristic. Stored as a length 1 character vector. 
-#' @slot Category The category for the charactersitic. Stored as a length 1 character vector.
+#' @slot Category The category for the characteristic. Stored as a length 1 character vector.
+#' @slot CategoryDispaly The display name for the category, sutiable for graphs, tables etc. 
 #' @slot Details A description of the characteristic as needed. Stored as a length 1 character vector. 
 #' @slot Units  The units of measurement of the characteristic. Stored as a length 1 character vector. 
 #' @slot Data  A \code{data.frame} containing the water quality data. Should have cloumns representing the date, measurment, any QAQC flags etc. for each measurement.
@@ -31,6 +32,7 @@ setClass(Class="Characteristic",
                  Substrate="character",
                  SampleFraction="character",
                  Category="character",
+                 CategoryDisplay="character",
                  Details="character",
                  Units="character",
                  Data="data.frame",
@@ -48,6 +50,7 @@ setClass(Class="Characteristic",
                         Substrate=character(), 
                         SampleFraction=character(),
                         Category=character(),
+                        CategoryDisplay=character(),
                         Details=character(),
                         Units=character(),
                         Data=data.frame(),
