@@ -48,7 +48,7 @@ importNCRNWater<-function(Dir, Data="Water Data.csv", MetaData="MetaData.csv"){
 
 #### Create Characteristic objects ####
   MetaData$Characteristics<-MetaData %>% 
-    dplyr::select(CharacteristicName, DisplayName, Units, Category, LowerPoint, UpperPoint, LowerDescription, 
+    dplyr::select(CharacteristicName, DisplayName, Units, Category, CategoryDisplay, LowerPoint, UpperPoint, LowerDescription, 
           UpperDescription, AssessmentDetails, Data) %>% 
     pmap(.f=new, Class="Characteristic")
 

@@ -5,7 +5,7 @@
 \title{getCharInfo}
 \usage{
 getCharInfo(object, parkcode = NA, sitecode = NA, charname = NA,
-  info)
+  category = NA, info)
 }
 \arguments{
 \item{object}{Either a \code{Characteristic} object or a \code{Site} object, a \code{Park} object or a \code{list} of such objects.}
@@ -14,7 +14,9 @@ getCharInfo(object, parkcode = NA, sitecode = NA, charname = NA,
 
 \item{sitecode}{One or more sitecodes, in quotes. If \code{object} is a \code{Park} object or a \code{list} of \code{Park} or \code{Site} objects, then the \code{sitcode} argument can be used to select which sites should be used.}
 
-\item{charname}{Name of one or more characteristics, in quotes.}
+\item{charname}{Name of one or more characteristics, in quotes. Only those characteristics will be returned.}
+
+\item{category}{One or more categories of characteristics, in quotes. Only those categories of charateristics will be returned.}
 
 \item{info}{Type of information to return. One of several options, in quotes.
 \describe{
@@ -23,6 +25,7 @@ getCharInfo(object, parkcode = NA, sitecode = NA, charname = NA,
 \item{"Substrate"}{"The substrate of the characteristic.}
 \item{"SampleFraction}{SampleFraction The sample fraction of the characteristic. Stored as a length 1 character vector.}
 \item{"Category"}{The category for the charactersitic. Stored as a length 1 character vector.}
+\item{"CategoryDisplay}{The display name for the category of the characteristic.}
 \item{"Details"}{A description of the characteristic as needed. Stored as a length 1 character vector.}
 \item{"Units"}{The units of measurement of the characteristic. Stored as a length 1 character vector.}
 \item{"Data'}{A \code{data.frame} containing the water quality data. Should have cloumns representing the date, measurment, any QAQC flags etc. for each measurement.}

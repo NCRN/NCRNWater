@@ -20,33 +20,53 @@
 #' @param maxdate The latest date of data to include, in quotes. Date is in the same format as the \code{Date} in the \code{Data} slot. 
 #' @param months A numeric vector corresponding to months of the year. Only data from those months will be returned.
 #' @param years A numeric vector corresponding to calendar years. Only data from those months will be returned.
-#' @param wyears A numeric vector correspoing to the water years. Only data from those water years will be returned.
-#' @param minvalue A number, indicating that only measuerments wtih values greater than or equal to \code{minvalue} should be returned.
-#' @param maxalue A number, indicating that only measuerments wtih values less than or equal to \code{maxvalue} should be returned.
-#' @param minobs  An integer indicating the minimum number of observations needed for a dataset to be returned. This is assessed after the other filters are applied. Defaults to 0.
-#' @param output Either "dataframe", the default, or "list". Determines the type of output when data from more than one characteristic or site are returned. If \code{dataframe} is chosen that a single data frame is returned. If \code{list} is chosen then it returns a list of \code{data.frames}, where each element is a unique site and characteristic. 
+#' @param wyears A numeric vector corresponding to water years. Only data from those water years will be returned.
+#' @param minvalue A number, indicating that only measurements wtih values greater than or equal to \code{minvalue} should be returned.
+#' @param maxalue A number, indicating that only measurements wtih values less than or equal to \code{maxvalue} should be returned.
+#' @param minobs  An integer indicating the minimum number of observations needed for a dataset to be returned. T
+#' his is assessed after the other filters are applied. Defaults to 0.
+#' @param output Either "dataframe", the default, or "list". Determines the type of output when data from more than one 
+#' characteristic or site are returned. If \code{dataframe} is chosen then a single \code{data.frame} is returned. If \code{list} 
+#' is chosen then it returns a \code{list} of \code{data.frames}, where each element is a unique site and characteristic. 
 #' 
 #' @return A \code{data.frame} or \code{list} based on the \code{Data} slot of \code{Charactersitic} objects. 
 #' 
-#' @details   This fuction is intended to be the primary method for accessing water data. Data from various \code{objects} (see below) is comined into a single \code{data.frame} along with comumns indicating which park/site/characteristic the data is from. 
+#' @details   This function is intended to be the primary method for accessing water data. Data from various \code{objects} (see below)
+#'  is combined into a single \code{data.frame} along with columns indicating which park/site/characteristic the data is from. 
 #'  
-#'    If \code{object} is a \code{Charactersitic} object \code{getWData} will return a \code{data.frame} with colums consisting of \code{Date} and \code{Value} from the \code{Data} slot as well as a column named \code{Characteristic} with the data from the {charname} slot. If \code{object} is a \code{Site} object it will return a \code{data.frame} that also includes a column named \code{Site} which comes from the \code{SiteCode} slot. If \code{object} is a \code{Park} object then a column named \code{Park} is included which comes from the \code{ParkCode} slot.  
+#'    If \code{object} is a \code{Characteristic} object \code{getWData} will return a \code{data.frame} with columns 
+#'    consisting of \code{Date} and \code{Value} from the \code{Data} slot as well as a column named \code{Characteristic}
+#'    with the data from the {charname} slot. and a column named \code{Category} iwth data from the \code{category} slot. 
+#'    If \code{object} is a \code{Site} object it will return a \code{data.frame} that also includes a column named \code{Site} 
+#'    which comes from the \code{SiteCode} slot. If \code{object} is a \code{Park} object then a column named \code{Park} is 
+#'    included which comes from the \code{ParkCode} slot.  
 #'    
-#'    Data can be filtered in a variety of ways. A date range can be selected by using the \code{mindate} and/or \code{maxdate} arguments. Dates passed to these arguments must be in text format and the same format as the dates in the data. The \code{months} argument will filter for data from one or more months. This argument requires months to be listed as one or more integers, e.g. \code{months=c(3,4)} will return only data collected in March or April. If \code{NA} is passed to \code{months} (the default), or \code{NA} is an element of the vector passed to \code{months} then data from all months will be returned. The \code{years} argument works in the same way, except that it only returns data from specific years. The \code{wyears} argument is the similar to \code{years} except that it filters by "water year". USGS water years start on October 1st and end on September 30th, so water year 2010 went from October 1st 2009 through September 30th 2010.
+#'    Data can be filtered in a variety of ways. A date range can be selected by using the \code{mindate} and/or \code{maxdate} 
+#'    arguments. Dates passed to these arguments must be in text format and the same format as the dates in the data. The \code{months} 
+#'    argument will filter for data from one or more months. This argument requires months to be listed as one or more integers,
+#'    e.g. \code{months=c(3,4)} will return only data collected in March or April. If \code{NA} is passed to 
+#'    \code{months} (the default), or \code{NA} is an element of the vector passed to \code{months} then data from all months
+#'     will be returned. The \code{years} argument works in the same way, except that it only returns data from specific years. 
+#'     The \code{wyears} argument is the similar to \code{years} except that it filters by "water year". USGS water years start 
+#'     on October 1st and end on September 30th, so water year 2010 went from October 1st 2009 through September 30th 2010.
 #'    
-#'    If an \code{Characteristic} object has an empty data slot, or the filtering options are such that no data meets the criteria, then the funciotn returns \code{NULL}. \code{NULL} is also returned if after filtering there are fewer observatiosn than \code{minobs}. This can be useful when getting data for analysis or graphics and you only wish to use datasets with sufficient observations. 
+#'    If an \code{Characteristic} object has an empty data slot, or the filtering options are such that no data meets the criteria,
+#'    then the function returns \code{NULL}. \code{NULL} is also returned if after filtering there are fewer observations 
+#'    than \code{minobs}. This can be useful when getting data for analysis or graphics and you only wish to use datasets with 
+#'    sufficient observations. 
 #' 
 #' @export
 
-setGeneric(name="getWData",function(object,parkcode=NA,sitecode=NA,charname=NA,mindate=NA,maxdate=NA,months=NA,years=NA,wyears=NA,
-                                    minvalue=NA,maxvalue=NA,minobs=1,output="dataframe"){standardGeneric("getWData")},signature=c("object") )
+setGeneric(name="getWData",function(object,parkcode=NA,sitecode=NA,charname=NA,category=NA, mindate=NA,maxdate=NA,months=NA,
+          years=NA,wyears=NA,minvalue=NA,maxvalue=NA,minobs=1,output="dataframe"){standardGeneric("getWData")},signature=c("object") )
 
 
 #### Given a list, break it down and feed it back to getWData ####
 setMethod(f="getWData", signature=c(object="list"),
-  function(object,parkcode,sitecode,charname,mindate,maxdate,months,years,wyears,minvalue,maxvalue,minobs,output){
-    OutData<- lapply(object,FUN=getWData, parkcode=parkcode, sitecode=sitecode, charname=charname, mindate=mindate, maxdate=maxdate,
-                     months=months,years=years, wyears=wyears,minvalue=minvalue,maxvalue=maxvalue,minobs=minobs,output=output)
+  function(object,parkcode,sitecode,charname,category,mindate,maxdate,months,years,wyears,minvalue,maxvalue,minobs,output){
+    OutData<- lapply(object,FUN=getWData, parkcode=parkcode, sitecode=sitecode, charname=charname, category=category,
+          mindate=mindate, maxdate=maxdate, months=months, years=years, wyears=wyears, minvalue=minvalue, maxvalue=maxvalue,
+          minobs=minobs, output=output)
             
     if(output=="list") { return(unlist(OutData, recursive=F)) } else {
       OutData %>% 
@@ -58,11 +78,11 @@ setMethod(f="getWData", signature=c(object="list"),
 
 #### Given one park get the sites and run again ####
 setMethod(f="getWData", signature=c(object="Park"),
-     function(object,parkcode,sitecode,charname,mindate,maxdate,months,years,wyears,minvalue,maxvalue,minobs, output){
+     function(object,parkcode,sitecode,charname,category,mindate,maxdate,months,years,wyears,minvalue,maxvalue,minobs,output){
        
-        OutData<-lapply(X=getSites(object=object,parkcode=parkcode,sitecode=sitecode) , FUN=function(x){
-          getWData(x, sitecode=sitecode, charname=charname,mindate=mindate, maxdate=maxdate,months=months,years=years,wyears=wyears,
-            minvalue=minvalue,maxvalue=maxvalue,minobs=minobs, output="list")}) %>% 
+        OutData<-lapply(X=getSites(object=object,parkcode=parkcode,sitecode=sitecode), FUN=function(x){
+          getWData(x, sitecode=sitecode, charname=charname, category=category, mindate=mindate, maxdate=maxdate,
+                  months=months, years=years, wyears=wyears, minvalue=minvalue, maxvalue=maxvalue, minobs=minobs, output="list")}) %>% 
          unlist(recursive=F) %>% 
          unname
 
@@ -79,11 +99,11 @@ setMethod(f="getWData", signature=c(object="Park"),
 
 #### Given one Site get the characteristics and run again ####
 setMethod(f="getWData", signature=c(object="Site"),
-  function(object,charname,mindate,maxdate,months,years,wyears,minvalue,maxvalue,minobs,output){
+  function(object,charname,category,mindate,maxdate,months,years,wyears,minvalue,maxvalue,minobs,output){
   
-    OutData<-getChars(object=object,charname=charname) %>% 
-      lapply(.,FUN=function(x){getWData(object=x, mindate=mindate, maxdate=maxdate,months=months,years=years,wyears=wyears,
-                                  minvalue=minvalue,maxvalue=maxvalue,minobs=minobs)
+    OutData<-getChars(object=object, charname=charname, category = category) %>% 
+      lapply(.,FUN=function(x){getWData(object=x, mindate=mindate, maxdate=maxdate, months=months, years=years, wyears=wyears,
+            minvalue=minvalue,maxvalue=maxvalue,minobs=minobs)
       }) 
       
     OutData<-lapply(OutData, FUN=function(x){if(is.null(x)) x else mutate(x, Site=getSiteInfo(object, info="SiteCode")) })  
@@ -99,10 +119,12 @@ setMethod(f="getWData", signature=c(object="Site"),
 
 #### Given one Characteristic get the data ####
 setMethod(f="getWData", signature=c(object="Characteristic"),
-  function(object,mindate,maxdate, months,years,wyears,minvalue,maxvalue,minobs,output){
+  function(object, mindate, maxdate, months, years, wyears, minvalue, maxvalue, minobs, output){
     OutData<-tryCatch({    ### tryCatch is here if there data slot is empty 
       data.frame(c(
-        getCharInfo(object,info="Data"), Characteristic= getCharInfo(object,info="CharName")), 
+        getCharInfo(object,info="Data"), 
+        Characteristic= getCharInfo(object,info="CharName"), 
+        Category=getCharInfo(object,info="Category")), 
                    stringsAsFactors = FALSE)
      },
     error=function(e){
