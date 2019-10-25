@@ -31,6 +31,7 @@ Collate:
     'NCRNWater_NCRNWaterObj_Class_def.R'
     'addChar.R'
     'addSite.R'
+    'compileNETNdata.R'
     'getParks.R'
     'getSites.R'
     'getChars.R'
