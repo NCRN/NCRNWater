@@ -24,23 +24,28 @@
 importNCRNWater<-function(Dir, Data="Water Data.csv", MetaData="MetaData.csv"){
   
 #### Read in Data ####
-  Indata<-read_csv(paste(Dir,Data, sep="/"), col_types=cols(.default="c")) %>% 
-    rename(SiteCode=StationID, Date=`Visit Start Date`,Characteristic=`Local Characteristic Name`,
-           Value=`Result Value/Text` ) %>% 
+  Indata <- read_csv(paste(Dir,Data, sep="/"), col_types=cols(.default="c")) %>% 
+    rename(SiteCode = StationID, Date=`Visit Start Date`, Characteristic = `Local Characteristic Name`,
+           Value = `Result Value/Text`) %>% 
     mutate(TextValue=Value)
-  
-  MetaData<-read_csv(paste(Dir,MetaData, sep="/"))
-  
+
+  MetaData<-read_csv(paste(Dir, MetaData, sep="/"), col_types=cols()) #makes function less chatty
   
 #### Get data ready to make into objects ####
-  
   Indata$Date<-mdy(Indata$Date)
 
-#### Create Data part of each charactersitic ####
+#### Check whether MDL and UDL fields are in Indata. Add them if not, make them numeric if they are
+  if(any(names(Indata)=="MDL")){
+    Indata$MDL<-as.numeric(Indata$MDL)} else {Indata$MDL<-as.numeric(NA)}
+  
+  if(any(names(Indata)=="UDL")){
+    Indata$UDL<-as.numeric(Indata$UDL)} else {Indata$UDL<-as.numeric(NA)}
+  
+#### Create Data part of each characteristic ####
   MetaData$Data<-MetaData %>% dplyr::select(SiteCode, DataName) %>% 
     pmap(.f=function(SiteCode, DataName) {
-    filter(Indata, SiteCode==!!SiteCode, Characteristic==DataName) %>% 
-              dplyr::select(Date,Value,TextValue)  })
+    dplyr::filter(Indata, SiteCode == !!SiteCode, Characteristic == DataName) %>% 
+              dplyr::select(Date, Value, TextValue, MDL, UDL)})
 
 #### Change numeric data to numeric, but the leave the rest as character ####
   NumDat<-MetaData$DataType=="numeric"
