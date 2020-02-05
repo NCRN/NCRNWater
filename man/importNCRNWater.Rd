@@ -4,8 +4,7 @@
 \alias{importNCRNWater}
 \title{importNCRNWater}
 \usage{
-importNCRNWater(Dir, Data = "Water Data.csv",
-  MetaData = "MetaData.csv")
+importNCRNWater(Dir, Data = "Water Data.csv", MetaData = "MetaData.csv")
 }
 \arguments{
 \item{Dir}{The directory where the data is found}

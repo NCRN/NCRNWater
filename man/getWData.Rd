@@ -4,10 +4,22 @@
 \alias{getWData}
 \title{getWData}
 \usage{
-getWData(object, parkcode = NA, sitecode = NA, charname = NA,
-  category = NA, mindate = NA, maxdate = NA, months = NA,
-  years = NA, wyears = NA, minvalue = NA, maxvalue = NA,
-  minobs = 1, output = "dataframe")
+getWData(
+  object,
+  parkcode = NA,
+  sitecode = NA,
+  charname = NA,
+  category = NA,
+  mindate = NA,
+  maxdate = NA,
+  months = NA,
+  years = NA,
+  wyears = NA,
+  minvalue = NA,
+  maxvalue = NA,
+  minobs = 1,
+  output = "dataframe"
+)
 }
 \arguments{
 \item{object}{Either a \code{Characteristic} object a \code{Site} object, a \code{Park} object or a \code{list} of such objects.}

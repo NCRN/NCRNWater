@@ -49,7 +49,7 @@ Collate:
     'waterseries.R'
     'exceed.R'
     'importNCRNWater.R'
-    'nonpar_trends.R'
+    'nonparTrends.R'
     'waterbox.R'
     'waterheat.R'
     'wcosinor.R'

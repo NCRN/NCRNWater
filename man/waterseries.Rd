@@ -4,11 +4,26 @@
 \alias{waterseries}
 \title{waterseries}
 \usage{
-waterseries(object, parkcode = NA, sitecode = NA, charname = NA,
-  category = NA, by = "char", assessment = TRUE,
-  layers = c("points", "line"), xname = NA, yname = NA,
-  labels = NA, title = NULL, colors = NA, assesscolor = "red",
-  sizes = c(3, 0.8, 1.1), legend = "bottom", webplot = FALSE, ...)
+waterseries(
+  object,
+  parkcode = NA,
+  sitecode = NA,
+  charname = NA,
+  category = NA,
+  by = "char",
+  assessment = TRUE,
+  layers = c("points", "line"),
+  xname = NA,
+  yname = NA,
+  labels = NA,
+  title = NULL,
+  colors = NA,
+  assesscolor = "red",
+  sizes = c(3, 0.8, 1.1),
+  legend = "bottom",
+  webplot = FALSE,
+  ...
+)
 }
 \arguments{
 \item{object}{Either a \code{data.frame} that is the output of \code{getWData}, a \code{Characteristic} object, a \code{Site} object, a \code{Park} object or a \code{list} of such objects.}
