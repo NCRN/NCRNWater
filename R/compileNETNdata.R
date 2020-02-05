@@ -4,15 +4,18 @@
 #' 
 #' @section Warning:
 #' 
-#' @importFrom RODBC odbcConnect sqlFetch sqlTables odbcClose
+#' @importFrom RODBC odbcConnect sqlFetch sqlTables odbcClose odbcDataSources
 #' @importFrom stats setNames
 #' @importFrom tidyr pivot_longer separate gather spread
-#' @importFrom dplyr  distinct case_when contains
+#' @importFrom dplyr  distinct case_when contains filter select mutate rename arrange left_join summarize group_by 
 #' @importFrom purrr map
+#' @importFrom stringr str_extract str_detect
 #' 
-#' @param export  \code{TRUE} or  \code{FALSE}. Export csv files to "Data" folder. Defaults to \code{TRUE}.
+#' @param path Quoted path to export csv files to. Defaults to "Data" folder within current project.
+#' @param export  \code{TRUE} or  \code{FALSE}. Export csv files to specified path. Defaults to \code{TRUE}.
 #' @param surface   \code{TRUE} or  \code{FALSE}. Return only measurements representing the stream surface or lake epilimnion. 
 #' If  \code{TRUE}, the median of the surface measurements from the top 2m of sampling are returned. Defaults to  \code{TRUE}.
+#' @param cleanEnv \code{TRUE} or  \code{FALSE}. Allows you to clean the global environment so that only waterDat and MD are kept. Defaults to \code{TRUE}.
 #' 
 #' @return Returns a list of two dataframes (WaterData and MetaData) formatted for import into NCRNwater R package.Exports data to folder by default.
 #' @details This function create flat files from NETN's water database. The function returns 2 data frames used for the 
@@ -25,9 +28,34 @@
 #' 
 #' @export
 
-
-compileNETNdata<-function(export = TRUE, surface = TRUE){
-
+compileNETNdata <- function(path = "./Data/", export = TRUE, surface = TRUE,
+           cleanEnv = TRUE) {
+    
+  if(!requireNamespace("RODBC", quietly = TRUE)){
+    stop("Package 'RODBC' needed for this function to work. Please install it.", call. = FALSE)
+  }
+  
+  if(!requireNamespace("stringr", quietly = TRUE)){
+    stop("Package 'stringr' needed for this function to work. Please install it.", call. = FALSE)
+  }
+  
+  # Error handling for specified path
+  path <- if (substr(path, nchar(path), nchar(path)) != "/") {
+    paste0(path, "/")
+  } else {(paste0(path))}
+  
+  # Check that specified path exists on computer
+  if(export == TRUE & dir.exists(path) == FALSE){
+    stop(paste0("The specified path: ", path, " does not exist"))
+  }
+  
+  # Check that NETNWQ is a named user or system DSN
+ 
+  if(nrow(data.frame(driver=(RODBC::odbcDataSources())) %>% 
+    mutate(dsn_name = row.names(.)) %>% 
+    filter(dsn_name == "NETNWQ"))==0) 
+    stop ('Compile function failed. There is no DSN named "NETNWQ".')
+  
 #########################
 #Import water data from Access database:
 
@@ -59,52 +87,71 @@ Locations <- Location %>%
 	select(c('PK_Location', 'NPStoretSiteCode', 'LocationType'))
 
 #set column order for 'Water data.csv', long form:
-col_order <- c("NPSTORET.Org.ID.Code", "StationID", "Visit.Start.Date", "SampleDepth", "Depth.Units", "Local.Characteristic.Name", "Result.Value.Text", "Lower.Quantification.Limit", "Upper.Quantification.Limit")
+col_order <- c("NPSTORET.Org.ID.Code", "StationID", "Visit.Start.Date", 
+               "SampleDepth", "Depth.Units", "Local.Characteristic.Name", 
+               "Result.Value.Text", "Lower.Quantification.Limit", 
+               "Upper.Quantification.Limit")
 
 #### Build Chemistry table ----
 #select variables of interest from Chemistry table:
 Chem <- Chemistry %>%
-	select(-c('SEC2016', 'LabCode', 'SampleTime', 'SampleStation', 'SampleType', 'FK_WaterQualityMethod', 'Project', 'pH_Lab', 'eqPH', 'AppColorFlag', 'AppColor_PCU', 'TrueColor_PCU', 'TColor_Flag', 'pH_Lab_Method', 'CONDMETH', 'COLORMETH', 'ALKMETH', 'ChemComments')) 
+	select(-c('SEC2016', 'LabCode', 'SampleTime', 'SampleStation', 
+	          'SampleType', 'FK_WaterQualityMethod', 'Project', 'pH_Lab', 
+	          'eqPH', 'AppColorFlag', 'AppColor_PCU', 'TrueColor_PCU', 
+	          'TColor_Flag', 'pH_Lab_Method', 'CONDMETH', 'COLORMETH', 
+	          'ALKMETH', 'ChemComments')) 
 	
 #merge in ancillary info on date and site:
 Chem <- merge(Chem, Samples, by.x="FK_Sample", by.y = "PK_Sample")
 Chem <- merge(Chem, Events, by.x="FK_Event", by.y = "PK_Event") 
 Chem <- merge(Chem, Locations, by.x="FK_Location", by.y = "PK_Location") 
+
 #format Date
-Chem$StartDate <- as.Date(Chem$StartDate, format = "%m/%d/%y")
+Chem$StartDate <- as.POSIXct(Chem$StartDate, format = "%Y-%m-%d")
 #filter out everything but QCtype = "ENV", rename columns, re-code Sample Depth:
 Chem <- Chem %>%
 	filter(QCtype == "ENV") %>%
-	rename(StationID=NPStoretSiteCode, Visit.Start.Date=StartDate, SampleDepth = SampleDepth_m) %>%
+	rename(StationID=NPStoretSiteCode, 
+	       Visit.Start.Date=StartDate, 
+	       SampleDepth = SampleDepth_m) %>%
 	mutate(NPSTORET.Org.ID.Code = "NETN") %>%
 	mutate(SampleDepth = case_when(LocationType == 'Stream' ~ 'stream',
-	 LocationType == 'Pond' ~ 'epilimnion', 
-	 LocationType == 'Lake' ~ 'epilimnion')) %>% 
+	                               LocationType == 'Pond' ~ 'epilimnion', 
+	                               LocationType == 'Lake' ~ 'epilimnion')) %>% 
   arrange(StationID, Visit.Start.Date)
 Chem <- Chem[order(Chem$StationID, Chem$Visit.Start.Date),]
-
 
 #check to be sure there is only measurement (representing the epilimnion) per visit. This takes about 15 seconds to run.
 ### function to count the number of unique levels of a character variable:
 how.many <- function(x){length(unique(x))}
-try(if(max(as.vector(tapply(Chem$SampleDepth, list(Chem$Visit.Start.Date, Chem$StationID), how.many)), na.rm=T) > 1) stop ('More than one sampling depth per site visit'))
+
+try(if(max(as.vector(tapply(
+  Chem$SampleDepth,
+  list(Chem$Visit.Start.Date, Chem$StationID),
+  how.many)), na.rm = T) > 1)
+  stop ('More than one sampling depth per site visit')
+)
 
 #split into two dataframes - measurments and quality flags.
-Chem_dat <- select(Chem,NPSTORET.Org.ID.Code, StationID, Visit.Start.Date, SampleDepth,-contains("Flag"),contains("mgL"), contains("ugL"), contains("eqL"))
+Chem_dat <- select(Chem,NPSTORET.Org.ID.Code, StationID, 
+                   Visit.Start.Date, SampleDepth,-contains("Flag"),
+                   contains("mgL"), contains("ugL"), contains("eqL"))
 
 Chem_flag <- select(Chem, StationID, Visit.Start.Date, contains("Flag"))
 
 #convert both dataframes to long form and remove rows with NA for observation value
 
 Chem_dat_long <- Chem_dat %>%
-  pivot_longer(cols= c(-StationID, -NPSTORET.Org.ID.Code, -SampleDepth, -Visit.Start.Date), names_to = "Local.Characteristic.Name", values_to = "Result.Value.Text") %>%
+  pivot_longer(cols= c(-StationID, -NPSTORET.Org.ID.Code, -SampleDepth, -Visit.Start.Date), 
+               names_to = "Local.Characteristic.Name", values_to = "Result.Value.Text") %>%
   mutate(Depth.Units = NA) %>% 
-  arrange(StationID, Visit.Start.Date,Local.Characteristic.Name )
+  arrange(StationID, Visit.Start.Date, Local.Characteristic.Name )
 
 Chem_flag_long <- Chem_flag %>%
-  pivot_longer(cols = c( -StationID,-Visit.Start.Date), names_to =  "Flag.Characteristic.Name", values_to = "Flag.Value")%>%
+  pivot_longer(cols = c( -StationID,-Visit.Start.Date), names_to = "Flag.Characteristic.Name", 
+               values_to = "Flag.Value")%>%
   rename(Visit.Start.Date.F = Visit.Start.Date, StationID.F = StationID) %>% 
-  arrange(StationID.F, Visit.Start.Date.F,Flag.Characteristic.Name )
+  arrange(StationID.F, Visit.Start.Date.F, Flag.Characteristic.Name )
 	
 #merge together:
 Chem_long <- cbind(Chem_dat_long, Chem_flag_long)
@@ -116,44 +163,30 @@ test <- Chem_long %>%
   mutate(Flag.Value = as.character(Flag.Value))
 
 #extract Lower and Upper limits from Flag.Value column and replace Result.Value.Text with character string if value was outside of qunatification limits:
-#unique(test$Flag.Value)
-#lower MRL
-LDL_rows <- setdiff(grep("MRL", test$Flag.Value), grep("E", test$Flag.Value)) #determine rows with flags
-LDL_vals <-sapply(strsplit(test$Flag.Value[LDL_rows], ""), "[",2)
-test$Lower.Quantification.Limit <- replace(test$Lower.Quantification.Limit, LDL_rows, LDL_vals)
-test$Result.Value.Text[!is.na(test$Lower.Quantification.Limit)] <- '*Present <QL'
-
-#replace lower MDL values (until the codes are standardized in the ACCESS database):
-test$Lower.Quantification.Limit <- ifelse(
-	test$Flag.Value == 'MDL<0.005', 0.005, ifelse(
-	test$Flag.Value == '<MDL 0.005', 0.005, ifelse(
-	test$Flag.Value == '<MDL 1', 1, ifelse(
-	test$Flag.Value == 'MDL<1', 1, ifelse(
-	test$Flag.Value == '<MDL 0.73', 0.73,test$Lower.Quantification.Limit)))))
-
-#upper QL
-UDL_rows <- union(grep("UDL", test$Flag.Value), grep("ULQ", test$Flag.Value)) # find rows with UQL
-UDL_vals <- rep(2.9, length(UDL_rows))# create vector of UQL; this will need to be changed when there are >1 UQL!
-test$Upper.Quantification.Limit <- replace(test$Upper.Quantification.Limit, UDL_rows, UDL_vals) # add in UQL values
-test$Result.Value.Text[!is.na(test$Upper.Quantification.Limit)] <- '*Present >QL'
+test <- suppressWarnings(test %>% mutate(limit = str_extract(Flag.Value, "\\-*\\d+\\.*\\d*"), #extracts the numbers
+                        Lower.Quantification.Limit = as.numeric(ifelse(str_detect(Flag.Value, "<"), paste(limit), NA)), 
+                        Upper.Quantification.Limit = as.numeric(ifelse(str_detect(Flag.Value, ">"), paste(limit), NA)),
+                        Result.Value.Text = case_when(!is.na(Lower.Quantification.Limit) ~ paste0("*Present <QL"),
+                                                      !is.na(Upper.Quantification.Limit) ~ paste0("*Present >QL"),
+                                                      TRUE ~ paste0(Result.Value.Text))) %>% 
+                 select(-limit))
 
 #clean up
 Chem_long <- test %>%
-	dplyr::filter(!is.na(Result.Value.Text)) %>%
-	select(-c(StationID.F, Visit.Start.Date.F, Flag.Characteristic.Name, Flag.Value)) %>% 
-  select(col_order)
+	dplyr::filter(!is.na(Result.Value.Text)) %>%  select(col_order)
 
 #### Build WQ Insitu table ----
 
 #select variables of interest from WQInSitu table:
 WQ <- WQInSitu %>%
-    	select(PK_WQInSitu, FK_Sample,SampleDepth=  Depth_m,BP_mmHg, DOsat_pct, DO_mgL, pH, SpCond_uScm,Temp_C, QCType) %>%
+    	select(PK_WQInSitu, FK_Sample,SampleDepth=  Depth_m,BP_mmHg, 
+    	       DOsat_pct, DO_mgL, pH, SpCond_uScm,Temp_C, QCType) %>%
     	filter(QCType == "0") %>% #Remove calibratin samples.
     	select(-QCType) %>% 
       left_join(., Samples, by=c("FK_Sample"= "PK_Sample"))%>% # add in ancillary data
       left_join(.,Events,    by=c("FK_Event" = "PK_Event")) %>% 
       left_join(.,Locations, by=c("FK_Location" = "PK_Location")) %>% 
-      mutate(StartDate = as.Date(StartDate, format = "%m/%d/%y")) %>% 
+      mutate(StartDate =  as.POSIXct(StartDate, format = "%Y-%m-%d")) %>% 
     	rename(StationID=NPStoretSiteCode, Visit.Start.Date=StartDate) %>%#clean up column names, remove rows with SampleDepth = NA
     	mutate(NPSTORET.Org.ID.Code = "NETN") %>%
     	filter(!is.na(SampleDepth)) %>%
@@ -163,7 +196,9 @@ WQ <- WQInSitu %>%
 #make long, remove rows with NA for observation value, record Depth units
 WQ_long <- WQ %>%
 	select(-LocationType) %>%
-	pivot_longer(names_to = "Local.Characteristic.Name", values_to =  "Result.Value.Text", cols= -c(SampleDepth, Visit.Start.Date, StationID, NPSTORET.Org.ID.Code)) %>%
+	pivot_longer(names_to = "Local.Characteristic.Name", 
+	             values_to = "Result.Value.Text", 
+	             cols= -c(SampleDepth, Visit.Start.Date, StationID, NPSTORET.Org.ID.Code)) %>%
 	dplyr::filter(!is.na(Result.Value.Text)) %>%
 	mutate(Upper.Quantification.Limit = NA) %>%
 	mutate(Lower.Quantification.Limit = NA) %>%
@@ -171,18 +206,19 @@ WQ_long <- WQ %>%
   select(col_order)
 
 #calculate median value for all depths 2m or less to represent the stream/epilimnion value.	
-temp <- WQ %>%
-	filter(SampleDepth >= 2) %>%
-	gather(key = Local.Characteristic.Name, value = Result.Value.Text, -c(SampleDepth, Visit.Start.Date, StationID, NPSTORET.Org.ID.Code)) %>%
+temp <- suppressWarnings(
+  WQ %>% filter(SampleDepth >= 2) %>%
+	gather(key = Local.Characteristic.Name, value = Result.Value.Text, 
+	       -c(SampleDepth, Visit.Start.Date, StationID, NPSTORET.Org.ID.Code)) %>%
 	mutate(Result.Value.Text = as.numeric(Result.Value.Text)) %>%
 	dplyr::filter(!is.na(Result.Value.Text)) %>%
 	group_by(StationID, Visit.Start.Date, Local.Characteristic.Name) %>%
 	dplyr::summarize(Result.Value.Text = median(as.numeric(Result.Value.Text))) %>%
-	ungroup() 	%>%
+	ungroup()	%>%
 	spread(key = Local.Characteristic.Name, value = Result.Value.Text) %>%
 	mutate(NPSTORET.Org.ID.Code = "NETN")	%>% 
   left_join(., Locations, by =c("StationID" = "NPStoretSiteCode")) # bind on location type (stream or Lake)
-
+)
 temp <- temp %>%
 	mutate(SampleDepth = case_when(LocationType == 'Stream' ~ 'stream',
 	 LocationType == 'Pond' ~ 'epilimnion', 
@@ -191,7 +227,8 @@ temp <- temp %>%
 
 #make long, remove rows with NA for observation value, add column for Depth.Units:
 temp_long <- temp %>%
-	gather(key = Local.Characteristic.Name, value = Result.Value.Text, -c(SampleDepth, Visit.Start.Date, StationID, NPSTORET.Org.ID.Code)) %>%
+	gather(key = Local.Characteristic.Name, value = Result.Value.Text, 
+	       -c(SampleDepth, Visit.Start.Date, StationID, NPSTORET.Org.ID.Code)) %>%
 	dplyr::filter(!is.na(Result.Value.Text)) %>%
 	mutate(Upper.Quantification.Limit = NA) %>%
 	mutate(Lower.Quantification.Limit = NA) %>%
@@ -209,7 +246,7 @@ SD <- StreamDischarge %>%
   left_join(., Samples, by=c("FK_Sample" = "PK_Sample")) %>% 
   left_join(., Events, by =c("FK_Event"= "PK_Event")) %>% 
   left_join(., Locations, by=c("FK_Location"= "PK_Location")) %>% 
-  mutate(StartDate= as.Date(StartDate, format = "%m/%d/%y")) %>% 
+  mutate(StartDate=  as.POSIXct(StartDate, format = "%Y-%m-%d")) %>% 
 	rename(StationID=NPStoretSiteCode, Visit.Start.Date=StartDate) %>%
 	mutate(NPSTORET.Org.ID.Code = "NETN") %>%
 	mutate(SampleDepth = NA) %>%
@@ -219,7 +256,9 @@ SD <- StreamDischarge %>%
 
 #make long and remove rows with NA for observation value
 SD_long <- SD %>%
-	pivot_longer(names_to = "Local.Characteristic.Name", values_to = "Result.Value.Text", cols=-c(SampleDepth, Visit.Start.Date, StationID, NPSTORET.Org.ID.Code)) %>%
+	pivot_longer(names_to = "Local.Characteristic.Name", 
+	             values_to = "Result.Value.Text", 
+	             cols=-c(SampleDepth, Visit.Start.Date, StationID, NPSTORET.Org.ID.Code)) %>%
 	dplyr::filter(!is.na(Result.Value.Text)) %>%
 	mutate(Upper.Quantification.Limit = NA) %>%
 	mutate(Lower.Quantification.Limit = NA) %>%
@@ -233,7 +272,7 @@ Turb <- Turbidity %>%
     left_join(.,Samples, by =c("FK_Sample"= "PK_Sample")) %>% #merge in ancillary info on date and site:
     left_join(., Events, by=c("FK_Event" = "PK_Event")) %>% 
     left_join(., Locations, by=c("FK_Location" = "PK_Location")) %>% 
-    mutate(StartDate = as.Date(StartDate, format = "%m/%d/%y") ) %>% #format Date
+    mutate(StartDate =  as.POSIXct(StartDate, format = "%Y-%m-%d")) %>% #format Date
   	rename(StationID=NPStoretSiteCode, Visit.Start.Date=StartDate) %>%
   	mutate(NPSTORET.Org.ID.Code = "NETN") %>%
   	mutate(SampleDepth = NA) %>%
@@ -242,7 +281,9 @@ Turb <- Turbidity %>%
 
 #make long and remove rows with NA for observation value
 Turb_long <- Turb %>%
-	pivot_longer(names_to = "Local.Characteristic.Name", values_to = "Result.Value.Text", cols= -c(SampleDepth, Visit.Start.Date, StationID, NPSTORET.Org.ID.Code)) %>%
+	pivot_longer(names_to = "Local.Characteristic.Name", 
+	             values_to = "Result.Value.Text", 
+	             cols= -c(SampleDepth, Visit.Start.Date, StationID, NPSTORET.Org.ID.Code)) %>%
 	dplyr::filter(!is.na(Result.Value.Text)) %>%
 	mutate(Upper.Quantification.Limit = NA) %>%
 	mutate(Lower.Quantification.Limit = NA) %>%
@@ -256,28 +297,29 @@ Sec <- Secchi %>%
   left_join(.,Samples, by =c("FK_Sample"= "PK_Sample")) %>% #merge in ancillary info on date and site:
   left_join(., Events, by=c("FK_Event" = "PK_Event")) %>% 
   left_join(., Locations, by=c("FK_Location" = "PK_Location")) %>% 
-  mutate(StartDate = as.Date(StartDate, format = "%m/%d/%y") ) %>% #format Date
+  mutate(StartDate =  as.POSIXct(StartDate, format = "%Y-%m-%d")) %>% #format Date
   mutate(Lower.Quantification.Limit = ifelse(Bot_SD1 == 'B', SDepth1_m, NA)) %>% 
   mutate(SDepth1_m = ifelse(Bot_SD1 == 'B', "*Present <QL", SDepth1_m)) %>% 
 	rename(StationID= NPStoretSiteCode, Visit.Start.Date=StartDate) %>%
 	mutate(NPSTORET.Org.ID.Code = "NETN") %>%
 	mutate(Upper.Quantification.Limit = NA) %>%
 	mutate(SampleDepth = case_when(LocationType == 'Stream' ~ 'stream',
-	 LocationType == 'Pond' ~ 'epilimnion', 
-	 LocationType == 'Lake' ~ 'epilimnion',
-	 LocationType == 'Bottom' ~ 'bottom')) %>%
+	                               LocationType == 'Pond' ~ 'epilimnion', 
+	                               LocationType == 'Lake' ~ 'epilimnion',
+	                               LocationType == 'Bottom' ~ 'bottom')) %>%
 	select(-c(FK_Location, FK_Event, FK_Sample, PK_Secchi, LocationType, Bot_SD1)) %>% 
   arrange(StationID, Visit.Start.Date)
 
 
 #make long and remove rows with NA for observation value
 Sec_long <- Sec %>%
-	pivot_longer(names_to = "Local.Characteristic.Name", values_to = "Result.Value.Text", cols= -c(SampleDepth,
-                Visit.Start.Date, StationID, NPSTORET.Org.ID.Code, Upper.Quantification.Limit, Lower.Quantification.Limit)) %>%
+	pivot_longer(names_to = "Local.Characteristic.Name", values_to = "Result.Value.Text", 
+	             cols= -c(SampleDepth, Visit.Start.Date, StationID, 
+	                      NPSTORET.Org.ID.Code, Upper.Quantification.Limit, 
+	                      Lower.Quantification.Limit)) %>%
 	dplyr::filter(!is.na(Result.Value.Text)) %>%
 	mutate(Depth.Units = NA) %>% 
   select(col_order)
-
 
 #### Light Penetration ----
 #select variables of interest from LightPenetration table:
@@ -286,7 +328,7 @@ Light <- LightPenetration %>%
   left_join(.,Samples, by =c("FK_Sample"= "PK_Sample")) %>% #merge in ancillary info on date and site:
   left_join(., Events, by=c("FK_Event" = "PK_Event")) %>% 
   left_join(., Locations, by=c("FK_Location" = "PK_Location")) %>% 
-  mutate(StartDate = as.Date(StartDate, format = "%m/%d/%y") ) %>% #format Date
+  mutate(StartDate = as.POSIXct(StartDate, format = "%Y-%m-%d")) %>% #format Date
 	rename(StationID=NPStoretSiteCode, Visit.Start.Date=StartDate, SampleDepth = Depth_m) %>%
 	mutate(NPSTORET.Org.ID.Code = "NETN") %>%
 	select(-c(FK_Location, FK_Event, FK_Sample, PK_LightPenetration)) %>% 
@@ -295,8 +337,9 @@ Light <- LightPenetration %>%
 #make long and remove rows with NA for observation value
 Light_long <- Light %>%
 	select(-LocationType) %>%
-	pivot_longer(names_to = "Local.Characteristic.Name", values_to = "Result.Value.Text", cols= -c(SampleDepth, Visit.Start.Date, StationID, 
-                            NPSTORET.Org.ID.Code)) %>%
+	pivot_longer(names_to = "Local.Characteristic.Name", 
+	             values_to = "Result.Value.Text", 
+	             cols= -c(SampleDepth, Visit.Start.Date, StationID, NPSTORET.Org.ID.Code)) %>%
 	dplyr::filter(!is.na(Result.Value.Text)) %>%
 	mutate(Upper.Quantification.Limit = NA) %>%
 	mutate(Lower.Quantification.Limit = NA) %>%
@@ -305,26 +348,31 @@ Light_long <- Light %>%
 
 #calc median light penetration in top 2m:
   ## Note : using gather since multiple data types in the value field (for pivot_longer these need to be specified by value ptypes))
-temp2 <- Light %>%
+temp2 <- suppressWarnings(
+  Light %>%
 	filter(SampleDepth >= 2) %>%
-	gather(key = Local.Characteristic.Name, value = Result.Value.Text, -c(SampleDepth, Visit.Start.Date, StationID, NPSTORET.Org.ID.Code)) %>%
+	gather(key = Local.Characteristic.Name, 
+	       value = Result.Value.Text, 
+	       -c(SampleDepth, Visit.Start.Date, StationID, NPSTORET.Org.ID.Code)) %>%
 	mutate(Result.Value.Text = as.numeric(Result.Value.Text)) %>%
 	dplyr::filter(!is.na(Result.Value.Text)) %>%
 	group_by(StationID, Visit.Start.Date, Local.Characteristic.Name) %>%
 	dplyr::summarize(Result.Value.Text = median(as.numeric(Result.Value.Text))) %>%
-	ungroup() 	%>%
+	ungroup() %>%
 	spread(key = Local.Characteristic.Name, value = Result.Value.Text) %>%
 	mutate(NPSTORET.Org.ID.Code = "NETN")	%>% 
   left_join(., Locations, by= c("StationID"= "NPStoretSiteCode")) %>% # bind liocation type
 	mutate(SampleDepth = case_when(LocationType == 'Stream' ~ 'stream',
-	LocationType == 'Pond' ~ 'epilimnion', 
-	LocationType == 'Lake' ~ 'epilimnion')) %>%
+	                               LocationType == 'Pond' ~ 'epilimnion', 
+	                               LocationType == 'Lake' ~ 'epilimnion')) %>%
 	select(-c(PK_Location, LocationType))
-
+  )
 
 #make long, remove rows with NA for observation value, add column for Depth.Units:
 temp2_long <- temp2 %>%
-	pivot_longer(names_to  = "Local.Characteristic.Name", values_to =  "Result.Value.Text", cols= -c(SampleDepth, Visit.Start.Date, StationID,
+	pivot_longer(names_to  = "Local.Characteristic.Name", 
+	             values_to =  "Result.Value.Text", 
+	             cols= -c(SampleDepth, Visit.Start.Date, StationID,
         NPSTORET.Org.ID.Code)) %>%
 	dplyr::filter(!is.na(Result.Value.Text)) %>%
 	mutate(Upper.Quantification.Limit = NA) %>%
@@ -340,8 +388,8 @@ Light_long <- rbind(Light_long, temp2_long)
 #First, make 'NETN_Water_Data.csv' (full datset with all depths and aggregations). 
 #Next, make 'Water Data.csv' (with data for depth profiles removed so that only samples that represent the stream/epilimnion remain) for the NCRN Water data and WaterViz packages.
 
-waterDat <- Reduce(function(x,y) rbind(x,y), list(Chem_long, WQ_long, SD_long, Turb_long, Sec_long, Light_long))
-
+waterDat <- Reduce(function(x,y) rbind(x,y), 
+                   list(Chem_long, WQ_long, SD_long, Turb_long, Sec_long, Light_long))
 
 # write data to new object to use for constructing metadata file below so that subsetting by surface measurements won't affect output and colname changing isn't a problem.
 waterDatBkup<-waterDat
@@ -355,7 +403,10 @@ if(surface == TRUE){
 }
 
 #replace "." with " " or "/" in column names to match what importNCRNWater expects:
-names(waterDat) <- c('Network', 'StationID', 'Visit Start Date', 'SampleDepth', 'Depth Units','Local Characteristic Name', 'Result Value/Text', 'Lower Quantification Limit', 'Upper Quantification Limit')
+names(waterDat) <- c('Network', 'StationID', 'Visit Start Date', 
+                     'SampleDepth', 'Depth Units','Local Characteristic Name', 
+                     'Result Value/Text', 'Lower Quantification Limit', 
+                     'Upper Quantification Limit')
 
 #### Create Metadata.csv ----
 #Each row represents a variable (characteristic) at a location.
@@ -364,24 +415,27 @@ names(waterDat) <- c('Network', 'StationID', 'Visit Start Date', 'SampleDepth', 
 sites <- unique(waterDatBkup$StationID)
 sites.temp <- merge(Location, tluParkCode, by = "ParkCode", all.x=T, all.y=F)
 sites_tlu <- sites.temp %>%
-  rename(ShortName = PARKNAME, Type = LocationType, SiteCode = NPStoretSiteCode, SiteName = ShortSiteName, Lat = StartLat_DD, Long = StartLon_DD) %>%
+  rename(ShortName = PARKNAME, Type = LocationType, 
+         SiteCode = NPStoretSiteCode, SiteName = ShortSiteName, 
+         Lat = StartLat_DD, Long = StartLon_DD) %>%
   mutate(Network = "NETN") %>%
   mutate(LongName = paste(ShortName, PARKTYPE, sep = " ")) %>%
   mutate(Type = case_when(Type == "Pond" ~ "Lake", ##change Pond to Lake for further handling; have to change all values
-                         Type == "Lake" ~ "Lake",
-                         Type == "Stream" ~ "Stream")) %>% 
+                          Type == "Lake" ~ "Lake",
+                          Type == "Stream" ~ "Stream")) %>% 
   dplyr::filter(SiteCode %in% sites) %>%
   select(c(Network, ParkCode, ShortName, LongName, SiteCode, SiteName, Lat, Long, Type))
 
 #create rows only for the variables measured at each site, extract units, and add in site names
 
-MD<-waterDatBkup %>% select(SiteCode = StationID, CharacteristicName= Local.Characteristic.Name) %>% 
+MD <- suppressWarnings(
+  waterDatBkup %>% select(SiteCode = StationID, CharacteristicName= Local.Characteristic.Name) %>% 
   mutate(SiteCode = as.character(SiteCode)) %>% 
   group_by(SiteCode) %>% 
   distinct() %>%
-  separate(CharacteristicName, c("DataName","Units"), sep="_", remove= FALSE) %>%
+  separate(CharacteristicName, c("CategoryDisplay","Units"), sep="_", remove= FALSE) %>%
   left_join(sites_tlu,.,by= "SiteCode") # join in site metadata
-
+)
 
 #create Display names
 MD <- MD %>%
@@ -425,20 +479,68 @@ MD$UpperPoint <- 100 #needs to be Num
 MD$LowerDescription <- 'testing'
 MD$UpperDescription <- 'testing2'
 MD$AssessmentDetails <- 'testing3'
-MD$Category <- MD$DataName  
-MD$CategoryDisplay <- MD$DisplayName
+MD$DataName <- MD$CharacteristicName
+MD$Category <- MD$DisplayName
+
+MD <- MD %>% select(Network,
+                    ParkCode,
+                    ShortName,
+                    LongName,
+                    SiteCode,
+                    SiteName,
+                    Lat,
+                    Long,
+                    Type,
+                    CharacteristicName,
+                    DisplayName,
+                    DataName,
+                    Category,
+                    CategoryDisplay,
+                    Units,
+                    LowerPoint,
+                    UpperPoint,
+                    DataType,
+                    LowerDescription,
+                    UpperDescription,
+                    AssessmentDetails)
 
 
+waterDat <- waterDat %>% mutate(
+    `STORET Characteristic Name` = `Local Characteristic Name`,
+    `Visit Start Date` = format(`Visit Start Date`, "%m/%d/%Y")) %>%
+  select(
+    StationID,
+    `Visit Start Date`,
+    `Local Characteristic Name`,
+    `STORET Characteristic Name`,
+    `Result Value/Text`,
+    `Lower Quantification Limit`, 
+    `Upper Quantification Limit`) %>% 
+  filter(!is.na(`Result Value/Text`) & `Result Value/Text`!="NA") %>% 
+  droplevels() %>% 
+  rename(MDL = `Lower Quantification Limit`,
+         UDL = `Upper Quantification Limit`)
 
 if (export == TRUE) {
-
   #write out data as 'Water Data.csv':
-  write.csv(waterDat,"./Data/NETN/Water Data.csv" , row.names=FALSE)
+  write.csv(waterDat, paste0(path, "Water Data.csv"),
+            row.names = FALSE)
   
   #write out Metadata in wide form...
-  write.csv(MD,"./Data/NETN/Metadata.csv" , row.names=FALSE)
+  write.csv(MD, paste0(path, "VizMetaData.csv"),
+            row.names = FALSE)
+  cat(paste0("Water Data.csv and VizMetaData.csv successfully saved to: ",
+               path))
+} else {
+  cat("NETN water data successfully compiled as 
+      waterDat and MD in global environment.")
+} 
 
-}else{
-    return(list(waterDat,MD))
-  }
-}
+if (cleanEnv == TRUE) {
+  rm(list = setdiff(ls(envir = .GlobalEnv),
+                    c("waterDat", "MD")),
+     inherits = TRUE,
+     envir = .GlobalEnv)
+} else return(list(waterDat, MD))
+
+} #end of function

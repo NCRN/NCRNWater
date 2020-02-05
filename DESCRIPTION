@@ -1,14 +1,15 @@
 Package: NCRNWater
 Type: Package
-Title: Data analysis and visualization for NCRN water monitoring.
-Version: 0.25.0
-Date: 2019-6-27
-Author: John Paul Schmit
+Title: Data analysis and visualization for NPS I&M water monitoring.
+Version: 0.26.0
+Date: 2020-02-02
+Author: John Paul Schmit, Aaron Weed, Kate Miler
 Maintainer: John Paul Schmit <john_schmit@nps.gov>
 Encoding: UTF-8
 Description: This pacakge is designed to analyze and visualize data from the
-    National Park Service, National Capital Region Inventory and Monitoring
-    Network.
+    National Park Service Inventory and Monitoring Program. Package was originally
+    designed for the National Capital Region, and has been expanded to cover the 
+    Northeast Temperate Network.
 License: Public Domain
 LazyData: true
 Depends:
@@ -23,7 +24,13 @@ Imports:
     readr,
     season,
     viridis
-RoxygenNote: 6.1.1
+Suggests:
+    RODBC,
+    stringr,
+    NADA,
+    openair,
+    tidyr
+RoxygenNote: 7.0.2
 Collate:
     'NCRNWater_Park_Class_def.R'
     'NCRNWater_Site_Class_def.R'
@@ -42,6 +49,7 @@ Collate:
     'waterseries.R'
     'exceed.R'
     'importNCRNWater.R'
+    'nonpar_trends.R'
     'waterbox.R'
     'waterheat.R'
     'wcosinor.R'
