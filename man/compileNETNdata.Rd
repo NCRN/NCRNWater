@@ -4,13 +4,22 @@
 \alias{compileNETNdata}
 \title{compileNETNdata}
 \usage{
-compileNETNdata(export = TRUE, surface = TRUE)
+compileNETNdata(
+  path = "./Data/",
+  export = TRUE,
+  surface = TRUE,
+  cleanEnv = TRUE
+)
 }
 \arguments{
-\item{export}{\code{TRUE} or  \code{FALSE}. Export csv files to "Data" folder. Defaults to \code{TRUE}.}
+\item{path}{Quoted path to export csv files to. Defaults to "Data" folder within current project.}
+
+\item{export}{\code{TRUE} or  \code{FALSE}. Export csv files to specified path. Defaults to \code{TRUE}.}
 
 \item{surface}{\code{TRUE} or  \code{FALSE}. Return only measurements representing the stream surface or lake epilimnion. 
 If  \code{TRUE}, the median of the surface measurements from the top 2m of sampling are returned. Defaults to  \code{TRUE}.}
+
+\item{cleanEnv}{\code{TRUE} or  \code{FALSE}. Allows you to clean the global environment so that only waterDat and MD are kept. Defaults to \code{TRUE}.}
 }
 \value{
 Returns a list of two dataframes (WaterData and MetaData) formatted for import into NCRNwater R package.Exports data to folder by default.

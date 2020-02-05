@@ -4,9 +4,19 @@
 \alias{exceed}
 \title{exceed}
 \usage{
-exceed(object, parkcode = NA, sitecode = NA, charname = NA,
-  category = NA, points = "both", lower = NA, upper = NA,
-  all = F, catsum = F, ...)
+exceed(
+  object,
+  parkcode = NA,
+  sitecode = NA,
+  charname = NA,
+  category = NA,
+  points = "both",
+  lower = NA,
+  upper = NA,
+  all = F,
+  catsum = F,
+  ...
+)
 }
 \arguments{
 \item{object}{One of a \code{Characteristic} object, a \code{Site} object, a \code{Park} object or a list of such objects.}

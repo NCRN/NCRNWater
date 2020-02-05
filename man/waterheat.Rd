@@ -4,9 +4,21 @@
 \alias{waterheat}
 \title{waterheat}
 \usage{
-waterheat(object, charname = NA, category = NA, by = "sitem",
-  yname = NA, xname = NA, labels = NA, title = NULL, ltitle = NA,
-  stat = "mean", siteorder = NA, webplot = FALSE, ...)
+waterheat(
+  object,
+  charname = NA,
+  category = NA,
+  by = "sitem",
+  yname = NA,
+  xname = NA,
+  labels = NA,
+  title = NULL,
+  ltitle = NA,
+  stat = "mean",
+  siteorder = NA,
+  webplot = FALSE,
+  ...
+)
 }
 \arguments{
 \item{object}{Required. Either a \code{data.frame} that is the output of \code{getWData}, a \code{Characteristic} object 

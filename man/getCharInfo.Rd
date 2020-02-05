@@ -4,8 +4,14 @@
 \alias{getCharInfo}
 \title{getCharInfo}
 \usage{
-getCharInfo(object, parkcode = NA, sitecode = NA, charname = NA,
-  category = NA, info)
+getCharInfo(
+  object,
+  parkcode = NA,
+  sitecode = NA,
+  charname = NA,
+  category = NA,
+  info
+)
 }
 \arguments{
 \item{object}{Either a \code{Characteristic} object or a \code{Site} object, a \code{Park} object or a \code{list} of such objects.}
