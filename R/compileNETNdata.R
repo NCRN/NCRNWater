@@ -12,10 +12,11 @@
 #' @importFrom stringr str_extract str_detect
 #' 
 #' @param path Quoted path to export csv files to. Defaults to "Data" folder within current project.
-#' @param export  \code{TRUE} or  \code{FALSE}. Export csv files to specified path. Defaults to \code{TRUE}.
-#' @param surface   \code{TRUE} or  \code{FALSE}. Return only measurements representing the stream surface or lake epilimnion. 
-#' If  \code{TRUE}, the median of the surface measurements from the top 2m of sampling are returned. Defaults to  \code{TRUE}.
-#' @param cleanEnv \code{TRUE} or  \code{FALSE}. Allows you to clean the global environment so that only waterDat and MD are kept. Defaults to \code{TRUE}.
+#' @param export \code{TRUE} or \code{FALSE}. Export csv files to specified path. Defaults to \code{TRUE}.
+#' @param surface \code{TRUE} or \code{FALSE}. Return only measurements representing the stream surface or lake epilimnion. 
+#' If \code{TRUE}, the median of the surface measurements from the top 2m of sampling are returned. Defaults to  \code{TRUE}.
+#'  @param cleanEnv \code{TRUE} or  \code{FALSE}. Allows you to clean the global environment so that 
+#'  only waterDat and MD are kept. Defaults to \code{TRUE}.
 #' 
 #' @return Returns a list of two dataframes (WaterData and MetaData) formatted for import into NCRNwater R package.Exports data to folder by default.
 #' @details This function create flat files from NETN's water database. The function returns 2 data frames used for the 
@@ -26,17 +27,20 @@
 #' The latter is to enable examining patterns in the stream surface or lake epilimnion over time and is currently (as of 11/1/2019) the data working 
 #' in the NCRNwater package. 
 #' 
+#' @examples
+#' compileNETNdata(path = "C:/Data/", export = TRUE, surface = TRUE)
+#' 
 #' @export
 
 compileNETNdata <- function(path = "./Data/", export = TRUE, surface = TRUE,
            cleanEnv = TRUE) {
     
   if(!requireNamespace("RODBC", quietly = TRUE)){
-    stop("Package 'RODBC' needed for this function to work. Please install it.", call. = FALSE)
+    stop("Package 'RODBC' is needed for this function to work. Please install it.", call. = FALSE)
   }
   
   if(!requireNamespace("stringr", quietly = TRUE)){
-    stop("Package 'stringr' needed for this function to work. Please install it.", call. = FALSE)
+    stop("Package 'stringr' is needed for this function to work. Please install it.", call. = FALSE)
   }
   
   # Error handling for specified path
@@ -219,6 +223,7 @@ temp <- suppressWarnings(
 	mutate(NPSTORET.Org.ID.Code = "NETN")	%>% 
   left_join(., Locations, by =c("StationID" = "NPStoretSiteCode")) # bind on location type (stream or Lake)
 )
+
 temp <- temp %>%
 	mutate(SampleDepth = case_when(LocationType == 'Stream' ~ 'stream',
 	 LocationType == 'Pond' ~ 'epilimnion', 
@@ -397,10 +402,11 @@ waterDatBkup<-waterDat
 ### Retain or exclude measurements by depth? If TRUE, only the median surface value from the top 2m are returned.
 
 if(surface == TRUE){
-  #select only 'stream', 'epilimnion', or NA Sample Depths.
+  #select only 'stream', 'epilimnion', NA Sample Depths, or depths <2m.
   waterDat <- waterDat %>%
-    filter(SampleDepth == 'stream' | SampleDepth == 'epilimnion' | is.na(SampleDepth))
-}
+    filter(SampleDepth == 'stream' | SampleDepth == 'epilimnion' | 
+             is.na(SampleDepth) | SampleDepth <2)
+} # MIMA sites have number recorded instead of factor level
 
 #replace "." with " " or "/" in column names to match what importNCRNWater expects:
 names(waterDat) <- c('Network', 'StationID', 'Visit Start Date', 
@@ -474,14 +480,102 @@ MD <- MD %>%
 
 #create extra columns. Column for Data Type: these are all numeric, so I took a shortcut. Will need to be changed if factor or ordinal data are added.
 MD$DataType <- "numeric"
-MD$LowerPoint <- 0 #needs to be Num
-MD$UpperPoint <- 100 #needs to be Num
-MD$LowerDescription <- 'testing'
-MD$UpperDescription <- 'testing2'
-MD$AssessmentDetails <- 'testing3'
+
+MD$LowerPoint <- as.numeric(NA) #needs to be Num
+MD$UpperPoint <- as.numeric(NA) #needs to be Num
 MD$DataName <- MD$CharacteristicName
 MD$Category <- MD$DisplayName
 
+#-------
+# Lower and upper assessment points based on Tables in 2015 reports
+# Create matrix that is joined to MD
+Reg8 <- c("ACAD", "MABI", "SAGA")
+
+MD <- MD %>% mutate(
+  LowerPoint = case_when(ParkCode %in% Reg8 & Type == "Lake" & CharacteristicName == "SDepth1_m" ~ 0.93,
+                         ParkCode == "MABI" & Type == "Stream" & CharacteristicName == "DO_mgL" ~ 7,
+                         ParkCode == "MABI" & Type == "Stream" & CharacteristicName == "pH" ~ 6.5,
+                         ParkCode == "MABI" & Type == "Lake" & CharacteristicName == "pH" ~ 6.5,
+                         ParkCode == "SAGA" & Type == "Stream" & CharacteristicName == "DO_mgL" ~ 6,
+                         ParkCode == "SAGA" & Type == "Lake" & CharacteristicName == "DO_mgL" ~ 5,
+                         ParkCode == "SAGA" & Type == "Stream" & CharacteristicName == "pH" ~ 6.5,
+                         ParkCode == "SAGA" & Type == "Lake" & CharacteristicName == "pH" ~ 6.5,
+                         ParkCode == "MIMA" & SiteName == "Concord River" & 
+                           CharacteristicName == "DO_mgL" ~ 6.0,
+                         ParkCode == "MIMA" & SiteName != "Concord River" & 
+                           CharacteristicName == "DO_mgL" ~ 5.0,
+                         ParkCode == "MIMA" & CharacteristicName == "pH" ~ 6.5,
+                         ParkCode == "SAIR" & CharacteristicName == "pH" ~ 6.5,
+                         ParkCode == "SARA" & CharacteristicName == "DO_mgL" ~ 4.0,
+                         ParkCode == "SARA" & CharacteristicName == "pH" ~ 6.5,
+                         ParkCode == "ROVA" & CharacteristicName == "DO_mgL" ~ 4.0,
+                         ParkCode == "ROVA" & CharacteristicName == "pH" ~ 6.5,
+                         ParkCode == "WEFA" & CharacteristicName == "DO_mgL" ~ 5.0,
+                         ParkCode == "WEFA" & CharacteristicName == "pH" ~ 6.5,
+                         ParkCode == "WEFA" & CharacteristicName == "SDepth1_m" ~ 4.5,
+                         ParkCode == "MORR" & CharacteristicName == "DO_mgL" ~ 7.0,
+                         ParkCode == "MORR" & CharacteristicName == "pH" ~ 6.5),
+  
+  UpperPoint = case_when(ParkCode %in% Reg8 & Type == "Stream" & CharacteristicName == "TP_ugL" ~ 10.0,
+                         ParkCode %in% Reg8 & Type == "Lake" & CharacteristicName == "TP_ugL" ~ 8.0,
+                         ParkCode %in% Reg8 & Type == "Stream" & CharacteristicName == "TN_mgL" ~ 0.38,
+                         ParkCode %in% Reg8 & Type == "Lake" & CharacteristicName == "TN_mgL" ~ 0.24,
+                         ParkCode %in% Reg8 & Type == "Stream" & CharacteristicName == "ChlA_ugL" ~ 0.63,
+                         ParkCode %in% Reg8 & Type == "Lake" & CharacteristicName == "ChlA_ugL" ~ 2.43,
+                         ParkCode == "MABI" & Type == "Stream" & CharacteristicName == "pH" ~ 8.5,
+                         ParkCode == "MABI" & Type == "Lake" & CharacteristicName == "pH" ~ 8.5,
+                         ParkCode == "SAGA" & Type == "Stream" & CharacteristicName == "pH" ~ 8.5,
+                         ParkCode == "SAGA" & Type == "Lake" & CharacteristicName == "pH" ~ 8.5,
+                         ParkCode == "MIMA" & SiteName == "Concord River" &
+                           CharacteristicName == "Temp_C" ~ 28.3,
+                         ParkCode == "MIMA" & SiteName != "Concord River" &
+                           CharacteristicName == "Temp_C" ~ 20.3,
+                         ParkCode == "MIMA" & CharacteristicName == "pH" ~ 8.3,
+                         ParkCode == "MIMA" & CharacteristicName == "TP_ugL" ~ 31.25,
+                         ParkCode == "MIMA" & CharacteristicName == "TN_mgL" ~ 0.71,
+                         ParkCode == "SAIR" & CharacteristicName == "pH" ~ 8.3,
+                         ParkCode == "SAIR" & CharacteristicName == "TP_ugL" ~ 31.25,
+                         ParkCode == "SAIR" & CharacteristicName == "TN_mgL" ~ 0.71,
+                         ParkCode == "SAIR" & CharacteristicName == "Temp_C" ~ 28.3,
+                         ParkCode == "SARA" & CharacteristicName == "pH" ~ 8.5,
+                         ParkCode == "SARA" & CharacteristicName == "TP_ugL" ~ 33.0,
+                         ParkCode == "SARA" & CharacteristicName == "TN_mgL" ~ 0.54,
+                         ParkCode == "ROVA" & CharacteristicName == "pH" ~ 8.5,
+                         ParkCode == "ROVA" & CharacteristicName == "TP_ugL" ~ 33.0,
+                         ParkCode == "ROVA" & CharacteristicName == "TN_mgL" ~ 0.54,
+                         ParkCode == "WEFA" & CharacteristicName == "Temp_C" ~ 29.4,
+                         ParkCode == "WEFA" & CharacteristicName == "pH" ~ 8.0,
+                         ParkCode == "WEFA" & CharacteristicName == "TP_ugL" ~ 8.0,
+                         ParkCode == "WEFA" & CharacteristicName == "TN_mgL" ~ 0.32,
+                         ParkCode == "WEFA" & CharacteristicName == "ChlA_ugL" ~ 2.9,
+                         ParkCode == "MORR" & CharacteristicName == "Temp_C" ~ 22.0,
+                         ParkCode == "MORR" & CharacteristicName == "pH" ~ 8.5,
+                         ParkCode == "MORR" & CharacteristicName == "TP_ugL" ~ 36.56,
+                         ParkCode == "MORR" & CharacteristicName == "TN_mgL" ~ 0.69,
+                         ParkCode == "MORR" & CharacteristicName == "SO4_ueqL" ~ 5200,
+                         ParkCode == "MORR" & CharacteristicName == "Turbidity_NTU" ~ 50),
+  Units = ifelse(CharacteristicName == "pH", paste0("(pH units) "), paste0(Units))
+)
+
+MD$LowerDescription <- ifelse(!is.na(MD$LowerPoint),
+                              paste0("Acceptable ", MD$DisplayName, 
+                                     " is above ", MD$LowerPoint, " ", 
+                                     ifelse(MD$DisplayName != "pH", paste0(MD$Units,"."), paste0("."))
+                                    ),
+                              paste0("Acceptable lower limits have not been established for this parameter."))
+MD$UpperDescription <- ifelse(!is.na(MD$UpperPoint),
+                              paste0("Acceptable ", MD$DisplayName, 
+                                     " is below ", MD$UpperPoint, " ", 
+                                     ifelse(MD$DisplayName != "pH", paste0(MD$Units,"."), paste0("."))
+                              ),
+                              paste0("Acceptable upper limits have not been established for this parameter."))
+
+MD$AssessmentDetails <- ifelse(!is.na(MD$LowerPoint) | !is.na(MD$UpperPoint),
+                               paste0("See Table 3 of Gawley et al. 2016 for more details."), 
+                               NA)
+
+
+#------
 MD <- MD %>% select(Network,
                     ParkCode,
                     ShortName,
@@ -504,7 +598,6 @@ MD <- MD %>% select(Network,
                     UpperDescription,
                     AssessmentDetails)
 
-
 waterDat <- waterDat %>% mutate(
     `STORET Characteristic Name` = `Local Characteristic Name`,
     `Visit Start Date` = format(`Visit Start Date`, "%m/%d/%Y")) %>%
@@ -521,6 +614,9 @@ waterDat <- waterDat %>% mutate(
   rename(MDL = `Lower Quantification Limit`,
          UDL = `Upper Quantification Limit`)
 
+assign("waterDat", waterDat, .GlobalEnv)
+assign("MD", MD, .GlobalEnv)
+
 if (export == TRUE) {
   #write out data as 'Water Data.csv':
   write.csv(waterDat, paste0(path, "Water Data.csv"),
@@ -535,12 +631,11 @@ if (export == TRUE) {
   cat("NETN water data successfully compiled as 
       waterDat and MD in global environment.")
 } 
+ if(cleanEnv == TRUE){
+   objs <- ls(pos = ".GlobalEnv")
+   objs <- objs[!objs %in% c("waterDat","MD")]
+   rm(list = objs, pos = ".GlobalEnv")
+ }
 
-if (cleanEnv == TRUE) {
-  rm(list = setdiff(ls(envir = .GlobalEnv),
-                    c("waterDat", "MD")),
-     inherits = TRUE,
-     envir = .GlobalEnv)
-} else return(list(waterDat, MD))
-
+#return(list(waterDat, MD))
 } #end of function
