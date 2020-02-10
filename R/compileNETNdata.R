@@ -183,7 +183,7 @@ Chem_long <- test %>%
 
 #select variables of interest from WQInSitu table:
 WQ <- WQInSitu %>%
-    	select(PK_WQInSitu, FK_Sample,SampleDepth=  Depth_m,BP_mmHg, 
+    	select(PK_WQInSitu, FK_Sample, SampleDepth = Depth_m, BP_mmHg, 
     	       DOsat_pct, DO_mgL, pH, SpCond_uScm,Temp_C, QCType) %>%
     	filter(QCType == "0") %>% #Remove calibratin samples.
     	select(-QCType) %>% 
@@ -207,7 +207,9 @@ WQ_long <- WQ %>%
 	mutate(Upper.Quantification.Limit = NA) %>%
 	mutate(Lower.Quantification.Limit = NA) %>%
 	mutate(Depth.Units = "m") %>% 
-  select(col_order)
+  select(col_order) %>% filter(!is.na(StationID)) #Removed records missing primary key
+  # 3 sites in WQInSitu table missing site data.
+
 
 #calculate median value for all depths 2m or less to represent the stream/epilimnion value.	
 temp <- suppressWarnings(
@@ -598,6 +600,7 @@ MD <- MD %>% select(Network,
                     UpperDescription,
                     AssessmentDetails)
 
+# Identify and handle metrics within a park that have censored data
 waterDat <- waterDat %>% mutate(
     `STORET Characteristic Name` = `Local Characteristic Name`,
     `Visit Start Date` = format(`Visit Start Date`, "%m/%d/%Y")) %>%
@@ -613,6 +616,13 @@ waterDat <- waterDat %>% mutate(
   droplevels() %>% 
   rename(MDL = `Lower Quantification Limit`,
          UDL = `Upper Quantification Limit`)
+
+waterDat <- waterDat %>% group_by(StationID, `Local Characteristic Name`) %>% 
+  mutate(Censored = ifelse(any(grepl("\\*", `Result Value/Text`) & (!is.na(MDL) | !is.na(UDL))), TRUE, FALSE),
+         ValueCen = case_when(!grepl("\\*", `Result Value/Text`) ~ paste(`Result Value/Text`),
+                              grepl("\\*", `Result Value/Text`)& !is.na(MDL) ~ paste(MDL),
+                              grepl("\\*", `Result Value/Text`) & !is.na(UDL) ~ paste(UDL)))
+View(waterDat)
 
 assign("waterDat", waterDat, .GlobalEnv)
 assign("MD", MD, .GlobalEnv)

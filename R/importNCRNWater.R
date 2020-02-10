@@ -11,7 +11,7 @@
 #' 
 #' @return Returns \code{Park} objects, one for each park, as a \code{list}.
 #' 
-#' @importFrom dplyr distinct mutate filter rename select ungroup
+#' @importFrom dplyr distinct mutate filter rename select ungroup group_by
 #' @importFrom lubridate mdy
 #' @importFrom magrittr %>%
 #' @importFrom purrr map map2 pmap
@@ -40,12 +40,22 @@ importNCRNWater<-function(Dir, Data="Water Data.csv", MetaData="MetaData.csv"){
   
   if(any(names(Indata)=="UDL")){
     Indata$UDL<-as.numeric(Indata$UDL)} else {Indata$UDL<-as.numeric(NA)}
+
+#### Check whether Censored and ValueCen fields are in Indata. Add them if not.
+  if(!any(names(Indata) == "Censored")){ 
+    Indata <- Indata %>% group_by(SiteCode, Characteristic) %>% 
+      mutate(Censored = ifelse(any(grepl("\\*", Value) & (!is.na(MDL) | !is.na(UDL))), TRUE, FALSE),
+             ValueCen = case_when(!grepl("\\*", Value) ~ paste(Value),
+                                  grepl("\\*",  Value) & !is.na(MDL) ~ paste(MDL),
+                                  grepl("\\*",  Value) & !is.na(UDL) ~ paste(UDL)))
+  }
+  
   
 #### Create Data part of each characteristic ####
   MetaData$Data<-MetaData %>% dplyr::select(SiteCode, DataName) %>% 
     pmap(.f=function(SiteCode, DataName) {
     dplyr::filter(Indata, SiteCode == !!SiteCode, Characteristic == DataName) %>% 
-              dplyr::select(Date, Value, TextValue, MDL, UDL)})
+              dplyr::select(Date, Value, TextValue, MDL, UDL, Censored, ValueCen)})
 
 #### Change numeric data to numeric, but the leave the rest as character ####
   NumDat<-MetaData$DataType=="numeric"
