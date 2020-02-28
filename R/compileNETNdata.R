@@ -398,6 +398,8 @@ Light_long <- rbind(Light_long, temp2_long)
 waterDat <- Reduce(function(x,y) rbind(x,y), 
                    list(Chem_long, WQ_long, SD_long, Turb_long, Sec_long, Light_long))
 
+waterDat <- waterDat %>% filter(!is.na(Result.Value.Text) & Result.Value.Text!="NA") # Dataset created a lot of site/param combinations that don't have data
+
 # write data to new object to use for constructing metadata file below so that subsetting by surface measurements won't affect output and colname changing isn't a problem.
 waterDatBkup<-waterDat
 
@@ -540,7 +542,6 @@ MD <- MD %>% mutate(
                          ParkCode == "SAIR" & CharacteristicName == "TN_mgL" ~ 0.71,
                          ParkCode == "SAIR" & CharacteristicName == "Temp_C" ~ 28.3,
                          ParkCode == "SARA" & CharacteristicName == "pH" ~ 8.5,
-                         ParkCode == "SARA" & CharacteristicName == "TP_ugL" ~ 33.0,
                          ParkCode == "SARA" & CharacteristicName == "TN_mgL" ~ 0.54,
                          ParkCode == "ROVA" & CharacteristicName == "pH" ~ 8.5,
                          ParkCode == "ROVA" & CharacteristicName == "TP_ugL" ~ 33.0,
@@ -563,19 +564,18 @@ MD$LowerDescription <- ifelse(!is.na(MD$LowerPoint),
                               paste0("Acceptable ", MD$DisplayName, 
                                      " is above ", MD$LowerPoint, " ", 
                                      ifelse(MD$DisplayName != "pH", paste0(MD$Units,"."), paste0("."))
-                                    ),
-                              paste0("Acceptable lower limits have not been established for this parameter."))
+                                    ), paste0(NA))
+#                              paste0("Acceptable lower limits have not been established for this parameter."))
 MD$UpperDescription <- ifelse(!is.na(MD$UpperPoint),
                               paste0("Acceptable ", MD$DisplayName, 
                                      " is below ", MD$UpperPoint, " ", 
                                      ifelse(MD$DisplayName != "pH", paste0(MD$Units,"."), paste0("."))
-                              ),
-                              paste0("Acceptable upper limits have not been established for this parameter."))
+                              ), paste0(NA))
+#                              paste0("Acceptable upper limits have not been established for this parameter."))
 
 MD$AssessmentDetails <- ifelse(!is.na(MD$LowerPoint) | !is.na(MD$UpperPoint),
                                paste0("See Table 3 of Gawley et al. 2016 for more details."), 
                                NA)
-
 
 #------
 MD <- MD %>% select(Network,
@@ -614,15 +614,16 @@ waterDat <- waterDat %>% mutate(
     `Upper Quantification Limit`) %>% 
   filter(!is.na(`Result Value/Text`) & `Result Value/Text`!="NA") %>% 
   droplevels() %>% 
-  rename(MDL = `Lower Quantification Limit`,
-         UDL = `Upper Quantification Limit`)
+  rename(MQL = `Lower Quantification Limit`,
+         UQL = `Upper Quantification Limit`)
 
-waterDat <- waterDat %>% group_by(StationID, `Local Characteristic Name`) %>% 
-  mutate(Censored = ifelse(any(grepl("\\*", `Result Value/Text`) & (!is.na(MDL) | !is.na(UDL))), TRUE, FALSE),
+waterDat <- waterDat %>% 
+  mutate(Censored = ifelse(grepl("\\*", `Result Value/Text`) & 
+                                                    (!is.na(MQL) | !is.na(UQL)), TRUE, FALSE),
+                                
          ValueCen = case_when(!grepl("\\*", `Result Value/Text`) ~ paste(`Result Value/Text`),
-                              grepl("\\*", `Result Value/Text`)& !is.na(MDL) ~ paste(MDL),
-                              grepl("\\*", `Result Value/Text`) & !is.na(UDL) ~ paste(UDL)))
-View(waterDat)
+                               grepl("\\*", `Result Value/Text`) & !is.na(MQL) ~ paste(MQL),
+                               grepl("\\*", `Result Value/Text`) & !is.na(UQL) ~ paste(UQL)))
 
 assign("waterDat", waterDat, .GlobalEnv)
 assign("MD", MD, .GlobalEnv)

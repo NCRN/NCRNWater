@@ -17,45 +17,38 @@
 #' @importFrom purrr map map2 pmap
 #' @importFrom readr cols read_csv
 #' 
+#' @examples 
+#' ncrnwd<-importNCRNWater(Dir = "./Data/NCRN", Data = "Water Data.csv", MetaData = "VizMetaData.csv")
+#' 
 #' @export
-#' @export %>%
 
 
 importNCRNWater<-function(Dir, Data="Water Data.csv", MetaData="MetaData.csv"){
   
 #### Read in Data ####
-  Indata <- read_csv(paste(Dir,Data, sep="/"), col_types=cols(.default="c")) %>% 
+  Indata <- read_csv(paste(Dir, Data, sep="/"), col_types=cols(.default="c")) %>% 
     rename(SiteCode = StationID, Date=`Visit Start Date`, Characteristic = `Local Characteristic Name`,
            Value = `Result Value/Text`) %>% 
-    mutate(TextValue=Value)
+    mutate(TextValue=Value, ValueCen = as.numeric(ValueCen), Censored = as.logical(Censored)) 
 
   MetaData<-read_csv(paste(Dir, MetaData, sep="/"), col_types=cols()) #makes function less chatty
   
 #### Get data ready to make into objects ####
   Indata$Date<-mdy(Indata$Date)
 
-#### Check whether MDL and UDL fields are in Indata. Add them if not, make them numeric if they are
-  if(any(names(Indata)=="MDL")){
-    Indata$MDL<-as.numeric(Indata$MDL)} else {Indata$MDL<-as.numeric(NA)}
+#### Check whether MQL and UQL fields (Minimum and Upper Detection Limits) are in Indata. 
+   # Add them if not, make them numeric if they are
+  if(any(names(Indata)=="MQL")){
+    Indata$MQL<-as.numeric(Indata$MQL)} else {Indata$MQL<-as.numeric(NA)}
   
-  if(any(names(Indata)=="UDL")){
-    Indata$UDL<-as.numeric(Indata$UDL)} else {Indata$UDL<-as.numeric(NA)}
+  if(any(names(Indata)=="UQL")){
+    Indata$UQL<-as.numeric(Indata$UQL)} else {Indata$UQL<-as.numeric(NA)}
 
-#### Check whether Censored and ValueCen fields are in Indata. Add them if not.
-  if(!any(names(Indata) == "Censored")){ 
-    Indata <- Indata %>% group_by(SiteCode, Characteristic) %>% 
-      mutate(Censored = ifelse(any(grepl("\\*", Value) & (!is.na(MDL) | !is.na(UDL))), TRUE, FALSE),
-             ValueCen = case_when(!grepl("\\*", Value) ~ paste(Value),
-                                  grepl("\\*",  Value) & !is.na(MDL) ~ paste(MDL),
-                                  grepl("\\*",  Value) & !is.na(UDL) ~ paste(UDL)))
-  }
-  
-  
 #### Create Data part of each characteristic ####
   MetaData$Data<-MetaData %>% dplyr::select(SiteCode, DataName) %>% 
     pmap(.f=function(SiteCode, DataName) {
     dplyr::filter(Indata, SiteCode == !!SiteCode, Characteristic == DataName) %>% 
-              dplyr::select(Date, Value, TextValue, MDL, UDL, Censored, ValueCen)})
+              dplyr::select(Date, Value, TextValue, MQL, UQL, Censored, ValueCen)})
 
 #### Change numeric data to numeric, but the leave the rest as character ####
   NumDat<-MetaData$DataType=="numeric"
@@ -69,14 +62,12 @@ importNCRNWater<-function(Dir, Data="Water Data.csv", MetaData="MetaData.csv"){
 
 
 #### Create a df of sites with correct Characteristic objects ####
-
   AllSites<-MetaData %>% group_by(ParkCode, SiteCode, SiteName,Lat,Long,Type) %>%
     summarize(Characteristics=list(Characteristics) %>% list) %>%
     ungroup
 
   
 #### Create Park objects ####
-  
    Parks<-MetaData %>% dplyr::select(Network, ParkCode, ShortName, LongName) %>% distinct() %>% 
     pmap(.f=new, Class="Park")
 
