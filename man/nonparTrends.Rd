@@ -9,6 +9,8 @@ nonparTrends(object, parkcode, sitecode, charname, censored = FALSE)
 \arguments{
 \item{object}{A \code{Park} object or a \code{list} of such objects.}
 
+\item{charname}{Name, in quotes, #' of a single \code{Characteristic} whose data should be graphed. This is required.}
+
 \item{censored}{Either \code{TRUE} or \code{FALSE}. If FALSE (default), function runs the openair::TheilSen test with deseason = TRUE. 
 If TRUE, function runs a separate NADA::cenken test for for each month in the dataset.}
 
@@ -22,4 +24,12 @@ the month, slope, intercept and p-value (pval) from each test.
 Uses non-parametric methods to test for trends in water quality data across years for each month. 
 This function assumes that the data are composed of monthly observations that are correlated within a year. 
 Note that this function is only appropriate for trends that are one-directional.
+}
+\examples{
+waterobj <- importNCRNWater(Dir = "./Data/",
+                            Data = "Water Data.csv",
+                            MetaData = "VizMetaData.csv")
+trends<- nonparTrends(waterobj, parkcode = "ACAD", sitecode = "NETN_ACAD_LONG", charname = "pH", censored = FALSE)
+trends_cen<- nonparTrends(waterobj, parkcode = "ACAD", sitecode = "NETN_ACAD_LONG", charname = "NO2+NO3_mgL", censored = TRUE)
+
 }
