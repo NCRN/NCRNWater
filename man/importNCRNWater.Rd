@@ -19,3 +19,7 @@ Returns \code{Park} objects, one for each park, as a \code{list}.
 \description{
 This function imports data from a .csv files exporterd from NPStoret and saves it as \code{Park} objects.
 }
+\examples{
+ncrnwd<-importNCRNWater(Dir = "./Data/NCRN", Data = "Water Data.csv", MetaData = "VizMetaData.csv")
+
+}
