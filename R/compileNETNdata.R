@@ -15,7 +15,7 @@
 #' @param export \code{TRUE} or \code{FALSE}. Export csv files to specified path. Defaults to \code{TRUE}.
 #' @param surface \code{TRUE} or \code{FALSE}. Return only measurements representing the stream surface or lake epilimnion. 
 #' If \code{TRUE}, the median of the surface measurements from the top 2m of sampling are returned. Defaults to  \code{TRUE}.
-#'  @param cleanEnv \code{TRUE} or  \code{FALSE}. Allows you to clean the global environment so that 
+#' @param cleanEnv \code{TRUE} or  \code{FALSE}. Allows you to clean the global environment so that 
 #'  only waterDat and MD are kept. Defaults to \code{TRUE}.
 #' 
 #' @return Returns a list of two dataframes (WaterData and MetaData) formatted for import into NCRNwater R package.Exports data to folder by default.
@@ -608,7 +608,8 @@ waterDat <- waterDat %>% mutate(
     StationID,
     `Visit Start Date`,
     `Local Characteristic Name`,
-    `STORET Characteristic Name`,
+    SampleDepth,
+    `Depth Units`,
     `Result Value/Text`,
     `Lower Quantification Limit`, 
     `Upper Quantification Limit`) %>% 

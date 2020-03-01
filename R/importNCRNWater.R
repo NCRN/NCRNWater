@@ -28,9 +28,15 @@ importNCRNWater<-function(Dir, Data="Water Data.csv", MetaData="MetaData.csv"){
 #### Read in Data ####
   Indata <- read_csv(paste(Dir, Data, sep="/"), col_types=cols(.default="c")) %>% 
     rename(SiteCode = StationID, Date=`Visit Start Date`, Characteristic = `Local Characteristic Name`,
-           Value = `Result Value/Text`) %>% 
-    mutate(TextValue=Value, ValueCen = as.numeric(ValueCen), Censored = as.logical(Censored)) 
-
+           Value = `Result Value/Text`)%>% 
+    mutate(TextValue=Value)
+  
+  if(any(names(Indata)=="ValueCen") & any(names(Indata)=="Censored")){
+    
+    Indata <- Indata %>%  
+      mutate(ValueCen = as.numeric(ValueCen), Censored = as.logical(Censored))
+  }
+    
   MetaData<-read_csv(paste(Dir, MetaData, sep="/"), col_types=cols()) #makes function less chatty
   
 #### Get data ready to make into objects ####
@@ -48,7 +54,7 @@ importNCRNWater<-function(Dir, Data="Water Data.csv", MetaData="MetaData.csv"){
   MetaData$Data<-MetaData %>% dplyr::select(SiteCode, DataName) %>% 
     pmap(.f=function(SiteCode, DataName) {
     dplyr::filter(Indata, SiteCode == !!SiteCode, Characteristic == DataName) %>% 
-              dplyr::select(Date, Value, TextValue, MQL, UQL, Censored, ValueCen)})
+              dplyr::select(-SiteCode,-Characteristic)})
 
 #### Change numeric data to numeric, but the leave the rest as character ####
   NumDat<-MetaData$DataType=="numeric"
