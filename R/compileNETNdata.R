@@ -608,7 +608,6 @@ waterDat <- waterDat %>% mutate(
     StationID,
     `Visit Start Date`,
     `Local Characteristic Name`,
-    `STORET Characteristic Name`,
     SampleDepth,
     `Depth Units`,
     `Result Value/Text`,
