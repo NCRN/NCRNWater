@@ -1,4 +1,5 @@
 #' @include getWData.R
+#' @include getCharInfo.R
 #' 
 #' @importFrom NADA cenken
 #' @importFrom openair TheilSen
@@ -32,7 +33,7 @@
 #' @export
 #' 
 
-nonparTrends <- function(object, parkcode, sitecode, charname, censored = FALSE){
+nonparTrends <- function(object, parkcode, sitecode, charname, censored = FALSE, ...){
   if(!requireNamespace("tidyr", quietly = TRUE)){
     stop("Package 'tidyr' needed for this function to work. Please install it.", call. = FALSE)
   }
@@ -46,7 +47,7 @@ nonparTrends <- function(object, parkcode, sitecode, charname, censored = FALSE)
   }
   if(missing(charname)) stop("Must specify a charname.")
   
-  df <- getWData(object, parkcode = parkcode, sitecode = sitecode, charname = charname)
+  df <- getWData(object, parkcode = parkcode, sitecode = sitecode, charname = charname, ...)
   
   if(nrow(df)==0) stop("The specified site and measurement returned a data frame with 0 records.")
   
