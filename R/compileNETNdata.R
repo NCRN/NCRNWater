@@ -409,7 +409,7 @@ if(surface == TRUE){
   #select only 'stream', 'epilimnion', NA Sample Depths, or depths <2m.
   waterDat <- waterDat %>%
     filter(SampleDepth == 'stream' | SampleDepth == 'epilimnion' | 
-             is.na(SampleDepth) | SampleDepth <2)
+             is.na(SampleDepth) | as.numeric(SampleDepth) <2)
 } # MIMA sites have number recorded instead of factor level
 
 #replace "." with " " or "/" in column names to match what importNCRNWater expects:
