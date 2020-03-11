@@ -213,7 +213,7 @@ WQ_long <- WQ %>%
 
 #calculate median value for all depths 2m or less to represent the stream/epilimnion value.	
 temp <- suppressWarnings(
-  WQ %>% filter(SampleDepth >= 2) %>%
+  WQ %>% filter(SampleDepth <= 2) %>%
 	gather(key = Local.Characteristic.Name, value = Result.Value.Text, 
 	       -c(SampleDepth, Visit.Start.Date, StationID, NPSTORET.Org.ID.Code)) %>%
 	mutate(Result.Value.Text = as.numeric(Result.Value.Text)) %>%
@@ -357,7 +357,7 @@ Light_long <- Light %>%
   ## Note : using gather since multiple data types in the value field (for pivot_longer these need to be specified by value ptypes))
 temp2 <- suppressWarnings(
   Light %>%
-	filter(SampleDepth >= 2) %>%
+	filter(SampleDepth <= 2) %>%
 	gather(key = Local.Characteristic.Name, 
 	       value = Result.Value.Text, 
 	       -c(SampleDepth, Visit.Start.Date, StationID, NPSTORET.Org.ID.Code)) %>%
@@ -408,8 +408,7 @@ waterDatBkup<-waterDat
 if(surface == TRUE){
   #select only 'stream', 'epilimnion', NA Sample Depths, or depths <2m.
   waterDat <- waterDat %>%
-    filter(SampleDepth == 'stream' | SampleDepth == 'epilimnion' | 
-             is.na(SampleDepth) | as.numeric(SampleDepth) <2)
+    filter(SampleDepth == 'stream' | SampleDepth == 'epilimnion' ) #| is.na(SampleDepth) | as.numeric(SampleDepth) <2)
 } # MIMA sites have number recorded instead of factor level
 
 #replace "." with " " or "/" in column names to match what importNCRNWater expects:
