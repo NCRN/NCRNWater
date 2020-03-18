@@ -51,12 +51,17 @@ nonparTrends <- function(object, parkcode, sitecode, charname, censored = FALSE,
   
   if(nrow(df)==0) stop("The specified site and measurement returned a data frame with 0 records.")
   
+  if("ValueCen" %in% colnames(df)==FALSE){
+    stop("Must have a field named 'ValueCen' to run this version of the function.")
+  }
+
   df$date = df$Date # to make openair happy
   
   units <- getCharInfo(object, parkcode = parkcode, sitecode = sitecode, charname = charname, info = "Units") 
   
   df <- suppressWarnings(df %>% mutate(year.dec = julian(Date)/365, 
                                        month = as.factor(lubridate::month(Date, label = TRUE, abbr=FALSE)))) 
+  
   
   if(censored == FALSE){
    trends_fun <- function(df){
@@ -99,7 +104,21 @@ nonparTrends <- function(object, parkcode, sitecode, charname, censored = FALSE,
    } 
     
   } else if(censored == TRUE) {
+    
+
+    
+    if(any(complete.cases(df$ValueCen==FALSE))){
+      num_nas<- nrow(df)- nrow(df %>% filter(!is.na(ValueCen)))
+      print(paste0("Warning: There were ", num_nas, " missing values in the ValueCen field that were deleted before running this function. This may have baised the analysis."))
+    }
+    
+    cenken_month<-function(df){  
+        NADA::cenken(y = df$ValueCen, ycen= df$Censored, x=df$year.dec) # function to map by month
+    }
+    
+    
     df2<- df %>% group_by(Category, Characteristic, Site, Park, month) %>% 
+      filter(!is.na(ValueCen)) %>% 
       mutate(num_meas=length(ValueCen), 
              pct_true= sum(ifelse(Censored==FALSE,1,0))/num_meas,
              adjValueCen = ifelse(Censored==TRUE, max(ValueCen), Value)) %>% ungroup()
@@ -117,8 +136,6 @@ nonparTrends <- function(object, parkcode, sitecode, charname, censored = FALSE,
     month_include<- df2 %>% filter(num_meas>=5 & pct_true>=0.5) %>% droplevels()
                                                                 
     df_mon <- suppressWarnings(month_include %>% group_by(month) %>% nest())
-    
-    cenken_month<-function(df){NADA::cenken(y = df$ValueCen, ycen= df$Censored, x=df$year.dec)} # function to map by month
     
     trends_mon <- suppressWarnings(df_mon %>% mutate(cenken = map(data, cenken_month)) %>% 
                                      select(month, cenken)) %>% ungroup() 
