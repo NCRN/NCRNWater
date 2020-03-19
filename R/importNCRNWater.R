@@ -11,7 +11,7 @@
 #' 
 #' @return Returns \code{Park} objects, one for each park, as a \code{list}.
 #' 
-#' @importFrom dplyr distinct mutate filter rename select ungroup group_by
+#' @importFrom dplyr distinct group_by filter mutate rename select ungroup
 #' @importFrom lubridate mdy
 #' @importFrom magrittr %>%
 #' @importFrom purrr map map2 pmap

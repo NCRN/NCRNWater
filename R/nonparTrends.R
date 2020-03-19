@@ -3,7 +3,7 @@
 #' 
 #' @importFrom NADA cenken
 #' @importFrom openair TheilSen
-#' @importFrom dplyr %>% group_by summarise mutate rename select case_when
+#' @importFrom dplyr %>% case_when group_by summarise mutate rename select
 #' @importFrom purrr map 
 #' @importFrom tidyr hoist nest
 #' @importFrom lubridate month
@@ -15,7 +15,9 @@
 #' Note that this function is only appropriate for trends that are one-directional. 
 #' 
 #' @param object A \code{Park} object or a \code{list} of such objects.
-#' @param charname Name, in quotes, #' of a single \code{Characteristic} whose data should be graphed. This is required.
+#' @param charname Name, in quotes, of a single \code{Characteristic} whose data should be analyzed. Either this or \code{category} is required.
+#' @param category Name, in quotes of a single cateogry of charactersitcs whose data should be analyzed. Either this or \code{charname} is required.
+
 #' @param ... Additional commands passed to \code{\link{getWData}} for filtering or subsetting the data.
 #' @param censored Either \code{TRUE} or \code{FALSE}. If FALSE (default), function runs the openair::TheilSen test with deseason = TRUE. 
 #' If TRUE, function runs a separate NADA::cenken test for for each month in the dataset. 
@@ -33,10 +35,8 @@
 #' @export
 #' 
 
-nonparTrends <- function(object, parkcode, sitecode, charname, censored = FALSE, ...){
-  if(!requireNamespace("tidyr", quietly = TRUE)){
-    stop("Package 'tidyr' needed for this function to work. Please install it.", call. = FALSE)
-  }
+nonparTrends <- function(object, parkcode, sitecode, charname=NA, category=NA, censored = FALSE, ...){
+
   
   if(!requireNamespace("openair", quietly = TRUE)){
     stop("Package 'openair' needed for this function to work. Please install it.", call. = FALSE)
@@ -45,9 +45,9 @@ nonparTrends <- function(object, parkcode, sitecode, charname, censored = FALSE,
   if(!requireNamespace("NADA", quietly = TRUE)){
     stop("Package 'NADA' needed for this function to work. Please install it.", call. = FALSE)
   }
-  if(missing(charname)) stop("Must specify a charname.")
+  if(is.na(charname) & is.na(category)) stop("Must specify a charname or a category.")
   
-  df <- getWData(object, parkcode = parkcode, sitecode = sitecode, charname = charname, ...)
+  df <- getWData(object, parkcode = parkcode, sitecode = sitecode, charname = charname, category=category,...)
   
   if(nrow(df)==0) stop("The specified site and measurement returned a data frame with 0 records.")
   
@@ -57,7 +57,9 @@ nonparTrends <- function(object, parkcode, sitecode, charname, censored = FALSE,
 
   df$date = df$Date # to make openair happy
   
-  units <- getCharInfo(object, parkcode = parkcode, sitecode = sitecode, charname = charname, info = "Units") 
+  units <- getCharInfo(object, parkcode = parkcode, sitecode = sitecode, charname = charname, category=category, info = "Units")[1] 
+  
+  displayname<-getCharInfo(object, parkcode = parkcode, sitecode = sitecode, charname = charname, category=category, info = "CategoryDisplay")[1]
   
   df <- suppressWarnings(df %>% mutate(year.dec = julian(Date)/365, 
                                        month = as.factor(lubridate::month(Date, label = TRUE, abbr=FALSE)))) 
@@ -86,11 +88,11 @@ nonparTrends <- function(object, parkcode, sitecode, charname, censored = FALSE,
       results <- suppressWarnings(trends2 %>% 
                     mutate(message = case_when(pval > 0 & pval < 0.05 & slope > 0 ~ 
                       paste0("There was a significant increasing trend of ", 
-                      paste0(round(slope,4)), " ", paste0(units), " of ",  paste0(charname), 
+                      paste0(round(slope,4)), " ", paste0(units), " of ",  paste0(displayname), 
                         " per year for ", paste0(month), "."),
                       pval > 0 & pval < 0.05 & slope < 0 ~ 
                       paste0("There was a significant decreasing trend of ", 
-                      paste0(round(slope,4)), " ", paste0(units), " of ",  paste0(charname),
+                      paste0(round(slope,4)), " ", paste0(units), " of ",  paste0(displayname),
                         " per year for ", paste0(month), "."),
                       pval == 0 | pval > 0.05 ~ paste0("no trend"),
                       is.na(pval) ~ paste0("Too few data points ")),
@@ -117,7 +119,7 @@ nonparTrends <- function(object, parkcode, sitecode, charname, censored = FALSE,
     }
     
     
-    df2<- df %>% group_by(Category, Characteristic, Site, Park, month) %>% 
+    df2<- df %>% group_by(Category, Site, Park, month) %>% 
       filter(!is.na(ValueCen)) %>% 
       mutate(num_meas=length(ValueCen), 
              pct_true= sum(ifelse(Censored==FALSE,1,0))/num_meas,
@@ -144,10 +146,10 @@ nonparTrends <- function(object, parkcode, sitecode, charname, censored = FALSE,
       select(month, slope, intercept, pval) %>%  
       mutate(message = ifelse(pval>0 & pval <0.05 & slope > 0, 
                               paste0("There was a significant increasing trend of ", 
-                                     paste0(round(slope,4)), " ", paste0(units), " of ",  paste0(charname), " per year for ", month, "."),
+                                     paste0(round(slope,4)), " ", paste0(units), " of ",  paste0(displayname), " per year for ", month, "."),
                               ifelse(pval>0 & pval <0.05 & slope < 0, 
                                      paste0("There was a significant decreasing trend of ", 
-                                            paste0(round(slope,4)), " ", paste0(units), " of ",  paste0(charname), " per year for ", month, "."),
+                                            paste0(round(slope,4)), " ", paste0(units), " of ",  paste0(displayname), " per year for ", month, "."),
                                      paste0("no trend"))),
                               modeled = TRUE)
     

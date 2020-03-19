@@ -1,10 +1,10 @@
 #' @include NCRNWater_NCRNWaterObj_Class_def.R 
 #' @include getWData.R
 #' @importFrom dplyr arrange pull filter mutate
-#' @importFrom ggplot2 ggplot aes geom_point geom_line scale_color_manual scale_shape_manual geom_hline labs theme_bw theme element_blank
-#' @importFrom lubridate year month
+#' @importFrom ggplot2 aes facet_wrap geom_hline geom_line geom_point ggplot labs scale_color_manual scale_shape_manual theme element_blank theme_bw
+#' @importFrom lubridate month year
 #' @importFrom magrittr %>% 
-#' @importFrom plotly ggplotly config
+#' @importFrom plotly config ggplotly
 #' @importFrom purrr map_chr
 #' @importFrom viridis scale_color_viridis
 
@@ -32,15 +32,19 @@
 #' @param layers Defaults to c("points","line") Indicates which layers you wish to see on the plot. 
 #' @param yname Text, defaults to \code{NA}. A label for the y-axis. If an \code{Characteristic}, \code{Site}, or \code{Park} object 
 #' is passed to \code{object}, then the y-label will default to the Display Name and Units for the Characteristic, unless overwitten by the 
-#' \code{yname} argument. If a \code{data.frame} is passed then the y-label will either be the text from \code{yname} or blank if \code{yname} is left as \code{NA}.
+#' \code{yname} argument. If a \code{data.frame} is passed then the y-label will either be the text from \code{yname} or blank 
+#' if \code{yname} is left as \code{NA}.
 #' @param xname Text, defaults to \code{NA}. A label for the x-axis. If a \code{Characteristic}, \code{Site}, or \code{Park} 
 #' object is passed to \code{object}, then the x-label will default to whatever is indicated in \code{by}, 
 #' unless overwitten by the \code{xname} argument. If a \code{data.frame} is passed then the x-label will either be the text 
 #' from \code{xname} or blank if \code{xname} is left as \code{NA}.
-#' @param censored If \code {FALSE} assumes all data points are true measurements. If \code {TRUE} plots the minimum or maximum 
-#' quantification limit and color codes to distinguish true measurements from detection limits. Defaults to \code {FALSE}.
-#' @param deseason If \code {FALSE} will plot all data points on the same figure. If \code {TRUE} will split plots by month. 
-#' Defaults to \code {FALSE}. Currenly only implemented for censored = \code{TRUE}.
+#' 
+#' @param censored If \code{FALSE} assumes all data points are true measurements. If \code{TRUE} plots the minimum or maximum 
+#' quantification limit and color codes to distinguish true measurements from detection limits. Defaults to \code{FALSE}.
+#' 
+#' @param deseason If \code{FALSE} will plot all data points on the same figure. If \code{TRUE} will split plots by month. 
+#' Defaults to \code{FALSE}. Currenly only implemented for censored = \code{TRUE}.
+#' 
 #' @param labels A character vector indicating the labels for the data series, defaults to \code{NA}. If labels are provided 
 #' (one for each series) they will be printed. If \code{object} is a \code{data.frame} and \code{labels} is \code{NA} then no labels 
 #' will be printed. If \code{object} is a \code{Characteristic}, \code{Site}, or \code{Park} object, and \code{labels} is \code{NA} 
@@ -75,7 +79,7 @@ setGeneric(name="waterseries",function(object, parkcode=NA, sitecode=NA,charname
 
 
 setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
-  function(object,parkcode, sitecode, charname,category, by, assessment, xname, yname,
+  function(object,parkcode, sitecode, charname,category, by, assessment, layers, xname, yname,
            labels, title, colors, assesscolor, sizes, censored, deseason, legend, webplot,...){
           
     PlotData<-getWData(object=object,parkcode=parkcode, sitecode=sitecode, charname=charname, category=category,...) %>% arrange(Date)
@@ -89,7 +93,7 @@ setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
       mutate(num_meas=length(ValueCen), pct_true= sum(ifelse(Censored==FALSE,1,0))/num_meas,
              adjValueCen = ifelse(Censored==TRUE, max(ValueCen), Value)) %>% ungroup() %>% arrange(month)
                 
-            if(is.na(yname)) yname<-paste0(getCharInfo(object=object, charname=charname, category=category, info="DisplayName")," (",
+            if(is.na(yname)) yname<-paste0(getCharInfo(object=object, charname=charname, category=category, info="CategoryDisplay")," (",
                                         getCharInfo(object=object, charname=charname, category=category, info="Units"),")") %>% unique()
             
             if(is.na(xname)) xname<-"Date"
@@ -171,7 +175,7 @@ setMethod(f="waterseries", signature=c(object="data.frame"),
                   ggplot(object, aes(x = Xaxis, y = Value))+
                     {if ("points" %in% layers) geom_point(aes(color = Grouper, shape = Grouper), size = sizes[1]) }+
                     {if ("line" %in% layers) geom_line(aes(color = Grouper), size = sizes[2])} +
-                    {if (is.na(colors)) viridis:scale_color_viridis(name = "legend", labels = labels, discrete = T)}+
+                    {if (is.na(colors)) viridis::scale_color_viridis(name = "legend", labels = labels, discrete = T)}+
                     {if (!is.na(colors)) scale_color_manual(name = "legend", labels = labels, values = colors)}+
                     scale_shape_manual(name = "legend", labels = labels, 
                                        values = c(16, 15, 17, 18, 1, 0, 2, 5, 6, 3, 4, 8, 13, 9, 12)[1:nlevels(Grouper)]) +
