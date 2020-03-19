@@ -4,12 +4,22 @@
 \alias{nonparTrends}
 \title{nonparTrends}
 \usage{
-nonparTrends(object, parkcode, sitecode, charname, censored = FALSE)
+nonparTrends(
+  object,
+  parkcode,
+  sitecode,
+  charname = NA,
+  category = NA,
+  censored = FALSE,
+  ...
+)
 }
 \arguments{
 \item{object}{A \code{Park} object or a \code{list} of such objects.}
 
-\item{charname}{Name, in quotes, #' of a single \code{Characteristic} whose data should be graphed. This is required.}
+\item{charname}{Name, in quotes, of a single \code{Characteristic} whose data should be analyzed. Either this or \code{category} is required.}
+
+\item{category}{Name, in quotes of a single cateogry of charactersitcs whose data should be analyzed. Either this or \code{charname} is required.}
 
 \item{censored}{Either \code{TRUE} or \code{FALSE}. If FALSE (default), function runs the openair::TheilSen test with deseason = TRUE. 
 If TRUE, function runs a separate NADA::cenken test for for each month in the dataset.}

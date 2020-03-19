@@ -23,13 +23,13 @@ Imports:
     purrr,
     readr,
     season,
+    tidyr,
     viridis
 Suggests:
     RODBC,
     stringr,
     NADA,
-    openair,
-    tidyr
+    openair
 RoxygenNote: 7.0.2
 Collate:
     'NCRNWater_Park_Class_def.R'

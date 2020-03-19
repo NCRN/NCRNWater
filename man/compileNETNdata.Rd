@@ -17,9 +17,10 @@ compileNETNdata(
 \item{export}{\code{TRUE} or \code{FALSE}. Export csv files to specified path. Defaults to \code{TRUE}.}
 
 \item{surface}{\code{TRUE} or \code{FALSE}. Return only measurements representing the stream surface or lake epilimnion. 
-If \code{TRUE}, the median of the surface measurements from the top 2m of sampling are returned. Defaults to  \code{TRUE}.
- @param cleanEnv \code{TRUE} or  \code{FALSE}. Allows you to clean the global environment so that 
- only waterDat and MD are kept. Defaults to \code{TRUE}.}
+If \code{TRUE}, the median of the surface measurements from the top 2m of sampling are returned. Defaults to  \code{TRUE}.}
+
+\item{cleanEnv}{\code{TRUE} or  \code{FALSE}. Allows you to clean the global environment so that 
+only waterDat and MD are kept. Defaults to \code{TRUE}.}
 }
 \value{
 Returns a list of two dataframes (WaterData and MetaData) formatted for import into NCRNwater R package.Exports data to folder by default.
