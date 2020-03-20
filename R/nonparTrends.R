@@ -107,11 +107,10 @@ nonparTrends <- function(object, parkcode, sitecode, charname=NA, category=NA, c
     
   } else if(censored == TRUE) {
     
-
-    
-    if(any(complete.cases(df$ValueCen==FALSE))){
+    if(any(is.na(df$ValueCen))){
       num_nas<- nrow(df)- nrow(df %>% filter(!is.na(ValueCen)))
-      print(paste0("Warning: There were ", num_nas, " missing values in the ValueCen field that were deleted before running this function. This may have baised the analysis."))
+      print(paste0("Warning: There were ", num_nas, 
+                   " missing values in the ValueCen field that were deleted before running this function. This may have baised the analysis."))
     }
     
     cenken_month<-function(df){  
