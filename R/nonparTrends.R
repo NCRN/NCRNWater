@@ -95,13 +95,13 @@ nonparTrends <- function(object, parkcode, sitecode, charname=NA, category=NA, c
                       paste0(round(slope,4)), " ", paste0(units), " of ",  paste0(displayname),
                         " per year for ", paste0(month), "."),
                       pval == 0 | pval > 0.05 ~ paste0("no trend"),
-                      is.na(pval) ~ paste0("Too few data points ")),
+                      is.na(pval) ~ paste0("Too few data points.")),
                       modeled = TRUE))
    
       } else if(trends_test=="Error"){
      
      results <- data.frame(month = NA, slope = NA, intercept = NA, pval = NA,
-                       message = "Too few data points.",
+                       message = paste0("Too few data points."),
                        modeled = FALSE)
    } 
     
@@ -156,7 +156,7 @@ nonparTrends <- function(object, parkcode, sitecode, charname=NA, category=NA, c
                   trends
                 } else if(is.na(month_drops$month) && nrow(trends)==0){
                   data.frame(slope = NA, intercept = NA, pval = NA,
-                             message = "Too few data points.",
+                             message = paste0("Too few data points."),
                              modeled = FALSE)
                 } else if(!is.na(month_drops$month) && nrow(trends)>0){
                   rbind(trends, month_drops)
