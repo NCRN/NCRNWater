@@ -4,11 +4,28 @@
 \alias{waterseries}
 \title{waterseries}
 \usage{
-waterseries(object, parkcode = NA, sitecode = NA, charname = NA,
-  category = NA, by = "char", assessment = TRUE,
-  layers = c("points", "line"), xname = NA, yname = NA,
-  labels = NA, title = NULL, colors = NA, assesscolor = "red",
-  sizes = c(3, 0.8, 1.1), legend = "bottom", webplot = FALSE, ...)
+waterseries(
+  object,
+  parkcode = NA,
+  sitecode = NA,
+  charname = NA,
+  category = NA,
+  by = "char",
+  assessment = TRUE,
+  layers = c("points", "line"),
+  xname = NA,
+  yname = NA,
+  labels = NA,
+  title = NULL,
+  colors = NA,
+  assesscolor = "red",
+  sizes = c(3, 0.8, 1.1),
+  censored = FALSE,
+  deseason = FALSE,
+  legend = "bottom",
+  webplot = FALSE,
+  ...
+)
 }
 \arguments{
 \item{object}{Either a \code{data.frame} that is the output of \code{getWData}, a \code{Characteristic} object, a \code{Site} object, a \code{Park} object or a \code{list} of such objects.}
@@ -31,7 +48,7 @@ whose data should be graphed.}
 each one.} 
 }}
 
-\item{assessment}{Vector indicating if assesment lines will be marked on the graph. See details below.}
+\item{assessment}{Vector indicating if assessment lines will be marked on the graph. See details below.}
 
 \item{layers}{Defaults to c("points","line") Indicates which layers you wish to see on the plot.}
 
@@ -41,7 +58,9 @@ unless overwitten by the \code{xname} argument. If a \code{data.frame} is passed
 from \code{xname} or blank if \code{xname} is left as \code{NA}.}
 
 \item{yname}{Text, defaults to \code{NA}. A label for the y-axis. If an \code{Characteristic}, \code{Site}, or \code{Park} object 
-is passed to \code{object}, then the y-label will default to the Display Name and Units for the Charecteristic, unless overwitten by the \code{yname} argument. If a \code{data.frame} is passed then the y-label will either be the text from \code{yname} or blank if \code{yname} is left as \code{NA}.}
+is passed to \code{object}, then the y-label will default to the Display Name and Units for the Characteristic, unless overwitten by the 
+\code{yname} argument. If a \code{data.frame} is passed then the y-label will either be the text from \code{yname} or blank 
+if \code{yname} is left as \code{NA}.}
 
 \item{labels}{A character vector indicating the labels for the data series, defaults to \code{NA}. If labels are provided 
 (one for each series) they will be printed. If \code{object} is a \code{data.frame} and \code{labels} is \code{NA} then no labels 
@@ -56,6 +75,12 @@ then the default will depend on the \code{by} argument. "site" will be labeled w
 \item{assesscolor}{a length one charactter vector with the color for the assessment lines.}
 
 \item{sizes}{a length 3 numeric vector with the sizes for the points, line connecting the points and assessment lines.}
+
+\item{censored}{If \code{FALSE} assumes all data points are true measurements. If \code{TRUE} plots the minimum or maximum 
+quantification limit and color codes to distinguish true measurements from detection limits. Defaults to \code{FALSE}.}
+
+\item{deseason}{If \code{FALSE} will plot all data points on the same figure. If \code{TRUE} will split plots by month. 
+Defaults to \code{FALSE}. Currenly only implemented for censored = \code{TRUE}.}
 
 \item{legend}{a vector indicating where the legend position. Can be: "none","left","right","top","bottom" or a two element 
 numeric vector.}
