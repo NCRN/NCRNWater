@@ -491,7 +491,7 @@ MD$DataType <- "numeric"
 MD$LowerPoint <- as.numeric(NA) #needs to be Num
 MD$UpperPoint <- as.numeric(NA) #needs to be Num
 MD$DataName <- MD$CharacteristicName
-MD$Category <- MD$DisplayName
+MD$Category <- MD$CharacteristicName
 
 #-------
 # Lower and upper assessment points based on Tables in 2015 reports
@@ -560,8 +560,11 @@ MD <- MD %>% mutate(
                          ParkCode == "MORR" & CharacteristicName == "TN_mgL" ~ 0.69,
                          ParkCode == "MORR" & CharacteristicName == "SO4_ueqL" ~ 5200,
                          ParkCode == "MORR" & CharacteristicName == "Turbidity_NTU" ~ 50),
-  Units = ifelse(CharacteristicName == "pH", paste0("(pH units) "), paste0(Units))
+  Units = ifelse(CharacteristicName == "pH", paste0("pH units"), 
+                 ifelse(CharacteristicName == "PenetrationRatio", paste0("percent"),
+                        paste0(Units)))
 )
+
 
 MD$LowerDescription <- ifelse(!is.na(MD$LowerPoint),
                               paste0("Acceptable ", MD$DisplayName, 
