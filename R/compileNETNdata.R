@@ -15,6 +15,8 @@
 #' @param export \code{TRUE} or \code{FALSE}. Export csv files to specified path. Defaults to \code{TRUE}.
 #' @param surface \code{TRUE} or \code{FALSE}. Return only measurements representing the stream surface or lake epilimnion. 
 #' If \code{TRUE}, the median of the surface measurements from the top 2m of sampling are returned. Defaults to  \code{TRUE}.
+#' @param active \code{TRUE} or  \code{FALSE}. If \code{TRUE} only compiles metrics that are actively collected.
+#' If \code{FALSE} compiles all metrics stored in the database. Defaults to \code{TRUE}.
 #' @param cleanEnv \code{TRUE} or  \code{FALSE}. Allows you to clean the global environment so that 
 #'  only waterDat and MD are kept. Defaults to \code{TRUE}.
 #' 
@@ -28,11 +30,13 @@
 #' in the NCRNwater package. 
 #' 
 #' @examples
-#' compileNETNdata(path = "C:/Data/", export = TRUE, surface = TRUE)
+#' # compile NETN water data for surface measurements and active metrics only,
+#' # and export to C:/Data.
+#' compileNETNdata(path = "C:/Data/", export = TRUE, surface = TRUE, active = TRUE)
 #' 
 #' @export
 
-compileNETNdata <- function(path = "./Data/", export = TRUE, surface = TRUE,
+compileNETNdata <- function(path = "./Data/", export = TRUE, surface = TRUE, active = TRUE,
            cleanEnv = TRUE) {
     
   if(!requireNamespace("RODBC", quietly = TRUE)){
@@ -256,7 +260,7 @@ SD <- StreamDischarge %>%
   mutate(StartDate=  as.POSIXct(StartDate, format = "%Y-%m-%d")) %>% 
 	rename(StationID=NPStoretSiteCode, Visit.Start.Date=StartDate) %>%
 	mutate(NPSTORET.Org.ID.Code = "NETN") %>%
-	mutate(SampleDepth = NA) %>%
+	mutate(SampleDepth = "stream") %>%
 	select(-c(FK_Location, FK_Event, FK_Sample, PK_StreamDischarge, LocationType)) %>% 
   arrange(StationID, Visit.Start.Date)
 
@@ -282,7 +286,7 @@ Turb <- Turbidity %>%
     mutate(StartDate =  as.POSIXct(StartDate, format = "%Y-%m-%d")) %>% #format Date
   	rename(StationID=NPStoretSiteCode, Visit.Start.Date=StartDate) %>%
   	mutate(NPSTORET.Org.ID.Code = "NETN") %>%
-  	mutate(SampleDepth = NA) %>%
+  	mutate(SampleDepth = "stream") %>%
   	select(-c(FK_Location, FK_Event, FK_Sample, PK_Turbidity, LocationType)) %>% 
     arrange(StationID, Visit.Start.Date)
 
@@ -400,10 +404,10 @@ waterDat <- Reduce(function(x,y) rbind(x,y),
 
 waterDat <- waterDat %>% filter(!is.na(Result.Value.Text) & Result.Value.Text!="NA") # Dataset created a lot of site/param combinations that don't have data
 
-# write data to new object to use for constructing metadata file below so that subsetting by surface measurements won't affect output and colname changing isn't a problem.
-waterDatBkup<-waterDat
-
 ### Retain or exclude measurements by depth? If TRUE, only the median surface value from the top 2m are returned.
+
+# write data to new object to use for constructing metadata file below so that subsetting by surface measurements won't affect output and colname changing isn't a problem.
+waterDatBkup <- waterDat
 
 if(surface == TRUE){
   #select only 'stream', 'epilimnion', NA Sample Depths, or depths <2m.
@@ -624,6 +628,21 @@ waterDat <- waterDat %>%
          ValueCen = case_when(!grepl("\\*", `Result Value/Text`) ~ paste(`Result Value/Text`),
                                grepl("\\*", `Result Value/Text`) & !is.na(MQL) ~ paste(MQL),
                                grepl("\\*", `Result Value/Text`) & !is.na(UQL) ~ paste(UQL)))
+
+active_metrics <- c('AL_ugL', 'ANC_ueqL', 'BP_mmHg', 'Ca_ueqL', 'ChlA_ugL', 
+                    'Cl_ueqL', 'Discharge_cfs', 'DO_mgL', 'DOC_mgL', 
+                    'DOsat_pct', 'K_ueqL', 'Mg_ueqL', 'Na_ueqL', 'NH4_mgL',
+                    'NO3_ueqL', 'PenetrationRatio', 'pH', 'SDepth1_m',
+                    'SO4_ueqL', 'SpCond_uScm', 'Temp_C','TN_mgL',
+                    'TP_ugL')
+
+if(active == TRUE){
+  waterDat <- waterDat %>% filter(`Local Characteristic Name` %in% active_metrics) %>% droplevels()
+} else {waterDat}
+
+if(active == TRUE){
+  MD <- MD %>% filter(CharacteristicName %in% active_metrics) %>% droplevels()
+} else {MD}
 
 assign("waterDat", waterDat, .GlobalEnv)
 assign("MD", MD, .GlobalEnv)
