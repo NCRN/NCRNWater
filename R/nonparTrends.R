@@ -17,7 +17,6 @@
 #' @param object A \code{Park} object or a \code{list} of such objects.
 #' @param charname Name, in quotes, of a single \code{Characteristic} whose data should be analyzed. Either this or \code{category} is required.
 #' @param category Name, in quotes of a single cateogry of charactersitcs whose data should be analyzed. Either this or \code{charname} is required.
-
 #' @param ... Additional commands passed to \code{\link{getWData}} for filtering or subsetting the data.
 #' @param censored Either \code{TRUE} or \code{FALSE}. If FALSE (default), function runs the openair::TheilSen test with deseason = TRUE. 
 #' If TRUE, function runs a separate NADA::cenken test for for each month in the dataset. 
