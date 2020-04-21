@@ -8,6 +8,7 @@ compileNETNdata(
   path = "./Data/",
   export = TRUE,
   surface = TRUE,
+  active = TRUE,
   cleanEnv = TRUE
 )
 }
@@ -18,6 +19,9 @@ compileNETNdata(
 
 \item{surface}{\code{TRUE} or \code{FALSE}. Return only measurements representing the stream surface or lake epilimnion. 
 If \code{TRUE}, the median of the surface measurements from the top 2m of sampling are returned. Defaults to  \code{TRUE}.}
+
+\item{active}{\code{TRUE} or  \code{FALSE}. If \code{TRUE} only compiles metrics that are actively collected.
+If \code{FALSE} compiles all metrics stored in the database. Defaults to \code{TRUE}.}
 
 \item{cleanEnv}{\code{TRUE} or  \code{FALSE}. Allows you to clean the global environment so that 
 only waterDat and MD are kept. Defaults to \code{TRUE}.}
@@ -42,6 +46,8 @@ in the NCRNwater package.
 }
 
 \examples{
-compileNETNdata(path = "C:/Data/", export = TRUE, surface = TRUE)
+# compile NETN water data for surface measurements and active metrics only,
+# and export to C:/Data.
+compileNETNdata(path = "C:/Data/", export = TRUE, surface = TRUE, active = TRUE)
 
 }

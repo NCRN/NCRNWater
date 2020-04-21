@@ -30,7 +30,7 @@ Suggests:
     stringr,
     NADA,
     openair
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 Collate:
     'NCRNWater_Park_Class_def.R'
     'NCRNWater_Site_Class_def.R'
