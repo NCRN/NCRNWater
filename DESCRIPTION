@@ -27,9 +27,9 @@ Imports:
     viridis
 Suggests:
     RODBC,
-    stringr,
     NADA,
-    openair
+    openair,
+    stringr
 RoxygenNote: 7.1.0
 Collate:
     'NCRNWater_Park_Class_def.R'

@@ -4,12 +4,9 @@
 #' 
 #' @section Warning:
 #' 
-#' @importFrom RODBC odbcConnect sqlFetch sqlTables odbcClose odbcDataSources
-#' @importFrom stats setNames
 #' @importFrom tidyr pivot_longer separate gather spread
 #' @importFrom dplyr  distinct case_when contains filter select mutate rename arrange left_join summarize group_by 
 #' @importFrom purrr map
-#' @importFrom stringr str_extract str_detect
 #' 
 #' @param path Quoted path to export csv files to. Defaults to "Data" folder within current project.
 #' @param export \code{TRUE} or \code{FALSE}. Export csv files to specified path. Defaults to \code{TRUE}.
@@ -69,16 +66,16 @@ compileNETNdata <- function(path = "./Data/", export = TRUE, surface = TRUE, act
 
 # Connect to database BE ti bring in tables
 
-con <- odbcConnect("NETNWQ")
+con <- RODBC::odbcConnect("NETNWQ")
 
 # grab all tables name from DB
-tableList<-sqlTables(con)$TABLE_NAME %>% as.vector()
+tableList<-RODBC::sqlTables(con)$TABLE_NAME %>% as.vector()
 
 # BUILD LIST OF tables from DB connection
-dfList <- map(tableList, function(x) sqlFetch(con, sqtable=  x, rows_at_time = 1 ))
+dfList <- map(tableList, function(x) RODBC::sqlFetch(con, sqtable = x, rows_at_time = 1))
 dfList <- setNames(dfList, tableList) # name each of the list tables
                
-odbcClose(con) # close ODBC connection
+RODBC::odbcClose(con) # close ODBC connection
 
 #put a dataframe for each DB table from the list object  in the Global Environment:
 list2env(dfList, envir=.GlobalEnv) # extract separate df's to environment
@@ -171,9 +168,9 @@ test <- Chem_long %>%
   mutate(Flag.Value = as.character(Flag.Value))
 
 #extract Lower and Upper limits from Flag.Value column and replace Result.Value.Text with character string if value was outside of qunatification limits:
-test <- suppressWarnings(test %>% mutate(limit = str_extract(Flag.Value, "\\-*\\d+\\.*\\d*"), #extracts the numbers
-                        Lower.Quantification.Limit = as.numeric(ifelse(str_detect(Flag.Value, "<"), paste(limit), NA)), 
-                        Upper.Quantification.Limit = as.numeric(ifelse(str_detect(Flag.Value, ">"), paste(limit), NA)),
+test <- suppressWarnings(test %>% mutate(limit = stringr::str_extract(Flag.Value, "\\-*\\d+\\.*\\d*"), #extracts the numbers
+                        Lower.Quantification.Limit = as.numeric(ifelse(stringr::str_detect(Flag.Value, "<"), paste(limit), NA)), 
+                        Upper.Quantification.Limit = as.numeric(ifelse(stringr::str_detect(Flag.Value, ">"), paste(limit), NA)),
                         Result.Value.Text = case_when(!is.na(Lower.Quantification.Limit) ~ paste0("*Present <QL"),
                                                       !is.na(Upper.Quantification.Limit) ~ paste0("*Present >QL"),
                                                       TRUE ~ paste0(Result.Value.Text))) %>% 

@@ -1,8 +1,6 @@
 #' @include getWData.R
 #' @include getCharInfo.R
 #' 
-#' @importFrom NADA cenken
-#' @importFrom openair TheilSen
 #' @importFrom dplyr %>% case_when group_by summarise mutate rename select
 #' @importFrom purrr map 
 #' @importFrom tidyr hoist nest
