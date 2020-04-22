@@ -14,6 +14,8 @@
 #' If \code{TRUE}, the median of the surface measurements from the top 2m of sampling are returned. Defaults to  \code{TRUE}.
 #' @param active \code{TRUE} or  \code{FALSE}. If \code{TRUE} only compiles metrics that are actively collected.
 #' If \code{FALSE} compiles all metrics stored in the database. Defaults to \code{TRUE}.
+#' @param restricted \code{TRUE} or \code{FALSE}. If \code{TRUE}, metrics within a site that have 4 or fewer
+#'  measurements since monitoring began in 2006 are dropped.
 #' @param cleanEnv \code{TRUE} or  \code{FALSE}. Allows you to clean the global environment so that 
 #'  only waterDat and MD are kept. Defaults to \code{TRUE}.
 #' 
@@ -29,12 +31,13 @@
 #' @examples
 #' # compile NETN water data for surface measurements and active metrics only,
 #' # and export to C:/Data.
-#' compileNETNdata(path = "C:/Data/", export = TRUE, surface = TRUE, active = TRUE)
+#' compileNETNdata(path = "C:/Data/", export = TRUE, surface = TRUE, active = TRUE, 
+#'   restricted = TRUE)
 #' 
 #' @export
 
-compileNETNdata <- function(path = "./Data/", export = TRUE, surface = TRUE, active = TRUE,
-           cleanEnv = TRUE) {
+compileNETNdata <- function(path = "./Data/", export = TRUE, surface = TRUE, 
+                            active = TRUE, restricted = TRUE, cleanEnv = TRUE) {
     
   if(!requireNamespace("RODBC", quietly = TRUE)){
     stop("Package 'RODBC' is needed for this function to work. Please install it.", call. = FALSE)
@@ -404,7 +407,7 @@ waterDat <- waterDat %>% filter(!is.na(Result.Value.Text) & Result.Value.Text!="
 ### Retain or exclude measurements by depth? If TRUE, only the median surface value from the top 2m are returned.
 
 # write data to new object to use for constructing metadata file below so that subsetting by surface measurements won't affect output and colname changing isn't a problem.
-waterDatBkup <- waterDat
+#waterDatBkup <- waterDat
 
 if(surface == TRUE){
   #select only 'stream', 'epilimnion', NA Sample Depths, or depths <2m.
@@ -417,6 +420,26 @@ names(waterDat) <- c('Network', 'StationID', 'Visit Start Date',
                      'SampleDepth', 'Depth Units','Local Characteristic Name', 
                      'Result Value/Text', 'Lower Quantification Limit', 
                      'Upper Quantification Limit')
+
+
+active_metrics <- c('AL_ugL', 'ANC_ueqL', 'BP_mmHg', 'Ca_ueqL', 'ChlA_ugL', 
+                    'Cl_ueqL', 'Discharge_cfs', 'DO_mgL', 'DOC_mgL', 
+                    'DOsat_pct', 'K_ueqL', 'Mg_ueqL', 'Na_ueqL', 'NH4_mgL',
+                    'NO3_ueqL', 'PenetrationRatio', 'pH', 'SDepth1_m',
+                    'SO4_ueqL', 'SpCond_uScm', 'Temp_C','TN_mgL',
+                    'TP_ugL')
+
+if(active == TRUE){
+  waterDat <- waterDat %>% filter(`Local Characteristic Name` %in% active_metrics) %>% droplevels()
+} else {waterDat}
+
+if(restricted == TRUE){
+  waterDat <- waterDat %>% group_by(StationID, `Local Characteristic Name`) %>%
+    mutate(tot_meas = length(!is.na(`Result Value/Text`))) %>% 
+    filter(tot_meas >= 4) %>% ungroup() %>% droplevels()
+} else {waterDat}
+
+waterDatBkup <- waterDat
 
 #### Create Metadata.csv ----
 #Each row represents a variable (characteristic) at a location.
@@ -439,7 +462,8 @@ sites_tlu <- sites.temp %>%
 #create rows only for the variables measured at each site, extract units, and add in site names
 
 MD <- suppressWarnings(
-  waterDatBkup %>% select(SiteCode = StationID, CharacteristicName= Local.Characteristic.Name) %>% 
+  waterDatBkup %>% select(SiteCode = StationID, 
+                          CharacteristicName = `Local Characteristic Name`) %>% 
   mutate(SiteCode = as.character(SiteCode)) %>% 
   group_by(SiteCode) %>% 
   distinct() %>%
@@ -479,7 +503,7 @@ MD <- MD %>%
 	CharacteristicName == "NO2+NO3_mgL" ~ "Nitrate + Nitrite",
 	CharacteristicName == "Discharge_cfs" ~ "Discharge",
 	CharacteristicName == "Turbidity_NTU" ~ "Turbidity",
-	CharacteristicName == "NO2_mgL" ~ "Nitrite"	
+	CharacteristicName == "NO2_mgL" ~ "Nitrite"
 	))
 
 #create extra columns. Column for Data Type: these are all numeric, so I took a shortcut. Will need to be changed if factor or ordinal data are added.
@@ -519,6 +543,7 @@ MD <- MD %>% mutate(
                          ParkCode == "WEFA" & CharacteristicName == "SDepth1_m" ~ 4.5,
                          ParkCode == "MORR" & CharacteristicName == "DO_mgL" ~ 7.0,
                          ParkCode == "MORR" & CharacteristicName == "pH" ~ 6.5),
+                         
   
   UpperPoint = case_when(ParkCode %in% Reg8 & Type == "Stream" & CharacteristicName == "TP_ugL" ~ 10.0,
                          ParkCode %in% Reg8 & Type == "Lake" & CharacteristicName == "TP_ugL" ~ 8.0,
@@ -628,21 +653,6 @@ waterDat <- waterDat %>%
          ValueCen = case_when(!grepl("\\*", `Result Value/Text`) ~ paste(`Result Value/Text`),
                                grepl("\\*", `Result Value/Text`) & !is.na(MQL) ~ paste(MQL),
                                grepl("\\*", `Result Value/Text`) & !is.na(UQL) ~ paste(UQL)))
-
-active_metrics <- c('AL_ugL', 'ANC_ueqL', 'BP_mmHg', 'Ca_ueqL', 'ChlA_ugL', 
-                    'Cl_ueqL', 'Discharge_cfs', 'DO_mgL', 'DOC_mgL', 
-                    'DOsat_pct', 'K_ueqL', 'Mg_ueqL', 'Na_ueqL', 'NH4_mgL',
-                    'NO3_ueqL', 'PenetrationRatio', 'pH', 'SDepth1_m',
-                    'SO4_ueqL', 'SpCond_uScm', 'Temp_C','TN_mgL',
-                    'TP_ugL')
-
-if(active == TRUE){
-  waterDat <- waterDat %>% filter(`Local Characteristic Name` %in% active_metrics) %>% droplevels()
-} else {waterDat}
-
-if(active == TRUE){
-  MD <- MD %>% filter(CharacteristicName %in% active_metrics) %>% droplevels()
-} else {MD}
 
 assign("waterDat", waterDat, .GlobalEnv)
 assign("MD", MD, .GlobalEnv)
