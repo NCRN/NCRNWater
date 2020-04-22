@@ -9,6 +9,7 @@ compileNETNdata(
   export = TRUE,
   surface = TRUE,
   active = TRUE,
+  restricted = TRUE,
   cleanEnv = TRUE
 )
 }
@@ -22,6 +23,9 @@ If \code{TRUE}, the median of the surface measurements from the top 2m of sampli
 
 \item{active}{\code{TRUE} or  \code{FALSE}. If \code{TRUE} only compiles metrics that are actively collected.
 If \code{FALSE} compiles all metrics stored in the database. Defaults to \code{TRUE}.}
+
+\item{restricted}{\code{TRUE} or \code{FALSE}. If \code{TRUE}, metrics within a site that have 4 or fewer
+measurements since monitoring began in 2006 are dropped.}
 
 \item{cleanEnv}{\code{TRUE} or  \code{FALSE}. Allows you to clean the global environment so that 
 only waterDat and MD are kept. Defaults to \code{TRUE}.}
@@ -48,6 +52,7 @@ in the NCRNwater package.
 \examples{
 # compile NETN water data for surface measurements and active metrics only,
 # and export to C:/Data.
-compileNETNdata(path = "C:/Data/", export = TRUE, surface = TRUE, active = TRUE)
+compileNETNdata(path = "C:/Data/", export = TRUE, surface = TRUE, active = TRUE, 
+  restricted = TRUE)
 
 }
