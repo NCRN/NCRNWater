@@ -157,6 +157,9 @@ setMethod(f="waterseries", signature=c(object="data.frame"),
                     theme(panel.grid = element_blank(), legend.title = element_blank(), legend.position = legend)
                   
                 } else if(deseason == TRUE){
+                  print(head(object))
+                  print(max(object$num_meas))
+                  print(max(object$pct_true))
                   if((max(object$num_meas, na.rm = TRUE) < 5) | (max(object$pct_true, na.rm = TRUE) < 0.5)) 
                     stop ("Must have at least 4 non-censored data points for at least one month for deseason plot.") 
                   
