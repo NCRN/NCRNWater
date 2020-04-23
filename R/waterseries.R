@@ -83,7 +83,7 @@ setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
            labels, title, colors, assesscolor, sizes, censored, deseason, legend, webplot,...){
           
     PlotData<-getWData(object=object,parkcode=parkcode, sitecode=sitecode, charname=charname, category=category,...) %>% arrange(Date)
-    if(!exists('PlotData') | nrow(PlotData)==0) stop("Function arguments did not return a data frame with records.")
+    if(!exists('PlotData'))stop("Function arguments did not return a data frame with records.")
     
     # Add months and censored info for later filter for plotting
     PlotData <- suppressWarnings(PlotData %>% mutate(year.dec = julian(Date)/365, 
