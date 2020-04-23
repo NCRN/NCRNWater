@@ -305,12 +305,13 @@ Turb_long <- Turb %>%
 #select variables of interest from Secchi table:
 Sec <- Secchi %>%
 	select(c('PK_Secchi', 'FK_Sample','SDepth1_m', 'Bot_SD1')) %>% 
-  left_join(.,Samples, by =c("FK_Sample"= "PK_Sample")) %>% #merge in ancillary info on date and site:
-  left_join(., Events, by=c("FK_Event" = "PK_Event")) %>% 
-  left_join(., Locations, by=c("FK_Location" = "PK_Location")) %>% 
+  left_join(., Samples, by = c("FK_Sample" = "PK_Sample")) %>% #merge in ancillary info on date and site:
+  left_join(., Events, by = c("FK_Event" = "PK_Event")) %>% 
+  left_join(., Locations, by = c("FK_Location" = "PK_Location")) %>% 
   mutate(StartDate =  as.POSIXct(StartDate, format = "%Y-%m-%d")) %>% #format Date
-  mutate(Lower.Quantification.Limit = ifelse(Bot_SD1 == 'B', SDepth1_m, NA)) %>% 
-  mutate(SDepth1_m = ifelse(Bot_SD1 == 'B', "*Present <QL", SDepth1_m)) %>% 
+  mutate(Lower.Quantification.Limit = ifelse(Bot_SD1 == 'B', paste(SDepth1_m), NA)) %>% 
+  mutate(SDepth1_m = case_when(Bot_SD1 == 'B' ~ paste("*Present <QL"),
+                               is.na(Bot_SD1) ~ paste(SDepth1_m))) %>% 
 	rename(StationID= NPStoretSiteCode, Visit.Start.Date=StartDate) %>%
 	mutate(NPSTORET.Org.ID.Code = "NETN") %>%
 	mutate(Upper.Quantification.Limit = NA) %>%

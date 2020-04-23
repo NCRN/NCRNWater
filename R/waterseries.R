@@ -83,15 +83,17 @@ setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
            labels, title, colors, assesscolor, sizes, censored, deseason, legend, webplot,...){
           
     PlotData<-getWData(object=object,parkcode=parkcode, sitecode=sitecode, charname=charname, category=category,...) %>% arrange(Date)
+    if(!exists('PlotData') | nrow(PlotData)==0) stop("Function arguments did not return a data frame with records.")
     
-    # Add months and censored ino for later filter for plotting
+    # Add months and censored info for later filter for plotting
     PlotData <- suppressWarnings(PlotData %>% mutate(year.dec = julian(Date)/365, 
                                                      month = as.factor(lubridate::month(Date, label = TRUE, abbr=FALSE))))
                                  
 
     PlotData <- PlotData %>% group_by(Category, Characteristic, Site, Park, month) %>% 
-      mutate(num_meas=length(ValueCen), pct_true= sum(ifelse(Censored==FALSE,1,0))/num_meas,
-             adjValueCen = ifelse(Censored==TRUE, max(ValueCen), Value)) %>% ungroup() %>% arrange(month)
+      mutate(num_meas=length(ValueCen), 
+             pct_true= sum(ifelse(Censored==FALSE,1,0))/num_meas,
+             adjValueCen = ifelse(Censored==TRUE, max(ValueCen, na.rm = TRUE), Value)) %>% ungroup() %>% arrange(month)
                 
             if(is.na(yname)) yname<-paste0(getCharInfo(object=object, charname=charname, category=category, info="CategoryDisplay")," (",
                                         getCharInfo(object=object, charname=charname, category=category, info="Units"),")") %>% unique()
@@ -146,7 +148,8 @@ setMethod(f="waterseries", signature=c(object="data.frame"),
                 if(deseason == FALSE){
                   ggplot(object, aes(x = Xaxis, y = ValueCen, color = Censored, group = Censored))+
                     {if ("points" %in% layers) geom_point(size = sizes[1]) }+
-                    {if (is.numeric(assessment)) geom_hline(yintercept = assessment, color = assesscolor, linetype = "dashed", size = sizes[3])} +
+                    {if (is.numeric(assessment)) geom_hline(yintercept = assessment, color = assesscolor, 
+                                                            linetype = "dashed", size = sizes[3])} +
                     labs(title = title, y = yname, x = xname) +
                     scale_color_manual(values = c("FALSE" = "black", "TRUE" = "red"),
                     labels = c("True Value", "Censored"))+
@@ -154,13 +157,12 @@ setMethod(f="waterseries", signature=c(object="data.frame"),
                     theme(panel.grid = element_blank(), legend.title = element_blank(), legend.position = legend)
                   
                 } else if(deseason == TRUE){
-                  if(max(object$num_meas, na.rm = TRUE) < 5 | max(object$pct_true, na.rm = TRUE) < 0.5) 
+                  if((max(object$num_meas, na.rm = TRUE) < 5) | (max(object$pct_true, na.rm = TRUE) < 0.5)) 
                     stop ("Must have at least 4 non-censored data points for at least one month for deseason plot.") 
-                  
                   
                   df_mon <- object %>% filter(num_meas>=5 & pct_true>=0.5) %>% droplevels() %>% arrange(month)
                   ggplot(df_mon, aes(x = Date, y = ValueCen, color = Censored, group = Censored))+
-                    {if ("points" %in% layers) geom_point(size = sizes[1]) }+
+                    {if ("points" %in% layers) geom_point(size = sizes[1])}+
                     {if (is.numeric(assessment)) geom_hline(yintercept = assessment, color = assesscolor, linetype = "dashed", size = sizes[3])} +
                     labs(title = title, y = yname, x = xname) +
                     scale_color_manual(values = c("FALSE" = "black", "TRUE" = "red"),
