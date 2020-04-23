@@ -157,8 +157,11 @@ setMethod(f="waterseries", signature=c(object="data.frame"),
                     theme(panel.grid = element_blank(), legend.title = element_blank(), legend.position = legend)
                   
                 } else if(deseason == TRUE){
-
-                  if((max(object$num_meas, na.rm = TRUE) < 5) | (max(object$pct_true, na.rm = TRUE) < 0.5)) 
+                  
+                  test_meas <- (PlotData %>% arrange(desc(num_meas)) %>% slice(1))$num_meas
+                  test_pct <- (PlotData %>% arrange(desc(pct_true)) %>% slice(1))$pct_true
+                  
+                  if((test_meas < 5) | (test_pct < 0.5)) 
                     stop ("Must have at least 4 non-censored data points for at least one month for deseason plot.") 
                   
                   df_mon <- object %>% filter(num_meas>=5 & pct_true>=0.5) %>% droplevels() %>% arrange(month)
