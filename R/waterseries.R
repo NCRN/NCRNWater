@@ -146,7 +146,7 @@ setMethod(f="waterseries", signature=c(object="data.frame"),
            OutPlot<-
               if(censored == TRUE){ 
                 if(deseason == FALSE){
-                  ggplot(object, aes(x = Xaxis, y = ValueCen, color = Censored, group = Censored))+
+                  ggplot(object, aes(x = Xaxis, y = adjValueCen, color = Censored, group = Censored))+
                     {if ("points" %in% layers) geom_point(size = sizes[1]) }+
                     {if (is.numeric(assessment)) geom_hline(yintercept = assessment, color = assesscolor, 
                                                             linetype = "dashed", size = sizes[3])} +
@@ -157,26 +157,24 @@ setMethod(f="waterseries", signature=c(object="data.frame"),
                     theme(panel.grid = element_blank(), legend.title = element_blank(), legend.position = legend)
                   
                 } else if(deseason == TRUE){
-                  print(head(object))
-                  print(max(object$num_meas))
-                  print(max(object$pct_true))
+
                   if((max(object$num_meas, na.rm = TRUE) < 5) | (max(object$pct_true, na.rm = TRUE) < 0.5)) 
                     stop ("Must have at least 4 non-censored data points for at least one month for deseason plot.") 
                   
                   df_mon <- object %>% filter(num_meas>=5 & pct_true>=0.5) %>% droplevels() %>% arrange(month)
-                  ggplot(df_mon, aes(x = Date, y = ValueCen, color = Censored, group = Censored))+
+                  ggplot(df_mon, aes(x = Date, y = adjValueCen, color = Censored, group = Censored))+
                     {if ("points" %in% layers) geom_point(size = sizes[1])}+
-                    {if (is.numeric(assessment)) geom_hline(yintercept = assessment, color = assesscolor, linetype = "dashed", size = sizes[3])} +
+                    {if (is.numeric(assessment)) geom_hline(yintercept = assessment, color = assesscolor, 
+                                                            linetype = "dashed", size = sizes[3])} +
                     labs(title = title, y = yname, x = xname) +
                     scale_color_manual(values = c("FALSE" = "black", "TRUE" = "red"),
                                      labels = c("True Value", "Censored"))+
-                   theme_bw() +
-                   theme(panel.grid = element_blank(), legend.title = element_blank(), legend.position = legend)+
-                   facet_wrap(~month)
+                    theme_bw() +
+                    theme(panel.grid = element_blank(), legend.title = element_blank(), legend.position = legend)+
+                    facet_wrap(~month)
                 } # End of deseason = TRUE
                 
               } else if (censored == FALSE){
-                #if(deseason == FALSE){
                   ggplot(object, aes(x = Xaxis, y = Value))+
                     {if ("points" %in% layers) geom_point(aes(color = Grouper, shape = Grouper), size = sizes[1]) }+
                     {if ("line" %in% layers) geom_line(aes(color = Grouper), size = sizes[2])} +
