@@ -42,7 +42,7 @@
 #' 
 #' @export
 
-setGeneric(name="getCharInfo",function(object,parkcode=NA, sitecode=NA,charname=NA,category=NA,info){standardGeneric("getCharInfo")},
+setGeneric(name="getCharInfo",function(object,parkcode=NA, sitecode=NA,charname=NA,category=NA,info=NA){standardGeneric("getCharInfo")},
            signature=c("object") )
 
 setMethod(f="getCharInfo", signature=c(object="list"),

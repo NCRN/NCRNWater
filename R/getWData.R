@@ -22,7 +22,7 @@
 #' @param years A numeric vector corresponding to calendar years. Only data from those months will be returned.
 #' @param wyears A numeric vector corresponding to water years. Only data from those water years will be returned.
 #' @param minvalue A number, indicating that only measurements wtih values greater than or equal to \code{minvalue} should be returned.
-#' @param maxalue A number, indicating that only measurements wtih values less than or equal to \code{maxvalue} should be returned.
+#' @param maxvalue A number, indicating that only measurements wtih values less than or equal to \code{maxvalue} should be returned.
 #' @param minobs  An integer indicating the minimum number of observations needed for a dataset to be returned. T
 #' his is assessed after the other filters are applied. Defaults to 0.
 #' @param output Either "dataframe", the default, or "list". Determines the type of output when data from more than one 
@@ -120,7 +120,7 @@ setMethod(f="getWData", signature=c(object="Site"),
 #### Given one Characteristic get the data ####
 setMethod(f="getWData", signature=c(object="Characteristic"),
   function(object, mindate, maxdate, months, years, wyears, minvalue, maxvalue, minobs, output){
-    OutData<-tryCatch({    ### tryCatch is here if there data slot is empty 
+    OutData<-tryCatch({    ### tryCatch is here if the data slot is empty 
       data.frame(c(
         getCharInfo(object,info="Data"), 
         Characteristic= getCharInfo(object,info="CharName"), 

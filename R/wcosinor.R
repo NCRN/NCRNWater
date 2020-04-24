@@ -4,6 +4,7 @@
 #' @include NCRNWater_NCRNWaterObj_Class_def.R 
 #' @include getWData.R
 #' @importFrom season cosinor yrfraction
+#' @importFrom methods callGeneric
 #' @title wcosinor
 #' 
 #' @description Does a cosinor analytsis on water quality data .

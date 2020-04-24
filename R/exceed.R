@@ -23,6 +23,7 @@
 #' characteristics without uppoer or lower references points will not be incldued in the reults. If \code{all} is \code{TRUE} such characteristics will be included.
 #' @param catsum Logical, defaults to \code{False}. When true sumamrizes by catgegory rather than a characteristic. Not used if 
 #' \code{object} is a \code{data.frame}
+#' @param ... Additional commands passed to \code{\link{getWData}} for filtering or subsetting the data.
 #' 
 #' @export
 

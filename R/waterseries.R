@@ -1,13 +1,13 @@
 #' @include NCRNWater_NCRNWaterObj_Class_def.R 
 #' @include getWData.R
-#' @importFrom dplyr arrange pull filter mutate
+#' @importFrom dplyr arrange filter mutate pull slice
 #' @importFrom ggplot2 aes facet_wrap geom_hline geom_line geom_point ggplot labs scale_color_manual scale_shape_manual theme element_blank theme_bw
 #' @importFrom lubridate month year
 #' @importFrom magrittr %>% 
 #' @importFrom plotly config ggplotly
 #' @importFrom purrr map_chr
 #' @importFrom viridis scale_color_viridis
-
+#' @importFrom methods callGeneric
 #' 
 #' @title waterseries
 #' 
@@ -72,10 +72,12 @@
 #' 
 #' @export
 
-setGeneric(name="waterseries",function(object, parkcode=NA, sitecode=NA,charname=NA, category=NA, by="char", assessment=TRUE,
+setGeneric(name="waterseries",function(object, parkcode=NA, sitecode=NA,charname=NA, category=NA, by="char", 
+                                       assessment=TRUE,
               layers=c("points","line"), xname=NA, yname=NA, labels=NA, title=NULL, colors=NA, assesscolor="red", 
               sizes=c(3, 0.8, 1.1), censored = FALSE, deseason = FALSE,
-              legend="bottom",webplot=FALSE,...){standardGeneric("waterseries")},signature=c("object") )
+              legend="bottom",webplot=FALSE,...)
+  {standardGeneric("waterseries")},signature=c("object") )
 
 
 setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),

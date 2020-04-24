@@ -45,10 +45,6 @@ Currently the Water Data list element can include (1) measurements at all sample
 The latter is to enable examining patterns in the stream surface or lake epilimnion over time and is currently (as of 11/1/2019) the data working 
 in the NCRNwater package.
 }
-\section{Warning}{
-
-}
-
 \examples{
 # compile NETN water data for surface measurements and active metrics only,
 # and export to C:/Data.

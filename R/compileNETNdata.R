@@ -2,8 +2,6 @@
 #' 
 #' @description Compile flat files from NETN Access Database for R package 
 #' 
-#' @section Warning:
-#' 
 #' @importFrom tidyr pivot_longer separate gather spread
 #' @importFrom dplyr  distinct case_when contains filter select mutate rename arrange left_join summarize group_by 
 #' @importFrom purrr map

@@ -44,6 +44,8 @@ characteristics without uppoer or lower references points will not be incldued i
 
 \item{catsum}{Logical, defaults to \code{False}. When true sumamrizes by catgegory rather than a characteristic. Not used if 
 \code{object} is a \code{data.frame}}
+
+\item{...}{Additional commands passed to \code{\link{getWData}} for filtering or subsetting the data.}
 }
 \description{
 Determines if water data contains observtions that exceed a upper and/or lower assessment points.

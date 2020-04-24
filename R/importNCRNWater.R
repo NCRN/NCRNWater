@@ -16,6 +16,7 @@
 #' @importFrom magrittr %>%
 #' @importFrom purrr map map2 pmap
 #' @importFrom readr cols read_csv
+#' @importFrom methods new
 #' 
 #' @examples 
 #' ncrnwd<-importNCRNWater(Dir = "./Data/NCRN", Data = "Water Data.csv", MetaData = "VizMetaData.csv")
@@ -27,7 +28,7 @@ importNCRNWater<-function(Dir, Data="Water Data.csv", MetaData="MetaData.csv"){
   
 #### Read in Data ####
   Indata <- read_csv(paste(Dir, Data, sep="/"), col_types=cols(.default="c")) %>% 
-    rename(SiteCode = StationID, Date=`Visit Start Date`, Characteristic = `Local Characteristic Name`,
+    rename(SiteCode = StationID, Date =`Visit Start Date`, Characteristic = `Local Characteristic Name`,
            Value = `Result Value/Text`)%>% 
     mutate(TextValue=Value)
   
@@ -62,7 +63,8 @@ importNCRNWater<-function(Dir, Data="Water Data.csv", MetaData="MetaData.csv"){
 
 #### Create Characteristic objects ####
   MetaData$Characteristics<-MetaData %>% 
-    dplyr::select(CharacteristicName, DisplayName, Units, Category, CategoryDisplay, LowerPoint, UpperPoint, LowerDescription, 
+    dplyr::select(CharacteristicName, DisplayName, Units, Category, 
+                  CategoryDisplay, LowerPoint, UpperPoint, LowerDescription, 
           UpperDescription, AssessmentDetails, Data) %>% 
     pmap(.f=new, Class="Characteristic")
 
@@ -80,7 +82,8 @@ importNCRNWater<-function(Dir, Data="Water Data.csv", MetaData="MetaData.csv"){
   
 ###### Make a list of sites with each park a nested list
   PSites<-map(Parks, function(Park){
-    SiteDf<-filter(AllSites, ParkCode==getParkInfo(Park, info="ParkCode") ) %>% dplyr::select(-ParkCode)
+    SiteDf<-filter(AllSites, ParkCode==getParkInfo(Park, info="ParkCode") ) %>% 
+      dplyr::select(-ParkCode)
     SiteList<-pmap(.l=SiteDf, .f=new, Class="Site" )
   })
   
