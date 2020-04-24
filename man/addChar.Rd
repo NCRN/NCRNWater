@@ -33,6 +33,8 @@ addChar(
 
 \item{DisplayName}{A name for the characteristic suitable for dispaly on graphs, tables etc. Stored as a length 1 character vector.}
 
+\item{Substrate}{The substrate of the characteristic, stored as a length 1  character vector.}
+
 \item{SampleFraction}{The sample fraction of the characteristic. Stored as a length 1 character vector.}
 
 \item{Category}{The category for the charactersitic. Stored as a length 1 character vector.}
@@ -43,15 +45,13 @@ addChar(
 
 \item{Data}{A \code{data.frame} containing the water quality data. Should have cloumns representing the date, measurment, any QAQC flags etc. for each measurement.}
 
-\item{LowerPoint, Upperpoint}{Indicates the assessmen points. Values lower than the lower point are considered to have failed the assessement, whereas values higher than the higher point are considered failures. Can either be a length 1 numerical vector, or a \code{data.frame}  giving the lower assessment value for each measurement. The vector method should be used for assessments that do not change, whereas the \code{data.frame} is for assmesent that change based on the time of the year or other factors.}
+\item{LowerPoint, UpperPoint}{Indicates the assessmen points. Values lower than the lower point are considered to have failed the assessement, whereas values higher than the higher point are considered failures. Can either be a length 1 numerical vector, or a \code{data.frame}  giving the lower assessment value for each measurement. The vector method should be used for assessments that do not change, whereas the \code{data.frame} is for assmesent that change based on the time of the year or other factors.}
 
 \item{LowerType, UpperType}{The type of assessment indicated by the lower and upper points. A length 1 character vector.}
 
 \item{LowerDescription, UpperDescription}{A description of the lowerand upper assesements point. Stored as a length 1 character vector.}
 
 \item{AssessmentDetails}{Additional description of the assessement point. Stored as a length 1 character vector.}
-
-\item{Substate}{The substrate of the characteristic, stored as a length 1  character vector.}
 }
 \value{
 If no park is specified,returns the site object with the characteristic added. If a park is specified, returns the park object with the characteristic added to the site.

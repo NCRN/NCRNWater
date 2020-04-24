@@ -10,7 +10,7 @@ getCharInfo(
   sitecode = NA,
   charname = NA,
   category = NA,
-  info
+  info = NA
 )
 }
 \arguments{
