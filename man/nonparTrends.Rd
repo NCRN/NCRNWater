@@ -6,10 +6,11 @@
 \usage{
 nonparTrends(
   object,
-  parkcode,
-  sitecode,
+  parkcode = NA,
+  sitecode = NA,
   charname = NA,
   category = NA,
+  info = NA,
   censored = FALSE,
   ...
 )
