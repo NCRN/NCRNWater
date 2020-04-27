@@ -81,15 +81,16 @@ setGeneric(name="waterseries",function(object, parkcode=NA, sitecode=NA,charname
 
 
 setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
-  function(object,parkcode, sitecode, charname,category, by, assessment, layers, xname, yname,
+  function(object, parkcode, sitecode, charname, category, by, assessment, layers, xname, yname,
            labels, title, colors, assesscolor, sizes, censored, deseason, legend, webplot,...){
           
-    PlotData<-getWData(object=object,parkcode=parkcode, sitecode=sitecode, charname=charname, category=category,...) %>% arrange(Date)
-    if(!exists('PlotData'))stop("Function arguments did not return a data frame with records.")
+    PlotData<-getWData(object=object,parkcode=parkcode, sitecode=sitecode, 
+                       charname=charname, category=category,...) %>% arrange(Date)
+    if(!exists('PlotData') | nrow(PlotData)==0)stop("Function arguments did not return a data frame with records.")
     
     # Add months and censored info for later filter for plotting
-    PlotData <- suppressWarnings(PlotData %>% mutate(year.dec = julian(Date)/365, 
-                                                     month = as.factor(lubridate::month(Date, label = TRUE, abbr=FALSE))))
+    PlotData <- PlotData %>% mutate(year.dec = julian(Date)/365, 
+                  month = as.factor(lubridate::month(Date, label = TRUE, abbr=FALSE)))
                                  
 
     PlotData <- PlotData %>% group_by(Category, Characteristic, Site, Park, month) %>% 
