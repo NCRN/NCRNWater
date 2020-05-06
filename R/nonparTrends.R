@@ -172,15 +172,15 @@ setMethod(f="nonparTrends", signature = c(object = "data.frame"),
                                      paste0("no trend"))),
                                modeled = TRUE)
 
-    results <- if(is.na(month_drops$month) & nrow(trends)>0){
+    results <- if(all(is.na(month_drops$month)) & nrow(trends)>0){
                   trends
-                } else if(is.na(month_drops$month) & nrow(trends)==0){
+                } else if(all(is.na(month_drops$month)) & nrow(trends)==0){
                   data.frame(slope = NA, intercept = NA, pval = NA,
                              message = paste0("Too few data points."),
                              modeled = FALSE)
-                } else if(!is.na(month_drops$month) & nrow(trends)>0){
+                } else if(!any(is.na(month_drops$month)) & nrow(trends)>0){
                   rbind(trends, month_drops)
-                } else if(!is.na(month_drops$month) & nrow(trends)==0){
+                } else if(!any(is.na(month_drops$month)) & nrow(trends)==0){
                   month_drops
     }
 
