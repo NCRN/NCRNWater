@@ -78,15 +78,15 @@ setMethod(f="nonparTrends", signature = c(object = "data.frame"),
             
   if(is.na(charname) && is.na(category)) stop("Must specify a charname or a category.")
   
-  df <- object %>% mutate(year.dec = julian(Date)/365,
-                      month = as.factor(lubridate::month(Date, label = TRUE,
-                                                         abbr = FALSE)))
+  df <- object %>% mutate(year.dec = as.numeric(julian(Date)/365),
+                      month = lubridate::month(Date, label = TRUE,
+                                                         abbr = FALSE))
 
   if(censored == FALSE){
    trends_fun <- function(df){
      openair::TheilSen(mydata = df, pollutant = "ValueCen", autocor = FALSE,
                        #deseason = TRUE,
-                       modeled = FALSE, type = "month", plot = FALSE, silent = TRUE)}
+                       modeled = FALSE, type = "month", plot = FALSE, silent = FALSE)}
    # type = "month" breaks data up by month, so don't need deseason=T, which breaks
    # down when you have <6 months represented (eg only June and August data).
 
