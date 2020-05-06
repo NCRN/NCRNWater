@@ -86,11 +86,12 @@ setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
           
     PlotData<-getWData(object=object,parkcode=parkcode, sitecode=sitecode, 
                        charname=charname, category=category,...) %>% arrange(Date)
-    if(!exists('PlotData') | nrow(PlotData)==0)stop("Function arguments did not return a data frame with records.")
+
+    if(is.null(PlotData) || nrow(PlotData)==0)stop("Function arguments did not return a data frame with records.")
     
     # Add months and censored info for later filter for plotting
-    PlotData <- PlotData %>% mutate(year.dec = julian(Date)/365, 
-                  month = as.factor(lubridate::month(Date, label = TRUE, abbr=FALSE)))
+    PlotData <- PlotData %>% mutate(year.dec = as.numeric(julian(Date)/365), 
+                  month = lubridate::month(Date, label = TRUE, abbr=FALSE))
                                  
 
     PlotData <- PlotData %>% group_by(Category, Characteristic, Site, Park, month) %>% 
@@ -168,6 +169,7 @@ setMethod(f="waterseries", signature=c(object="data.frame"),
                     stop ("Must have at least 4 non-censored data points for at least one month for deseason plot.") 
                   
                   df_mon <- object %>% filter(num_meas>=5 & pct_true>=0.5) %>% droplevels() %>% arrange(month)
+
                   ggplot(df_mon, aes(x = Date, y = adjValueCen, color = Censored, group = Censored))+
                     {if ("points" %in% layers) geom_point(size = sizes[1])}+
                     {if (is.numeric(assessment)) geom_hline(yintercept = assessment, color = assesscolor, 
