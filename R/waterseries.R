@@ -43,7 +43,7 @@
 #' quantification limit and color codes to distinguish true measurements from detection limits. Defaults to \code{FALSE}.
 #' 
 #' @param deseason If \code{FALSE} will plot all data points on the same figure. If \code{TRUE} will split plots by month. 
-#' Defaults to \code{FALSE}. Currenly only implemented for censored = \code{TRUE}.
+#' Defaults to \code{FALSE}. 
 #' 
 #' @param labels A character vector indicating the labels for the data series, defaults to \code{NA}. If labels are provided 
 #' (one for each series) they will be printed. If \code{object} is a \code{data.frame} and \code{labels} is \code{NA} then no labels 
@@ -84,20 +84,21 @@ setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
   function(object, parkcode, sitecode, charname, category, by, assessment, layers, xname, yname,
            labels, title, colors, assesscolor, sizes, censored, deseason, legend, webplot,...){
           
-    PlotData<-getWData(object=object,parkcode=parkcode, sitecode=sitecode, 
-                       charname=charname, category=category,...) %>% arrange(Date)
-
-    if(is.null(PlotData) || nrow(PlotData)==0)stop("Function arguments did not return a data frame with records.")
+    try(PlotData<-getWData(object=object,parkcode=parkcode, sitecode=sitecode, 
+                       charname=charname, category=category, ...)) 
     
+    if(!exists("PlotData") || nrow(PlotData)==0)stop("Function arguments did not return a data frame with records.")
+
     # Add months and censored info for later filter for plotting
     PlotData <- PlotData %>% mutate(year.dec = as.numeric(julian(Date)/365), 
-                  month = lubridate::month(Date, label = TRUE, abbr=FALSE))
+                  month = lubridate::month(Date, label = TRUE, abbr = FALSE)) %>% arrange(Date)
                                  
 
     PlotData <- PlotData %>% group_by(Category, Characteristic, Site, Park, month) %>% 
-      mutate(num_meas=length(ValueCen), 
-             pct_true= sum(ifelse(Censored==FALSE,1,0))/num_meas,
-             adjValueCen = ifelse(Censored==TRUE, max(ValueCen, na.rm = TRUE), Value)) %>% ungroup() %>% arrange(month)
+      mutate(num_meas = sum(!is.na(Value)), 
+             pct_true = sum(ifelse(Censored == FALSE, 1, 0))/sum(!is.na(ValueCen)),
+             adjValueCen = ifelse(Censored == TRUE, max(ValueCen, na.rm = TRUE), Value)) %>% 
+      ungroup() %>% arrange(month)
                 
             if(is.na(yname)) yname<-paste0(getCharInfo(object=object, charname=charname, category=category, info="CategoryDisplay")," (",
                                         getCharInfo(object=object, charname=charname, category=category, info="Units"),")") %>% unique()
@@ -129,7 +130,8 @@ setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
           })
 
 setMethod(f="waterseries", signature=c(object="data.frame"),
-          function(object, by, assessment, layers, xname, yname, labels, title, colors, assesscolor, sizes, censored, deseason, legend, webplot){
+          function(object, by, assessment, layers, xname, yname, labels, title, colors, assesscolor, 
+                   sizes, censored, deseason, legend, webplot){
             
             Grouper<-switch(by,
                             char=object %>% pull(Characteristic) %>% factor(., levels=unique(.)),
@@ -145,8 +147,8 @@ setMethod(f="waterseries", signature=c(object="data.frame"),
                                                   site=object$Site %>% unique,
                                                   park=object$Park %>% unique)
             
-           Xaxis<- object$Date
-           
+           Xaxis <- object$Date
+          
            OutPlot<-
               if(censored == TRUE){ 
                 if(deseason == FALSE){
@@ -155,37 +157,55 @@ setMethod(f="waterseries", signature=c(object="data.frame"),
                     {if (is.numeric(assessment)) geom_hline(yintercept = assessment, color = assesscolor, 
                                                             linetype = "dashed", size = sizes[3])} +
                     labs(title = title, y = yname, x = xname) +
-                    scale_color_manual(values = c("FALSE" = "black", "TRUE" = "red"),
-                    labels = c("True Value", "Censored"))+
+                    scale_color_manual(values = c("FALSE" = "blue", "TRUE" = "red"),
+                                       labels = c("FALSE" = "True Value", "TRUE"= "Censored"))+
                     theme_bw() +
                     theme(panel.grid = element_blank(), legend.title = element_blank(), legend.position = legend)
                   
                 } else if(deseason == TRUE){
                   
-                  test_meas <- (object %>% arrange(desc(num_meas)) %>% slice(1))$num_meas
-                  test_pct <- (object %>% arrange(desc(pct_true)) %>% slice(1))$pct_true
-                  
-                  if((test_meas < 5) | (test_pct < 0.5)) 
-                    stop ("Must have at least 4 non-censored data points for at least one month for deseason plot.") 
-                  
-                  df_mon <- object %>% filter(num_meas>=5 & pct_true>=0.5) %>% droplevels() %>% arrange(month)
+                  df_mon <- object %>% filter(num_meas>=4 && pct_true>=0.5) %>% droplevels() %>% arrange(month)
+
+                  if(nrow(df_mon)==0)stop("Too few data points to plot.")
 
                   ggplot(df_mon, aes(x = Date, y = adjValueCen, color = Censored, group = Censored))+
                     {if ("points" %in% layers) geom_point(size = sizes[1])}+
                     {if (is.numeric(assessment)) geom_hline(yintercept = assessment, color = assesscolor, 
                                                             linetype = "dashed", size = sizes[3])} +
                     labs(title = title, y = yname, x = xname) +
-                    scale_color_manual(values = c("FALSE" = "black", "TRUE" = "red"),
-                                     labels = c("True Value", "Censored"))+
+                    scale_color_manual(values = c("FALSE" = "blue", "TRUE" = "red"),
+                                       labels = c("FALSE" = "True Value", "TRUE"= "Censored"))+
                     theme_bw() +
                     theme(panel.grid = element_blank(), legend.title = element_blank(), legend.position = legend)+
                     facet_wrap(~month)
                 } # End of deseason = TRUE
                 
               } else if (censored == FALSE){
+                if(deseason == FALSE){
                   ggplot(object, aes(x = Xaxis, y = Value))+
                     {if ("points" %in% layers) geom_point(aes(color = Grouper, shape = Grouper), size = sizes[1]) }+
                     {if ("line" %in% layers) geom_line(aes(color = Grouper), size = sizes[2])} +
+                    {if (is.na(colors)) viridis::scale_color_viridis(name = "legend", labels = labels, 
+                                                                     discrete = T)}+
+                    {if (!is.na(colors)) scale_color_manual(name = "legend", labels = labels, values = colors)}+
+                    scale_shape_manual(name = "legend", labels = labels, 
+                                       values = c(16, 15, 17, 18, 1, 0, 2, 5, 6, 3, 4, 8, 13, 9, 12)[1:nlevels(Grouper)]) +
+                    {if (is.numeric(assessment)) geom_hline(yintercept = assessment, color = assesscolor,
+                                                            linetype = "dashed", size = sizes[3])} +
+                    labs(title = title, y = yname, x = xname) +
+                    theme_bw() +
+                    theme(panel.grid = element_blank(), legend.title = element_blank(), legend.position = legend)#+
+
+                  
+                  } else if(deseason == TRUE){
+                  
+                  df_mon2 <- object %>% filter(num_meas>=4) %>% droplevels() %>% arrange(month)
+                  
+                  if(nrow(df_mon2)==0)stop("Too few data points to plot.")
+
+                  ggplot(df_mon2, aes(x = Date, y = Value))+
+                    {if ("points" %in% layers) geom_point(size = sizes[1], color='blue')}+
+                    #{if ("line" %in% layers) geom_line(aes(color = Grouper), size = sizes[2])} +
                     {if (is.na(colors)) viridis::scale_color_viridis(name = "legend", labels = labels, discrete = T)}+
                     {if (!is.na(colors)) scale_color_manual(name = "legend", labels = labels, values = colors)}+
                     scale_shape_manual(name = "legend", labels = labels, 
@@ -194,8 +214,10 @@ setMethod(f="waterseries", signature=c(object="data.frame"),
                                                             linetype = "dashed", size = sizes[3])} +
                     labs(title = title, y = yname, x = xname) +
                     theme_bw() +
-                    theme(panel.grid = element_blank(), legend.title = element_blank(), legend.position = legend)
-                
+                    theme(panel.grid = element_blank(), legend.title = element_blank(), legend.position = legend)+
+                    facet_wrap(~month)
+                  
+                  }
               }# End of censored == FALSE
             
             ifelse(webplot, return(ggplotly(OutPlot) %>% plotly::config(displaylogo=F)),return(OutPlot))

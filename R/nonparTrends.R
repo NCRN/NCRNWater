@@ -81,7 +81,7 @@ setMethod(f="nonparTrends", signature = c(object = "data.frame"),
   df <- object %>% mutate(year.dec = as.numeric(julian(Date)/365),
                       month = lubridate::month(Date, label = TRUE,
                                                          abbr = FALSE))
-
+  
   if(censored == FALSE){
    trends_fun <- function(df){
      openair::TheilSen(mydata = df, pollutant = "ValueCen", autocor = FALSE,
@@ -94,28 +94,30 @@ setMethod(f="nonparTrends", signature = c(object = "data.frame"),
                      error = function(e) {"Error"},
                      warning = function(w) {"Warning"})
 
-   if(all(trends_test!="Error")){
+   if(all(!trends_test %in% c("Error", "Warning"))){
      trends1 <- trends_fun(df)
-     trends2 <- trends1$data$main.data %>%
+     trends2 <- trends1$data$main.data 
+     #trends2$pval <- ifelse(exists("trends2$p"), trends2$p, NA) 
+     trends3 <- trends2 %>%
        group_by(month) %>% summarise(slope = mean(slope, na.rm=T),
                                      intercept = mean(intercept, na.rm=T),
-                                     pval = mean(p, na.rm=T))
+                                     pval = ifelse("p" %in% names(trends2), mean(p, na.rm=T), NA))
    
         #Assumes a p-value = 0 means the model didn't converge.
-      results <- trends2 %>%
+      results <- trends3 %>%
                     mutate(message = case_when(pval > 0 & pval < 0.05 & slope > 0 ~
-                      paste0("There was a significant increasing trend of ",
-                      paste0(round(slope,4)), " ", paste0(paramunits), " of ",  paste0(displayname),
-                        " per year for ", paste0(month), "."),
-                      pval > 0 & pval < 0.05 & slope < 0 ~
-                      paste0("There was a significant decreasing trend of ",
-                      paste0(round(slope,4)), " ", paste0(paramunits), " of ",  paste0(displayname),
-                        " per year for ", paste0(month), "."),
-                      pval == 0 | pval > 0.05 ~ paste0("no trend"),
-                      is.na(pval) ~ paste0("Too few data points.")),
-                      modeled = TRUE)
+                                                   paste0("There was a significant increasing trend of ",
+                                                   paste0(round(slope,4)), " ", paste0(paramunits), " of ",  paste0(displayname),
+                                                   " per year for ", paste0(month), "."),
+                                               pval > 0 & pval < 0.05 & slope < 0 ~
+                                                   paste0("There was a significant decreasing trend of ",
+                                                   paste0(round(slope,4)), " ", paste0(paramunits), " of ",  paste0(displayname),
+                                                   " per year for ", paste0(month), "."),
+                                               pval == 0 | pval > 0.05 ~ paste0("no trend"),
+                                                   is.na(pval) ~ paste0("Too few data points.")),
+                                               modeled = ifelse(is.na(pval), FALSE, TRUE))
 
-      } else if(trends_test=="Error"){
+      } else if(any(trends_test %in% c("Error", "Warning"))){
 
      results <- data.frame(month = NA, slope = NA, intercept = NA, pval = NA,
                        message = paste0("Too few data points."),
@@ -139,12 +141,12 @@ setMethod(f="nonparTrends", signature = c(object = "data.frame"),
 
     df2<- df %>% group_by(Category, Site, Park, month) %>%
       filter(!is.na(ValueCen)) %>%
-      mutate(num_meas=length(ValueCen),
+      mutate(num_meas=sum(!is.na(ValueCen)),
              pct_true= sum(ifelse(Censored==FALSE,1,0))/num_meas,
              adjValueCen = ifelse(Censored==TRUE, max(ValueCen, na.rm = TRUE),
                                   Value)) %>% ungroup()
 
-    month_drops<- df2 %>% filter(num_meas<5 | pct_true<0.5) %>%
+    month_drops<- df2 %>% filter(num_meas<4 | pct_true<0.5) %>%
       group_by(Category, Characteristic, Site, Park, month) %>%
       summarise(slope = NA,
                 intercept = NA,
@@ -154,7 +156,7 @@ setMethod(f="nonparTrends", signature = c(object = "data.frame"),
       ungroup() %>% droplevels() %>%
       select(month, slope, intercept, pval, message, modeled) %>% unique()
 
-    month_include<- df2 %>% filter(num_meas >= 5 & pct_true >= 0.5) %>% droplevels()
+    month_include<- df2 %>% filter(num_meas >= 4 & pct_true >= 0.5) %>% droplevels()
 
     df_mon <- month_include %>% group_by(month) %>% nest()
 
