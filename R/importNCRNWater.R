@@ -59,7 +59,7 @@ importNCRNWater<-function(Dir, Data="Water Data.csv", MetaData="MetaData.csv"){
 
 #### Change numeric data to numeric, but the leave the rest as character ####
   NumDat<-MetaData$DataType=="numeric"
-  MetaData[NumDat,]$Data<-MetaData[NumDat,]$Data %>% map(.f=function(x) mutate(x,Value = as.numeric(Value) )) 
+  MetaData[NumDat,]$Data<-suppressWarnings(MetaData[NumDat,]$Data %>% map(.f=function(x) mutate(x,Value = as.numeric(Value) ))) 
 
 #### Create Characteristic objects ####
   MetaData$Characteristics<-MetaData %>% 
