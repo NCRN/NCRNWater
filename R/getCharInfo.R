@@ -47,7 +47,8 @@ setGeneric(name="getCharInfo",function(object,parkcode=NA, sitecode=NA,charname=
 
 setMethod(f="getCharInfo", signature=c(object="list"),
           function(object,parkcode, sitecode, charname, category, info){
-          
+            
+            if (is.na(info)) stop("Need to specify 'info" )
             if (info=="Data") return(lapply(object,FUN=getCharInfo, parkcode=parkcode, sitecode=sitecode, charname=charname, 
                                             category=category, info=info)) %>% 
               unlist(recursive=F) else 
@@ -59,6 +60,7 @@ setMethod(f="getCharInfo", signature=c(object="list"),
 #### Given one park get the sites and run again ####
 setMethod(f="getCharInfo", signature=c(object="Park"),
     function(object,parkcode, sitecode,charname,category,info){
+      if (is.na(info)) stop("Need to specify 'info'" )
       switch(info,
         ParkCode=, ParkShortName=, ParkLongName=, Network =#info from Park Object
         return(getParkInfo(object, parkcode=parkcode, info=info) %>% 
@@ -81,7 +83,8 @@ setMethod(f="getCharInfo", signature=c(object="Park"),
  #### Given one Site get the characteristics and run again ####
  setMethod(f="getCharInfo", signature=c(object="Site"),
     function(object,sitecode,charname,info){
-     switch(info,
+      if (is.na(info)) stop("Need to specify 'info'" )
+      switch(info,
               SiteCode=,SiteName=,coords=,type= 
         return(getSiteInfo(object, info=info) %>% 
                  rep(times=getChars(object=object, charname=charname, category=category) %>% length)), #info from Site Object
@@ -94,6 +97,7 @@ setMethod(f="getCharInfo", signature=c(object="Park"),
 #### Given one Characteristic get the info ####
 setMethod(f="getCharInfo", signature=c(object="Characteristic"),
           function(object,info){
+            if (is.na(info)) stop("Need to specify 'info'" )
             switch(info,
                    CharName = return(object@CharacteristicName),
                    DisplayName=return(object@DisplayName),

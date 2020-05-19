@@ -14,7 +14,9 @@ getSites(object, parkcode = NA, sitecode = NA)
 \item{sitecode}{Site code of one or more sites, in quotes.}
 }
 \value{
-A list of one or more site objects. If \code{parkcode} and/or \code{sitecode} are specificed then only site which match those codes will be returned. If there are no such sites then the fuciton will return \code{NULL}
+A list of one or more site objects. If \code{parkcode} and/or \code{sitecode} are specified 
+then only sites which match those codes will be returned. If there are no such sites then the function 
+will return \code{NULL}
 }
 \description{
 Retrieves sites from a \code{Park} object or a \code{list} of such objects.

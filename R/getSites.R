@@ -11,7 +11,7 @@
 #' @param sitecode Site code of one or more sites, in quotes.
 #' 
 #' @return  A list of one or more site objects. If \code{parkcode} and/or \code{sitecode} are specified 
-#' then only site which match those codes will be returned. If there are no such sites then the function 
+#' then only sites which match those codes will be returned. If there are no such sites then the function 
 #' will return \code{NULL}
 #' 
 #' @export

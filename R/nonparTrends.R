@@ -13,7 +13,7 @@
 #' This function assumes that the data are composed of monthly observations that are correlated within a year. 
 #' Note that this function is only appropriate for trends that are one-directional. 
 #' 
-#' @param object A \code{Park} object or a \code{list} of such objects.
+#' @param object A \code{Park} object or a \code{data.frame} such as that produced by getWData.
 #' @param charname Name, in quotes, of a single \code{Characteristic} whose data should be analyzed. Either this or \code{category} is required.
 #' @param category Name, in quotes of a single cateogry of charactersitcs whose data should be analyzed. Either this or \code{charname} is required.
 #' @param ... Additional commands passed to \code{\link{getWData}} for filtering or subsetting the data.
@@ -40,6 +40,10 @@ setGeneric(name = "nonparTrends", function(object, parkcode = NA, sitecode = NA,
 
 setMethod(f = "nonparTrends", signature = c(object = "NCRNWaterObj"), 
           function(object, parkcode, sitecode, charname, category, info, censored, ...){
+            
+            if(is.na(charname) && is.na(category)) stop("Must specify a charname or a category.")
+            
+            
             watdata <- getWData(object, parkcode = parkcode, sitecode = sitecode, 
                            charname = charname, category = category, ...)
             
@@ -48,6 +52,7 @@ setMethod(f = "nonparTrends", signature = c(object = "NCRNWaterObj"),
             if("ValueCen" %in% colnames(watdata) == FALSE){
               stop("Must have a field named 'ValueCen' to run this version of the function.")
             }
+            
             
             watdata$date = watdata$Date # to make openair happy
   

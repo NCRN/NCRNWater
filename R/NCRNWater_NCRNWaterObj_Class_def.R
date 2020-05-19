@@ -1,4 +1,3 @@
-setClassUnion(name="NCRNWaterObj", members=c("Park","Site","Characteristic","list"))
 
 #' @include NCRNWater_Park_Class_def.R 
 #' @include NCRNWater_Site_Class_def.R 
@@ -9,4 +8,7 @@ setClassUnion(name="NCRNWaterObj", members=c("Park","Site","Characteristic","lis
 #' @description This is an virtual class combining \code{Park}, \code{Site}, \code{Characteristic} 
 #' and \code{list}. It is used for convenience for writing methods for the \code{NCRNWater} package. 
 #'  
-#' @exportClass NCRNWaterObj
+#' @export 
+
+
+setClassUnion(name="NCRNWaterObj", members=c("Park","Site","Characteristic","list"))

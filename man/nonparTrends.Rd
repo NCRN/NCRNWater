@@ -16,7 +16,7 @@ nonparTrends(
 )
 }
 \arguments{
-\item{object}{A \code{Park} object or a \code{list} of such objects.}
+\item{object}{A \code{Park} object or a \code{data.frame} such as that produced by getWData.}
 
 \item{charname}{Name, in quotes, of a single \code{Characteristic} whose data should be analyzed. Either this or \code{category} is required.}
 
