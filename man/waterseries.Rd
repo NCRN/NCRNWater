@@ -80,7 +80,7 @@ then the default will depend on the \code{by} argument. "site" will be labeled w
 quantification limit and color codes to distinguish true measurements from detection limits. Defaults to \code{FALSE}.}
 
 \item{deseason}{If \code{FALSE} will plot all data points on the same figure. If \code{TRUE} will split plots by month. 
-Defaults to \code{FALSE}. Currenly only implemented for censored = \code{TRUE}.}
+Defaults to \code{FALSE}.}
 
 \item{legend}{a vector indicating where the legend position. Can be: "none","left","right","top","bottom" or a two element 
 numeric vector.}
