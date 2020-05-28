@@ -4,7 +4,7 @@
 \alias{getSites}
 \title{getSites}
 \usage{
-getSites(object, parkcode = NA, sitecode = NA)
+getSites(object, parkcode = NA, sitecode = NA, type = NA)
 }
 \arguments{
 \item{object}{Either a \code{Park} object or a \code{list} of such objects.}
@@ -12,6 +12,8 @@ getSites(object, parkcode = NA, sitecode = NA)
 \item{parkcode}{Park code of one or more parks, in quotes.}
 
 \item{sitecode}{Site code of one or more sites, in quotes.}
+
+\item{type}{Type of site, such as Lake or Stream, in quotes.}
 }
 \value{
 A list of one or more site objects. If \code{parkcode} and/or \code{sitecode} are specified 
