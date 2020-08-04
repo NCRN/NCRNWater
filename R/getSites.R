@@ -22,7 +22,7 @@ setGeneric(name="getSites",function(object,parkcode=NA, sitecode=NA, type=NA){st
 setMethod(f="getSites", signature=c(object="list"),
           function(object, parkcode, sitecode, type){
             OutList<-lapply(object,FUN=getSites, parkcode=parkcode, sitecode=sitecode, type=type)
-            if(all(sapply(OutList,is.null))) return(warning("No sites match these criteria."))
+            if(all(sapply(OutList,is.null))) return(warning("object=list: No sites match these criteria."))
             
             if(any(lapply(OutList,FUN=class)=="list")) return(OutList[!sapply(OutList, is.null)] %>% 
                                                             unlist) else
@@ -33,16 +33,16 @@ setMethod(f="getSites", signature=c(object="Park"),
           function(object,parkcode,sitecode, type){
             
             ParkUse<-getParks(object, parkcode=parkcode)
-            if (is.null(ParkUse) ) return(warning("No sites match these criteria.")) else 
+            if (is.null(ParkUse) ) return(warning("object=Park1:No sites match these criteria.")) else 
               SitesOut<-getSites(ParkUse@Sites, sitecode=sitecode, type=type)
-              if(all(sapply(SitesOut,is.null))) return(warning("No sites match these criteria.")) else return(SitesOut)
+              if(all(sapply(SitesOut,is.null))) return(warning("object=Park2:No sites match these criteria.")) else return(SitesOut)
 })
 
 setMethod(f="getSites", signature=c(object="Site"),
           function(object, sitecode, type){
             OutSites <- if(is.na(sitecode) || getSiteInfo(object, info="SiteCode") %in% sitecode ) (object) else NULL
             OutSites <- if(!is.null(OutSites) && (is.na(type) || getSiteInfo(object, info="type") %in% type))(object) else NULL
-            if(!is.null(OutSites)) return(OutSites) else return(warning("No sites match these criteria."))
+            if(!is.null(OutSites)) return(OutSites) else return(warning("object=Site:No sites match these criteria."))
 })
 
 
