@@ -3,7 +3,7 @@
 #' @include NCRNWater_Characteristic_Class_def.R
 #' @title importNCRNWater
 #' 
-#' @description This function imports data from a .csv files exporterd from NPStoret and saves it as \code{Park} objects. 
+#' @description This function imports data from a .csv files exported from NPStoret and saves it as \code{Park} objects. 
 #' 
 #' @param Dir The directory where the data is found
 #' @param Data The data file. Defaults to "Water Data.csv"

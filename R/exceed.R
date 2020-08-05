@@ -7,11 +7,11 @@
 #' 
 #' @title exceed
 #' 
-#' @description Determines if water data contains observtions that exceed a upper and/or lower assessment points. 
+#' @description Determines if water data contains observations that exceed a upper and/or lower assessment points. 
 #' 
 #' @inheritParams getChars
 #' @inheritParams getWData
-#' @param points What assessemnt points to use when determining if there are exceedences. There are three options
+#' @param points What assessment points to use when determining if there are exceedances. There are three options
 #' \describe{
 #' \item{"lower"}{Only assess the data against the lower reference point}
 #' \item{"upper"}{Only assess the data against the upper reference point}
@@ -20,8 +20,8 @@
 #' @param lower,upper The lower and uppers assessment points. Either a number specified by the user, or if \code{NA}, the default,
 #'  the assessment point is determined by the \code{LowerPoint} and \code{UpperPoint} slots in the \code{Characteristic} objects. 
 #' @param all Logical, defaults to \code{FALSE}. Not used when \code{object} is a \code{data.frame}. If \code{all} is \code{FALSE} 
-#' characteristics without uppoer or lower references points will not be incldued in the reults. If \code{all} is \code{TRUE} such characteristics will be included.
-#' @param catsum Logical, defaults to \code{False}. When true sumamrizes by catgegory rather than a characteristic. Not used if 
+#' characteristics without upper or lower references points will not be included in the results. If \code{all} is \code{TRUE} such characteristics will be included.
+#' @param catsum Logical, defaults to \code{False}. When true summarizes by category rather than a characteristic. Not used if 
 #' \code{object} is a \code{data.frame}
 #' @param ... Additional commands passed to \code{\link{getWData}} for filtering or subsetting the data.
 #' 

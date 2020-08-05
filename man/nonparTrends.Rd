@@ -20,7 +20,7 @@ nonparTrends(
 
 \item{charname}{Name, in quotes, of a single \code{Characteristic} whose data should be analyzed. Either this or \code{category} is required.}
 
-\item{category}{Name, in quotes of a single cateogry of charactersitcs whose data should be analyzed. Either this or \code{charname} is required.}
+\item{category}{Name, in quotes of a single category of characteristics whose data should be analyzed. Either this or \code{charname} is required.}
 
 \item{censored}{Either \code{TRUE} or \code{FALSE}. If FALSE (default), function runs the openair::TheilSen test with deseason = TRUE. 
 If TRUE, function runs a separate NADA::cenken test for for each month in the dataset.}
@@ -34,7 +34,8 @@ the month, slope, intercept and p-value (pval) from each test.
 \description{
 Uses non-parametric methods to test for trends in water quality data across years for each month. 
 This function assumes that the data are composed of monthly observations that are correlated within a year. 
-Note that this function is only appropriate for trends that are one-directional.
+Note that this function is only appropriate for trends that are one-directional and requires at least 6 datapoints 
+within a given month to test for trends.
 }
 \examples{
 waterobj <- importNCRNWater(Dir = "./Data/",

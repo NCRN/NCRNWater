@@ -9,7 +9,7 @@
 #' 
 #' @title getCharInfo
 #' 
-#' @description Retreives the metadata from a \code{Site} object or a \code{list} of such objects.
+#' @description Retrieves the metadata from a \code{Site} object or a \code{list} of such objects.
 #' 
 #' @inheritParams getChars
 #' @param object Either a \code{Characteristic} object or a \code{Site} object, a \code{Park} object or a \code{list} of such objects.
@@ -23,7 +23,7 @@
 #' \item{"CategoryDisplay}{The display name for the category of the characteristic.}
 #' \item{"Details"}{A description of the characteristic as needed. Stored as a length 1 character vector.}
 #' \item{"Units"}{The units of measurement of the characteristic. Stored as a length 1 character vector.}
-#' \item{"Data'}{A \code{data.frame} containing the water quality data. Should have cloumns representing the date, measurment, any QAQC flags etc. for each measurement.}
+#' \item{"Data'}{A \code{data.frame} containing the water quality data. Should have columns representing the date, measurement, any QAQC flags etc. for each measurement.}
 #' \item{"LowerPoint","UpperPoint}{Indicates the assessment points. Values lower than the lower point are considered to have failed the assessement, whereas values higher than the higher point are considered failures.}
 #' \item{"LowerType","UpperType"}{The type of assessment indicated by the lower and upper points.}
 #' \item{"LowerDescription","UpperDescription"}{A description of the lowerand upper assesements point.}

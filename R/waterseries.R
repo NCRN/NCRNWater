@@ -31,12 +31,12 @@
 #' @param assessment Vector indicating if assessment lines will be marked on the graph. See details below.
 #' @param layers Defaults to c("points","line") Indicates which layers you wish to see on the plot. 
 #' @param yname Text, defaults to \code{NA}. A label for the y-axis. If an \code{Characteristic}, \code{Site}, or \code{Park} object 
-#' is passed to \code{object}, then the y-label will default to the Display Name and Units for the Characteristic, unless overwitten by the 
+#' is passed to \code{object}, then the y-label will default to the Display Name and Units for the Characteristic, unless overwritten by the 
 #' \code{yname} argument. If a \code{data.frame} is passed then the y-label will either be the text from \code{yname} or blank 
 #' if \code{yname} is left as \code{NA}.
 #' @param xname Text, defaults to \code{NA}. A label for the x-axis. If a \code{Characteristic}, \code{Site}, or \code{Park} 
 #' object is passed to \code{object}, then the x-label will default to whatever is indicated in \code{by}, 
-#' unless overwitten by the \code{xname} argument. If a \code{data.frame} is passed then the x-label will either be the text 
+#' unless overwritten by the \code{xname} argument. If a \code{data.frame} is passed then the x-label will either be the text 
 #' from \code{xname} or blank if \code{xname} is left as \code{NA}.
 #' 
 #' @param censored If \code{FALSE} assumes all data points are true measurements. If \code{TRUE} plots the minimum or maximum 
@@ -52,7 +52,7 @@
 #' \code{Display Name} slot and "park" with the \code{Park}'s short name from the \code{ShortName} slot. 
 #' @param title A title in the graph in quotes. Defaults to \code{NULL}, which indicates no title should be used. 
 #' @param colors a character vector with the colors for the points and lines. 
-#' @param assesscolor a length one charactter vector with the color for the assessment lines.
+#' @param assesscolor a length one character vector with the color for the assessment lines.
 #' @param sizes a length 3 numeric vector with the sizes for the points, line connecting the points and assessment lines.
 #' @param legend  a vector indicating where the legend position. Can be: "none","left","right","top","bottom" or a two element 
 #' numeric vector.

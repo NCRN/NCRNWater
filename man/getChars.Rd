@@ -15,7 +15,7 @@ getChars(object, parkcode = NA, sitecode = NA, charname = NA, category = NA)
 
 \item{charname}{Name of one or more characteristics, in quotes. Only those characteristics will be returned.}
 
-\item{category}{One or more categories of characteristics, in quotes. Only those categories of charateristics will be returned.}
+\item{category}{One or more categories of characteristics, in quotes. Only those categories of characteristics will be returned.}
 }
 \value{
 A list of one or more \code{Characteristic} objects.

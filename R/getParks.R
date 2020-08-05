@@ -5,7 +5,8 @@
 #' 
 #' @param object Either a \code{Park} object or a \code{list} of such objects.
 #' @param parkcode Park code of one or more parks, in quotes.
-#' @return  A list of one or more park objects. If \code{parkcode} is specified, only parks with those park codes will be returned. If no parks are matched by \code{parkcode} then the funciton will return \code{NULL}
+#' @return  A list of one or more park objects. If \code{parkcode} is specified, only parks with those park codes will be returned. 
+#' If no parks are matched by \code{parkcode} then the function will return \code{NULL}
 #' 
 #' @export
 
