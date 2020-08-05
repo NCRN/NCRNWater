@@ -6,7 +6,7 @@ Date: 2020-08-05
 Author: John Paul Schmit, Aaron Weed, Kate Miler
 Maintainer: John Paul Schmit <john_schmit@nps.gov>
 Encoding: UTF-8
-Description: This pacakge is designed to analyze and visualize data from the
+Description: This package is designed to analyze and visualize data from the
     National Park Service Inventory and Monitoring Program. Package was originally
     designed for the National Capital Region, and has been expanded to cover the 
     Northeast Temperate Network.
