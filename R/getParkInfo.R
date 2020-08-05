@@ -2,7 +2,7 @@
 #' @include getParks.R
 #' @title getParkInfo
 #' 
-#' @description Retreives park information from an \code{Park} object or a \code{list} of such objects.
+#' @description Retrieves park information from an \code{Park} object or a \code{list} of such objects.
 #' 
 #' @param object Either a \code{Park} object or a \code{list} of such objects.
 #' @param parkcode Code of one or more parks, in quotes. Only data from parks whose code is included in parkcode is returned.

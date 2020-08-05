@@ -34,7 +34,7 @@ object a \code{Site} object, a \code{Park} object or a \code{list} of such objec
 \item{charname}{Name, in quotes, #' of a single \code{Characteristic} whose data should be graphed. This is required unless 
 \code{category} is specified or \code{object} is a \code{data.frame}.}
 
-\item{category}{Name, in quotes, #' of a single catogory of characteristics whose data should be graphed. This is required unless 
+\item{category}{Name, in quotes, #' of a single category of characteristics whose data should be graphed. This is required unless 
 \code{charname} is specified or \code{object} is a \code{data.frame}.}
 
 \item{by}{Indicates how the data for the boxplot should be grouped. A character variable in quotes. Choices are:
@@ -44,19 +44,19 @@ object a \code{Site} object, a \code{Park} object or a \code{list} of such objec
 all February data in another, etc.}
 \item{"site}{If more than one site is included in the input object, this will produce a different box for each site.}
 \item{"park"}{If more than one park is included int he input object, this will produce a different box for each park.}
-\item{"char"}{If a single category of charactersitics is chosen, this will produce a different box for each of
+\item{"char"}{If a single category of characteristics is chosen, this will produce a different box for each of
 the component characteristics.}
 }}
 
-\item{assessment}{Vector indicating if assessment points will be maked on the graph. See details below.}
+\item{assessment}{Vector indicating if assessment points will be drawn on the graph. See details below.}
 
 \item{yname}{Text, defaults to \code{NA}. A label for the y-axis. If an \code{Characteristic}, \code{Site}, or \code{Park} object 
-is passed to \code{object}, then the y-label will default to the Display Name and Units for the Charecteristic, unless overwitten by
+is passed to \code{object}, then the y-label will default to the Display Name and Units for the Characteristic, unless overwritten by
  the \code{yname} argument. If a \code{data.frame} is passed then the y-label will either be the text from \code{yname} or blank 
  if \code{yname} is left as \code{NA}.}
 
 \item{xname}{Text, defaults to \code{NA}. A label for the x-axis. If a \code{Characteristic}, \code{Site}, or \code{Park} object is 
-passed to \code{object}, then the x-label will default to whatever is indicated in \code{by}.unless overwitten by the \code{xname} 
+passed to \code{object}, then the x-label will default to whatever is indicated in \code{by}.unless overwritten by the \code{xname} 
 argument. If a \code{data.frame} is passed then the x-label will either be the text from \code{xname} or blank if \code{xname} is 
 left as \code{NA}.}
 
@@ -88,8 +88,8 @@ Produces box plots from water data.
 \details{
 The \code{assessment} argument determines if lines representing the assessment points should be drawn on the graph. 
 If \code{FALSE} then no lines will be drawn. If \code{TRUE}, the default, then the upper and lower assessment points indicated 
-in \code{object}'s \code{Character} objects will be used to draw the lines. Note that if there are multiple assessemnt points, 
-for example if diffrerent sites have different points, or if there is both an upper and lower point, they will all be drawn. If 
+in \code{object}'s \code{Character} objects will be used to draw the lines. Note that if there are multiple assessment points, 
+for example if different sites have different points, or if there is both an upper and lower point, they will all be drawn. If 
 a \code{vector} of numbers is passed to \code{assessment} instead then those will serve as the assessment points and lines will 
 be drawn accordingly. Note that if \code{obejct} is a \code{data.frame} then the only way to draw assessment points is by passing 
 a \code{numeric vector} to \code{assessment}.

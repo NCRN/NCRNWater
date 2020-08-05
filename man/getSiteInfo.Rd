@@ -13,7 +13,7 @@ getSiteInfo(object, parkcode = NA, sitecode = NA, info)
 
 \item{sitecode}{Site code of one or more sites, in quotes.}
 
-\item{info}{Type of infromation to return. One of several options, in quotes.
+\item{info}{Type of information to return. One of several options, in quotes.
 \describe{
 \item{"SiteCode"}{The default. Returns the site code.}
 \item{"SiteName"}{Returns the name of the site.}
@@ -30,7 +30,7 @@ getSiteInfo(object, parkcode = NA, sitecode = NA, info)
 A vector of information for each site.
 }
 \description{
-Retreives the metadata from a \code{Site} object or a \code{list} of such objects.
+Retrieves the metadata from a \code{Site} object or a \code{list} of such objects.
 }
 \details{
 If \code{object} is a \code{list} or a \code{Park} object, then the list is filtered using both the \code{parkcode} and \code{sitecode} arguments. If \code{object} is a \code{Site} then both \code{parkcode} and \code{sitecode} are ignored.

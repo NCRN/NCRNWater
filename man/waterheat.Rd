@@ -30,18 +30,18 @@ single \code{Characteristic} whose data should be graphed.}
 \item{category}{Required if \code{object} is not a \code{data.frame} and \code{charname} is not specified. Name, in quotes, of a 
 single category of \code{Characteristic}s whose data should be graphed.}
 
-\item{by}{Indicates how the data for the heatmnp should be grouped. A text variable in quotes. Choices are:
+\item{by}{Indicates how the data for the heatmap should be grouped. A text variable in quotes. Choices are:
 \describe{
 \item{"month"}{ Will produce a heatmap where each row is a month and each column a year.}
 \item{"sitey}{Will provide a heatmap where each row corresponds to a site, and each column is a year.}
-\item{'sites}{will privde a heatmap where each row corresponds to a site and each column is a season-year combination sucah as Win-11. 
+\item{'sites}{will provide a heatmap where each row corresponds to a site and each column is a season-year combination such as Win-11. 
 For this graph Winter is Dec-Feb, Spring is Mar-May, Summer is Jun-Aug and Fall is Sept-Nov}
-\item{"sitem}{Will provide a heatmap where each row corresponds ot a site and each column is month X year combination - such as Jan-11,
+\item{"sitem}{Will provide a heatmap where each row corresponds to a site and each column is month X year combination - such as Jan-11,
  Feb-11 etc.}
 }}
 
 \item{yname}{Text, defaults to \code{NA}. A label for the y-axis. The y-label will default to whatever is chosen in \code{by}. 
-unless overwitten by the \code{yname} argument.}
+unless overwritten by the \code{yname} argument.}
 
 \item{xname}{Text, defaults to \code{NA}. A label for the x-axis. If left as \code{NA} and \code{by} is "month" then \code{xname}
 defaults to "year", if \code{by} is "Site" then \code{xname} will be "Date".}
@@ -50,13 +50,13 @@ defaults to "year", if \code{by} is "Site" then \code{xname} will be "Date".}
 is "month", the tick labels will be the three letter abbreviation for the month, if \code{by} is "site", and object is a \code{Site} 
 or \code{Park} object, then the tick labels will be the site names.}
 
-\item{title}{A title in the graph in quotes. Defauls to \code{NULL}, which indicates no title should be used.}
+\item{title}{A title in the graph in quotes. Defaults to \code{NULL}, which indicates no title should be used.}
 
 \item{ltitle}{The title for the legend in quotes. Defaults to \code{NA}. If left as \code{NA} and \code{object} is a \code{Park},
 \code{Site}, or \code{Characteristic} object, the title will be the characteristic or category name and units.}
 
 \item{stat}{Used to determine cell values when more than one observation corresponds to a single cell. One of four options:"mean",
-"median",min" or "max", corresponing to the mean (the default), the median, the minimum or the maximum of all values for that cell.}
+"median",min" or "max", corresponding to the mean (the default), the median, the minimum or the maximum of all values for that cell.}
 
 \item{siteorder}{The order in which sites should be displayed when \code{by} is "sitem" or "sitey". If left as \code{NA} then the 
 order will be determined by the order in which \code{Park} objects are in \code{object}, and/or the order of the \code{Site} objects
