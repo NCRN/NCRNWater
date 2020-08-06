@@ -111,18 +111,17 @@ setMethod(f="nonparTrends", signature = c(object = "data.frame"),
      num_samps <- df %>% group_by(month) %>% summarise(num_samps = sum(!is.na(ValueCen)), .groups = 'drop')
      trendsres2 <- merge(trendsres, num_samps, by = "month", all.x = TRUE, all.y = TRUE)
      
-     results <- trendsres2 %>% mutate(message = ifelse(num_samps >= 6, 
-                                                  case_when(!is.na(pval) & pval > 0 & pval < 0.05 & slope > 0 ~ 
-                                                              paste0("There was a significant increasing trend of ", 
-                                                              paste0(round(slope, 4)), " ", paste0(units), " of ",  
-                                                              paste0(displayname), " per year for ", paste0(month), "."),
-                                                            !is.na(pval) & pval > 0 & pval < 0.05 & slope < 0 ~ 
-                                                              paste0("There was a significant decreasing trend of ", 
-                                                              paste0(round(slope,4)), " ", paste0(units), " of ",  
-                                                              paste0(displayname), " per year for ", paste0(month), "."),
-                                                            !is.na(pval) & (pval == 0 | pval > 0.05) ~ paste0("no trend"),
-                                                            is.na(pval) ~ paste0("Too few data points.")),
-                                                    paste0("Too few data points")),
+     results <- trendsres2 %>% mutate(message = case_when(num_samps >= 6 & !is.na(pval) & pval > 0 & pval <=0.05 & slope > 0 ~ 
+                                                            paste0("There was a significant increasing trend of ", 
+                                                            paste0(round(slope, 4)), " ", paste0(paramunits), " of ",  
+                                                            paste0(displayname), " per year for ", paste0(month), "."),
+                                                          num_samps >= 6 & !is.na(pval) & pval > 0 & pval <=0.05 & slope < 0 ~ 
+                                                            paste0("There was a significant decreasing trend of ", 
+                                                            paste0(round(slope,4)), " ", paste0(paramunits), " of ",  
+                                                            paste0(displayname), " per year for ", paste0(month), "."),
+                                                          num_samps >= 6 & !is.na(pval) & pval > 0.05 ~ paste0("no trend"),
+                                                          num_samps >= 6 & (is.na(pval) | pval == 0) ~ paste0("Too few data points."),
+                                                          num_samps < 6  ~ paste0("Too few data points")),
                                       modeled = TRUE)
 
       } else if(any(trends_test %in% c("Error", "Warning"))){
@@ -160,7 +159,7 @@ setMethod(f="nonparTrends", signature = c(object = "data.frame"),
                 intercept = NA,
                 pval = NA,
                 modeled = FALSE,
-                message = paste0("Too few data points.")) %>%
+                message = paste0("Too few data points."), .groups = "drop") %>%
       ungroup() %>% droplevels() %>%
       select(month, slope, intercept, pval, message, modeled) %>% unique()
 
@@ -173,16 +172,16 @@ setMethod(f="nonparTrends", signature = c(object = "data.frame"),
 
     trends <- trends_mon %>% hoist(cenken, slope = "slope", intercept = "intercept", pval="p") %>%
                              select(month, slope, intercept, pval) %>%
-                             mutate(message = ifelse(pval  >0 & pval <0.05 & slope > 0,
-                                                paste0("There was a significant increasing trend of ",
-                                                paste0(round(slope, 4)), " ", paste0(paramunits), " of ",  
-                                                paste0(displayname), " per year for ", month, "."),
-                                                  ifelse(pval > 0 & pval <0.05 & slope < 0,
-                                                    paste0("There was a significant decreasing trend of ",
-                                                    paste0(round(slope,4)), " ", paste0(paramunits), " of ",  
-                                                    paste0(displayname), " per year for ", month, "."),
-                                              paste0("no trend"))),
-                               modeled = TRUE)
+                             mutate(message = case_when(pval > 0 & pval < 0.05 & slope > 0 ~
+                                                          paste0("There was a significant increasing trend of ",
+                                                          paste0(round(slope, 4)), " ", paste0(paramunits), " of ",  
+                                                          paste0(displayname), " per year for ", month, "."),
+                                                        pval > 0 & pval < 0.05 & slope < 0 ~
+                                                          paste0("There was a significant decreasing trend of ",
+                                                          paste0(round(slope,4)), " ", paste0(paramunits), " of ",  
+                                                          paste0(displayname), " per year for ", month, "."),
+                                                        TRUE ~ paste0("no trend")),
+                                    modeled = TRUE)
 
     results <- if(all(is.na(month_drops$month)) & nrow(trends)>0){
                   trends
