@@ -66,7 +66,7 @@ setMethod(f = "nonparTrends", signature = c(object = "NCRNWaterObj"),
 
             callGeneric(object = watdata, parkcode = parkcode, sitecode = sitecode, 
                         charname = charname, category = category, info = info, paramunits = paramunits, 
-                        displayname = displayname)
+                        displayname = displayname, censored = censored)
                       })
 
 setMethod(f="nonparTrends", signature = c(object = "data.frame"),
@@ -82,7 +82,6 @@ setMethod(f="nonparTrends", signature = c(object = "data.frame"),
          call. = FALSE)
   }
             
-  
      
   if(is.na(charname) && is.na(category)) stop("Must specify a charname or a category.")
   if(nrow(object)==0) stop("The specified site and measurement returned a data frame with 0 records.")    
@@ -103,7 +102,8 @@ setMethod(f="nonparTrends", signature = c(object = "data.frame"),
                      error = function(e) {"Error"},
                      warning = function(w) {"Warning"})
 
-   if(all(!trends_test %in% c("Error", "Warning"))){
+
+   if(all(!trends_test %in% c("Error"))==TRUE){
      trends1 <- trends_fun(df)
      trendsres <- subset(trends1$data[[2]], !is.na(conc))
      names(trendsres)[names(trendsres) == 'p'] <- 'pval'
@@ -121,24 +121,26 @@ setMethod(f="nonparTrends", signature = c(object = "data.frame"),
                                                             paste0(displayname), " per year for ", paste0(month), "."),
                                                           num_samps >= 6 & !is.na(pval) & pval > 0.05 ~ paste0("no trend"),
                                                           num_samps >= 6 & (is.na(pval) | pval == 0) ~ paste0("Too few data points."),
-                                                          num_samps < 6  ~ paste0("Too few data points")),
+                                                          num_samps < 6  ~ paste0("Too few data points.")),
                                       modeled = TRUE)
 
-      } else if(any(trends_test %in% c("Error", "Warning"))){
+      } else if(all(!trends_test %in% c("Error"))==FALSE){
 
      results <- data.frame(month = NA, slope = NA, intercept = NA, pval = NA,
-                       message = paste0("Too few data points."),
+                       message = paste0("Model failed to converge."),
                        modeled = FALSE)
    }
 
-  } else if(censored == TRUE) {
+  } 
+  
+  if(censored == TRUE) {
 
     if(any(is.na(df$ValueCen))){
       num_nas<- nrow(df)- nrow(df %>% filter(!is.na(ValueCen)))
       print(paste0("Warning: There were ", num_nas,
                    " missing values in the ValueCen field that
                    were deleted before running this function.
-                   This may have baised the analysis."))
+                   This may have biased the analysis."))
     }
 
     cenken_month<-function(df){
@@ -153,7 +155,7 @@ setMethod(f="nonparTrends", signature = c(object = "data.frame"),
              adjValueCen = ifelse(Censored==TRUE, max(ValueCen, na.rm = TRUE),
                                   Value)) %>% ungroup()
 
-    month_drops<- df2 %>% filter(num_meas<6 | pct_true<0.5) %>%
+    month_drops<- df2 %>% filter(num_meas < 6 | pct_true < 0.5) %>%
       group_by(Category, Characteristic, Site, Park, month) %>%
       summarise(slope = NA,
                 intercept = NA,
@@ -168,30 +170,30 @@ setMethod(f="nonparTrends", signature = c(object = "data.frame"),
     df_mon <- month_include %>% group_by(month) %>% nest()
 
     trends_mon <- df_mon %>% mutate(cenken = map(data, cenken_month)) %>%
-                             select(month, cenken) %>% ungroup()
+                             select(month, cenken) %>% ungroup() 
 
     trends <- trends_mon %>% hoist(cenken, slope = "slope", intercept = "intercept", pval="p") %>%
                              select(month, slope, intercept, pval) %>%
-                             mutate(message = case_when(pval > 0 & pval < 0.05 & slope > 0 ~
+                             mutate(message = case_when(pval > 0 & pval <= 0.05 & slope > 0 ~
                                                           paste0("There was a significant increasing trend of ",
                                                           paste0(round(slope, 4)), " ", paste0(paramunits), " of ",  
                                                           paste0(displayname), " per year for ", month, "."),
-                                                        pval > 0 & pval < 0.05 & slope < 0 ~
+                                                        pval > 0 & pval <= 0.05 & slope < 0 ~
                                                           paste0("There was a significant decreasing trend of ",
-                                                          paste0(round(slope,4)), " ", paste0(paramunits), " of ",  
+                                                          paste0(round(slope, 4)), " ", paste0(paramunits), " of ",  
                                                           paste0(displayname), " per year for ", month, "."),
                                                         TRUE ~ paste0("no trend")),
                                     modeled = TRUE)
 
-    results <- if(all(is.na(month_drops$month)) & nrow(trends)>0){
+    results <- if(all(is.na(month_drops$slope)) & nrow(trends)>0){
                   trends
-                } else if(all(is.na(month_drops$month)) & nrow(trends)==0){
+                } else if(all(is.na(month_drops$slope)) & nrow(trends)==0){
                   data.frame(slope = NA, intercept = NA, pval = NA,
                              message = paste0("Too few data points."),
                              modeled = FALSE)
-                } else if(!any(is.na(month_drops$month)) & nrow(trends)>0){
+                } else if(any(!is.na(month_drops$month)) & nrow(trends)>0){
                   rbind(trends, month_drops)
-                } else if(!any(is.na(month_drops$month)) & nrow(trends)==0){
+                } else if(any(!is.na(month_drops$month)) & nrow(trends)==0){
                   month_drops
     }
 
