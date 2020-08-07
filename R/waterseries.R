@@ -76,7 +76,7 @@ setGeneric(name="waterseries",function(object, parkcode=NA, sitecode=NA,charname
                                        assessment=TRUE,
               layers=c("points","line"), xname=NA, yname=NA, labels=NA, title=NULL, colors=NA, assesscolor="red", 
               sizes=c(3, 0.8, 1.1), censored = FALSE, deseason = FALSE,
-              legend="bottom",webplot=FALSE,...)
+              legend="bottom", webplot=FALSE,...)
   {standardGeneric("waterseries")},signature=c("object") )
 
 
@@ -95,7 +95,7 @@ setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
                                  
 
     PlotData <- PlotData %>% group_by(Category, Characteristic, Site, Park, month) %>% 
-      mutate(num_meas = sum(!is.na(Value)), 
+      mutate(num_meas = sum(!is.na(ValueCen)), 
              pct_true = sum(ifelse(Censored == FALSE, 1, 0))/sum(!is.na(ValueCen)),
              adjValueCen = ifelse(Censored == TRUE, max(ValueCen, na.rm = TRUE), Value)) %>% 
       ungroup() %>% arrange(month)
@@ -164,24 +164,25 @@ setMethod(f="waterseries", signature=c(object="data.frame"),
                   
                 } else if(deseason == TRUE){
                   
-                  df_mon <- object %>% filter(num_meas>=4 && pct_true>=0.5) %>% droplevels() %>% arrange(month)
-
+                  df_mon <- object %>% filter(num_meas>=6) %>% droplevels() %>% arrange(month)
+                  
                   if(nrow(df_mon)==0)stop("Too few data points to plot.")
 
-                  ggplot(df_mon, aes(x = Date, y = adjValueCen, color = Censored, group = Censored))+
-                    {if ("points" %in% layers) geom_point(size = sizes[1])}+
-                    {if (is.numeric(assessment)) geom_hline(yintercept = assessment, color = assesscolor, 
-                                                            linetype = "dashed", size = sizes[3])} +
+                  ggplot(df_mon, aes(x = Xaxis, y = adjValueCen, color = Censored, group = Censored))+
+                    geom_point(size = sizes[1])+
                     labs(title = title, y = yname, x = xname) +
                     scale_color_manual(values = c("FALSE" = "blue", "TRUE" = "red"),
                                        labels = c("FALSE" = "True Value", "TRUE"= "Censored"))+
                     theme_bw() +
                     theme(panel.grid = element_blank(), legend.title = element_blank(), legend.position = legend)+
-                    facet_wrap(~month)
+                    facet_wrap(~month)+
+                  {if (is.numeric(assessment)) geom_hline(yintercept = assessment, color = assesscolor, 
+                                                          linetype = "dashed", size = sizes[3])} 
                 } # End of deseason = TRUE
                 
               } else if (censored == FALSE){
                 if(deseason == FALSE){
+                  
                   ggplot(object, aes(x = Xaxis, y = Value))+
                     {if ("points" %in% layers) geom_point(aes(color = Grouper, shape = Grouper), size = sizes[1]) }+
                     {if ("line" %in% layers) geom_line(aes(color = Grouper), size = sizes[2])} +
@@ -198,17 +199,16 @@ setMethod(f="waterseries", signature=c(object="data.frame"),
 
                   
                   } else if(deseason == TRUE){
-                  
-                  df_mon2 <- object %>% filter(num_meas>=4) %>% droplevels() %>% arrange(month)
+                    
+                  df_mon2 <- object %>% filter(num_meas>=6) %>% droplevels() %>% arrange(month)
                   
                   if(nrow(df_mon2)==0)stop("Too few data points to plot.")
 
-                  ggplot(df_mon2, aes(x = Date, y = Value))+
-                    {if ("points" %in% layers) geom_point(size = sizes[1], color='blue')}+
-                    #{if ("line" %in% layers) geom_line(aes(color = Grouper), size = sizes[2])} +
+                  ggplot(df_mon2, aes(x = Xaxis, y = Value))+
+                    geom_point(aes(color = Grouper, shape = Grouper), size = sizes[1])+
                     {if (is.na(colors)) viridis::scale_color_viridis(name = "legend", labels = labels, discrete = T)}+
                     {if (!is.na(colors)) scale_color_manual(name = "legend", labels = labels, values = colors)}+
-                    scale_shape_manual(name = "legend", labels = labels, 
+                    scale_shape_manual(name = "legend", labels = labels,
                                        values = c(16, 15, 17, 18, 1, 0, 2, 5, 6, 3, 4, 8, 13, 9, 12)[1:nlevels(Grouper)]) +
                     {if (is.numeric(assessment)) geom_hline(yintercept = assessment, color = assesscolor,
                                                             linetype = "dashed", size = sizes[3])} +
