@@ -522,9 +522,10 @@ MD <- MD %>% mutate(Category = case_when(CharacteristicName %in% physical ~ past
                                          CharacteristicName %in% nutrients ~ paste0("nutrients"),
                                          CharacteristicName %in% other ~ paste0("other_chem"), 
                                          TRUE ~ "other chemistry"),
-                    CategoryDisplay = case_when(Category == "physical" ~ paste0("In situ physical parameter"), 
-                                                Category == "nutrients" ~ paste0("Lab-derived nutrient"),
-                                                Category == "other chemistry" ~ paste0("Other lab-derived parameter"))
+                    CategoryDisplay = CharacteristicName
+                    # CategoryDisplay = case_when(Category == "physical" ~ paste0("In situ physical parameter"), 
+                                                # Category == "nutrients" ~ paste0("Lab-derived nutrient"),
+                                                # Category == "other chemistry" ~ paste0("Other lab-derived parameter"))
                     )
 
 #-------
