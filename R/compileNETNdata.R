@@ -367,7 +367,7 @@ temp2 <- suppressWarnings(
 	mutate(Result.Value.Text = as.numeric(Result.Value.Text)) %>%
 	dplyr::filter(!is.na(Result.Value.Text)) %>%
 	group_by(StationID, Visit.Start.Date, Local.Characteristic.Name) %>%
-	dplyr::summarize(Result.Value.Text = median(as.numeric(Result.Value.Text))) %>%
+	dplyr::summarize(Result.Value.Text = median(as.numeric(Result.Value.Text)), .groups = 'keep') %>%
 	ungroup() %>%
 	spread(key = Local.Characteristic.Name, value = Result.Value.Text) %>%
 	mutate(NPSTORET.Org.ID.Code = "NETN")	%>% 
@@ -426,7 +426,7 @@ active_metrics <- c('AL_ugL', 'ANC_ueqL', 'BP_mmHg', 'Ca_ueqL', 'ChlA_ugL',
                     'DOsat_pct', 'K_ueqL', 'Mg_ueqL', 'Na_ueqL', 'NH4_mgL',
                     'NO3_ueqL', 'PenetrationRatio', 'pH', 'SDepth1_m',
                     'SO4_ueqL', 'SpCond_uScm', 'Temp_C','TN_mgL',
-                    'TP_ugL')
+                    'TP_ugL', 'Turbidity_NTU')
 
 if(active == TRUE){
   waterDat <- waterDat %>% filter(`Local Characteristic Name` %in% active_metrics) %>% droplevels()
@@ -511,7 +511,21 @@ MD$DataType <- "numeric"
 MD$LowerPoint <- as.numeric(NA) #needs to be Num
 MD$UpperPoint <- as.numeric(NA) #needs to be Num
 MD$DataName <- MD$CharacteristicName
-MD$Category <- MD$CharacteristicName
+
+physical <- c("Discharge_cfs", "DO_mgL", "DOsat_pct", "PenetrationRatio",
+              "pH", "SDepth1_m", "SpCond_uScm", "Temp_C", "Turbidity_NTU")
+nutrients <- c("ANC_ueqL", "ChlA_ugL", "DOC_mgL", "TN_mgL", "TP_ugL") 
+other <- c("Ca_ueqL", "Cl_ueqL", "K_ueqL", "Mg_ueqL", "Na_ueqL", "NH4_mgL", 
+           "NO3_ueqL", "SO4_ueqL") 
+
+MD <- MD %>% mutate(Category = case_when(CharacteristicName %in% physical ~ paste0("physical"),
+                                         CharacteristicName %in% nutrients ~ paste0("nutrients"),
+                                         CharacteristicName %in% other ~ paste0("other_chem"), 
+                                         TRUE ~ "other chemistry"),
+                    CategoryDisplay = case_when(Category == "physical" ~ paste0("In situ physical parameter"), 
+                                                Category == "nutrients" ~ paste0("Lab-derived nutrient"),
+                                                Category == "other chemistry" ~ paste0("Other lab-derived parameter"))
+                    )
 
 #-------
 # Lower and upper assessment points based on Tables in 2015 reports
