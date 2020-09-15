@@ -487,7 +487,7 @@ MD <- MD %>%
 	CharacteristicName == "SO4_ueqL" ~ "Sulfate",
 	CharacteristicName == "TN_mgL" ~ "Total Nitrogen",
 	CharacteristicName == "BP_mmHg" ~ "Air Pressure",
-	CharacteristicName == "DOsat_pct" ~ "Dissolved Oxygen",
+	CharacteristicName == "DOsat_pct" ~ "Dissolved Oxygen Saturation",
 	CharacteristicName == "DO_mgL" ~ "Dissolved Oxygen",
 	CharacteristicName == "pH" ~ "pH",
 	CharacteristicName == "SpCond_uScm" ~ "Specific Conductance",
