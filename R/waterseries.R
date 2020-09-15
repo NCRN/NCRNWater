@@ -165,10 +165,10 @@ setMethod(f="waterseries", signature=c(object="data.frame"),
                 } else if(deseason == TRUE){
                   
                   df_mon <- object %>% filter(num_meas>=6) %>% droplevels() %>% arrange(month)
-                  
+                  print(head(df_mon))
                   if(nrow(df_mon)==0)stop("Too few data points to plot.")
 
-                  ggplot(df_mon, aes(x = Xaxis, y = adjValueCen, color = Censored, group = Censored))+
+                  ggplot(df_mon, aes(x = Date, y = adjValueCen, color = Censored, group = Censored))+
                     geom_point(size = sizes[1])+
                     labs(title = title, y = yname, x = xname) +
                     scale_color_manual(values = c("FALSE" = "blue", "TRUE" = "red"),
@@ -199,13 +199,21 @@ setMethod(f="waterseries", signature=c(object="data.frame"),
 
                   
                   } else if(deseason == TRUE){
-                    
+                 
                   df_mon2 <- object %>% filter(num_meas>=6) %>% droplevels() %>% arrange(month)
-                  
+                  print(head(df_mon2))  
                   if(nrow(df_mon2)==0)stop("Too few data points to plot.")
+                  
+                  Grouper2<-switch(by,
+                                  char = df_mon2 %>% pull(Characteristic) %>% factor(., levels=unique(.)),
+                                  site = df_mon2 %>% pull(Site) %>% factor(., levels=unique(sort(.))),
+                                  park = df_mon2 %>% pull(Park) %>% factor(., levels=unique(sort(.))),
+                                  category = df_mon2 %>% pull(Category) %>% factor(., levels=unique(sort(.)))
+                  )
 
-                  ggplot(df_mon2, aes(x = Xaxis, y = Value))+
-                    geom_point(aes(color = Grouper, shape = Grouper), size = sizes[1])+
+                  ggplot(df_mon2, aes(x = Date, y = Value))+
+                    geom_point(aes(color = Grouper2, shape = Grouper2), size = sizes[1])+
+                    #geom_point(size = sizes[1])+
                     {if (is.na(colors)) viridis::scale_color_viridis(name = "legend", labels = labels, discrete = T)}+
                     {if (!is.na(colors)) scale_color_manual(name = "legend", labels = labels, values = colors)}+
                     scale_shape_manual(name = "legend", labels = labels,
