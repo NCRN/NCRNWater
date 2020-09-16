@@ -165,7 +165,7 @@ setMethod(f="waterseries", signature=c(object="data.frame"),
                 } else if(deseason == TRUE){
                   
                   df_mon <- object %>% filter(num_meas>=6) %>% droplevels() %>% arrange(month)
-                  print(head(df_mon))
+                  
                   if(nrow(df_mon)==0)stop("Too few data points to plot.")
 
                   ggplot(df_mon, aes(x = Date, y = adjValueCen, color = Censored, group = Censored))+
@@ -201,7 +201,7 @@ setMethod(f="waterseries", signature=c(object="data.frame"),
                   } else if(deseason == TRUE){
                  
                   df_mon2 <- object %>% filter(num_meas>=6) %>% droplevels() %>% arrange(month)
-                  print(head(df_mon2))  
+                  
                   if(nrow(df_mon2)==0)stop("Too few data points to plot.")
                   
                   Grouper2<-switch(by,
