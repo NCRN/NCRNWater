@@ -9,11 +9,11 @@ wcosinor(object, ...)
 \arguments{
 \item{object}{Either a \code{Characteristic} object a \code{Site} object, a \code{Park} object or a \code{list} of such objects.}
 
-\item{...}{Additional commands passed to \code{\link{getWData}} for filtering or subsetting hte data.}
+\item{...}{Additional commands passed to \code{\link{getWData}} for filtering or subsetting the data.}
 }
 \value{
 The results of a cosinor analysis.
 }
 \description{
-Does a cosinor analytsis on water quality data .
+Does a cosinor analysis on water quality data.
 }

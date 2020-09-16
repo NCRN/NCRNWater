@@ -30,7 +30,7 @@ getWData(
 
 \item{charname}{Name of one or more characteristics, in quotes. Only those characteristics will be returned.}
 
-\item{category}{One or more categories of characteristics, in quotes. Only those categories of charateristics will be returned.}
+\item{category}{One or more categories of characteristics, in quotes. Only those categories of characteristics will be returned.}
 
 \item{mindate}{The earliest date of data to include, in quotes. Date is in the same format as the \code{Date} in the \code{Data} slot.}
 
@@ -42,7 +42,9 @@ getWData(
 
 \item{wyears}{A numeric vector corresponding to water years. Only data from those water years will be returned.}
 
-\item{minvalue}{A number, indicating that only measurements wtih values greater than or equal to \code{minvalue} should be returned.}
+\item{minvalue}{A number, indicating that only measurements with values greater than or equal to \code{minvalue} should be returned.}
+
+\item{maxvalue}{A number, indicating that only measurements with values less than or equal to \code{maxvalue} should be returned.}
 
 \item{minobs}{An integer indicating the minimum number of observations needed for a dataset to be returned. T
 his is assessed after the other filters are applied. Defaults to 0.}
@@ -50,8 +52,6 @@ his is assessed after the other filters are applied. Defaults to 0.}
 \item{output}{Either "dataframe", the default, or "list". Determines the type of output when data from more than one 
 characteristic or site are returned. If \code{dataframe} is chosen then a single \code{data.frame} is returned. If \code{list} 
 is chosen then it returns a \code{list} of \code{data.frames}, where each element is a unique site and characteristic.}
-
-\item{maxalue}{A number, indicating that only measurements wtih values less than or equal to \code{maxvalue} should be returned.}
 }
 \value{
 A \code{data.frame} or \code{list} based on the \code{Data} slot of \code{Charactersitic} objects.

@@ -5,7 +5,7 @@
 \alias{Site-class}
 \title{S4 Class Definition for Site object in  NCRNWater}
 \description{
-An S4 class that contains the data from water monitoring from a single site. Data on indivudiaul characteristics will be stored as 
+An S4 class that contains the data from water monitoring from a single site. Data on individual characteristics will be stored as 
 one o more S4 objects in each site object. Site objects are themselves stored as a list within a park object.
 }
 \section{Slots}{
@@ -21,6 +21,6 @@ one o more S4 objects in each site object. Site objects are themselves stored as
 
 \item{\code{Type}}{The type of water body at the site - e.g. Stream, River, Lake, Ocean etc. Stored as a length 1 character \code{vector}.}
 
-\item{\code{Characteristics}}{A \code{list} of water quality charactertic objects that include the water quality data and associated meta-data.}
+\item{\code{Characteristics}}{A \code{list} of water quality characteristic objects that include the water quality data and associated meta-data.}
 }}
 

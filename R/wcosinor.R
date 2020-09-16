@@ -4,12 +4,13 @@
 #' @include NCRNWater_NCRNWaterObj_Class_def.R 
 #' @include getWData.R
 #' @importFrom season cosinor yrfraction
+#' @importFrom methods callGeneric
 #' @title wcosinor
 #' 
-#' @description Does a cosinor analytsis on water quality data .
+#' @description Does a cosinor analysis on water quality data.
 #' 
 #' @param object Either a \code{Characteristic} object a \code{Site} object, a \code{Park} object or a \code{list} of such objects.
-#' @param ... Additional commands passed to \code{\link{getWData}} for filtering or subsetting hte data.
+#' @param ... Additional commands passed to \code{\link{getWData}} for filtering or subsetting the data.
 #' 
 #' @return The results of a cosinor analysis.
 #' 

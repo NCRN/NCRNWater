@@ -6,11 +6,11 @@
 #' 
 #' @title getSiteInfo
 #' 
-#' @description Retreives the metadata from a \code{Site} object or a \code{list} of such objects.
+#' @description Retrieves the metadata from a \code{Site} object or a \code{list} of such objects.
 #' 
 #' @inheritParams getSites
 #' @param object Either a \code{Park} object or a \code{site} object or a \code{list} of such objects.
-#' @param info Type of infromation to return. One of several options, in quotes.
+#' @param info Type of information to return. One of several options, in quotes.
 #' \describe{
 #' \item{"SiteCode"}{The default. Returns the site code.}
 #' \item{"SiteName"}{Returns the name of the site.}
