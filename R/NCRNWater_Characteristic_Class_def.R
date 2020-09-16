@@ -7,18 +7,21 @@ setClassUnion(name="Num_or_DF",members= c("numeric","data.frame"))
 #' @description An S4 class that contains the data from water monitoring for a single water quality characteristic as a single site in a single park.   
 #' 
 #' @slot CharacteristicName The name of the water quality characteristic. Stored as a length 1 character vector. 
-#' @slot DisplayName A name for the characteristic suitable for dispaly on graphs, tables etc. Stored as a length 1 character vector.
+#' @slot DisplayName A name for the characteristic suitable for display on graphs, tables etc. Stored as a length 1 character vector.
 #' @slot Substrate The substrate of the characteristic, stored as a length 1 character vector. 
 #' @slot SampleFraction The sample fraction of the characteristic. Stored as a length 1 character vector. 
 #' @slot Category The category for the characteristic. Stored as a length 1 character vector.
-#' @slot CategoryDispaly The display name for the category, sutiable for graphs, tables etc. 
+#' @slot CategoryDisplay The display name for the category, suitable for graphs, tables etc. 
 #' @slot Details A description of the characteristic as needed. Stored as a length 1 character vector. 
 #' @slot Units  The units of measurement of the characteristic. Stored as a length 1 character vector. 
-#' @slot Data  A \code{data.frame} containing the water quality data. Should have cloumns representing the date, measurment, any QAQC flags etc. for each measurement.
-#' @slot LowerPoint,Upperpoint Indicates the assessment points. Values lower than the lower point are considered to have failed the assessement, whereas values higher than the higher point are considered failures. Can either be a length 1 numerical vector, or a \code{data.frame}  giving the lower assessment value for each measurement. The vector method should be used for assessments that do not change, whereas the \code{data.frame} is for assmesent that change based on the time of the year or other factors.
+#' @slot Data  A \code{data.frame} containing the water quality data. Should have columns representing the date, measurement, any QAQC flags etc. for each measurement.
+#' @slot LowerPoint,UpperPoint Indicates the assessment points. Values lower than the lower point are considered to have failed the assessment, 
+#' whereas values higher than the higher point are considered failures. Can either be a length 1 numerical vector, or a \code{data.frame} 
+#' giving the lower assessment value for each measurement. The vector method should be used for assessments that do not change, whereas the \code{data.frame} is for 
+#' assessment that change based on the time of the year or other factors.
 #' @slot LowerType,UpperType The type of assessment indicated by the lower and upper points. A length 1 character vector.
-#' @slot LowerDescription,UpperDescription A description of the lowerand upper assesements point. Stored as a length 1 character vector.
-#' @slot AssessmentDetails Additional description of the assessement point. Stored as a length 1 character vector.
+#' @slot LowerDescription,UpperDescription A description of the lower and upper assessments point. Stored as a length 1 character vector.
+#' @slot AssessmentDetails Additional description of the assessment point. Stored as a length 1 character vector.
 #' 
 #' @exportClass Characteristic
 

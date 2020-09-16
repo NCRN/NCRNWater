@@ -1,12 +1,12 @@
 Package: NCRNWater
 Type: Package
-Title: Data analysis and visualization for NPS I&M water monitoring.
-Version: 0.26.0
-Date: 2020-02-28
+Title: Data analysis and visualization for NPS I&M water monitoring
+Version: 0.26.1
+Date: 2020-08-05
 Author: John Paul Schmit, Aaron Weed, Kate Miler
 Maintainer: John Paul Schmit <john_schmit@nps.gov>
 Encoding: UTF-8
-Description: This pacakge is designed to analyze and visualize data from the
+Description: This package is designed to analyze and visualize data from the
     National Park Service Inventory and Monitoring Program. Package was originally
     designed for the National Capital Region, and has been expanded to cover the 
     Northeast Temperate Network.
@@ -19,6 +19,7 @@ Imports:
     ggplot2,
     lubridate,
     magrittr,
+    methods,
     plotly,
     purrr,
     readr,
@@ -27,10 +28,10 @@ Imports:
     viridis
 Suggests:
     RODBC,
-    stringr,
     NADA,
-    openair
-RoxygenNote: 7.0.2
+    openair,
+    stringr
+RoxygenNote: 7.1.0
 Collate:
     'NCRNWater_Park_Class_def.R'
     'NCRNWater_Site_Class_def.R'

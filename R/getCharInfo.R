@@ -9,7 +9,7 @@
 #' 
 #' @title getCharInfo
 #' 
-#' @description Retreives the metadata from a \code{Site} object or a \code{list} of such objects.
+#' @description Retrieves the metadata from a \code{Site} object or a \code{list} of such objects.
 #' 
 #' @inheritParams getChars
 #' @param object Either a \code{Characteristic} object or a \code{Site} object, a \code{Park} object or a \code{list} of such objects.
@@ -23,7 +23,7 @@
 #' \item{"CategoryDisplay}{The display name for the category of the characteristic.}
 #' \item{"Details"}{A description of the characteristic as needed. Stored as a length 1 character vector.}
 #' \item{"Units"}{The units of measurement of the characteristic. Stored as a length 1 character vector.}
-#' \item{"Data'}{A \code{data.frame} containing the water quality data. Should have cloumns representing the date, measurment, any QAQC flags etc. for each measurement.}
+#' \item{"Data'}{A \code{data.frame} containing the water quality data. Should have columns representing the date, measurement, any QAQC flags etc. for each measurement.}
 #' \item{"LowerPoint","UpperPoint}{Indicates the assessment points. Values lower than the lower point are considered to have failed the assessement, whereas values higher than the higher point are considered failures.}
 #' \item{"LowerType","UpperType"}{The type of assessment indicated by the lower and upper points.}
 #' \item{"LowerDescription","UpperDescription"}{A description of the lowerand upper assesements point.}
@@ -42,12 +42,13 @@
 #' 
 #' @export
 
-setGeneric(name="getCharInfo",function(object,parkcode=NA, sitecode=NA,charname=NA,category=NA,info){standardGeneric("getCharInfo")},
+setGeneric(name="getCharInfo",function(object,parkcode=NA, sitecode=NA,charname=NA,category=NA,info=NA){standardGeneric("getCharInfo")},
            signature=c("object") )
 
 setMethod(f="getCharInfo", signature=c(object="list"),
           function(object,parkcode, sitecode, charname, category, info){
-          
+            
+            if (is.na(info)) stop("Need to specify 'info" )
             if (info=="Data") return(lapply(object,FUN=getCharInfo, parkcode=parkcode, sitecode=sitecode, charname=charname, 
                                             category=category, info=info)) %>% 
               unlist(recursive=F) else 
@@ -59,6 +60,7 @@ setMethod(f="getCharInfo", signature=c(object="list"),
 #### Given one park get the sites and run again ####
 setMethod(f="getCharInfo", signature=c(object="Park"),
     function(object,parkcode, sitecode,charname,category,info){
+      if (is.na(info)) stop("Need to specify 'info'" )
       switch(info,
         ParkCode=, ParkShortName=, ParkLongName=, Network =#info from Park Object
         return(getParkInfo(object, parkcode=parkcode, info=info) %>% 
@@ -81,7 +83,8 @@ setMethod(f="getCharInfo", signature=c(object="Park"),
  #### Given one Site get the characteristics and run again ####
  setMethod(f="getCharInfo", signature=c(object="Site"),
     function(object,sitecode,charname,info){
-     switch(info,
+      if (is.na(info)) stop("Need to specify 'info'" )
+      switch(info,
               SiteCode=,SiteName=,coords=,type= 
         return(getSiteInfo(object, info=info) %>% 
                  rep(times=getChars(object=object, charname=charname, category=category) %>% length)), #info from Site Object
@@ -94,6 +97,7 @@ setMethod(f="getCharInfo", signature=c(object="Park"),
 #### Given one Characteristic get the info ####
 setMethod(f="getCharInfo", signature=c(object="Characteristic"),
           function(object,info){
+            if (is.na(info)) stop("Need to specify 'info'" )
             switch(info,
                    CharName = return(object@CharacteristicName),
                    DisplayName=return(object@DisplayName),

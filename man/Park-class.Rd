@@ -16,7 +16,7 @@ An S4 class that contains the data from water monitoring from a single park. Dat
 
 \item{\code{LongName}}{A long, formal name for the park. Stored as a length 1 character vector.}
 
-\item{\code{Network}}{The code for the Inventory & Montoirng network the park belongs to. Stored as a length 1 character vector.}
+\item{\code{Network}}{The code for the Inventory & Monitoring network the park belongs to. Stored as a length 1 character vector.}
 
 \item{\code{Sites}}{A list of \code{Site} objects associated with the park.}
 }}

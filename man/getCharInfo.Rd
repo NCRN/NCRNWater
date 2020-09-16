@@ -10,7 +10,7 @@ getCharInfo(
   sitecode = NA,
   charname = NA,
   category = NA,
-  info
+  info = NA
 )
 }
 \arguments{
@@ -22,7 +22,7 @@ getCharInfo(
 
 \item{charname}{Name of one or more characteristics, in quotes. Only those characteristics will be returned.}
 
-\item{category}{One or more categories of characteristics, in quotes. Only those categories of charateristics will be returned.}
+\item{category}{One or more categories of characteristics, in quotes. Only those categories of characteristics will be returned.}
 
 \item{info}{Type of information to return. One of several options, in quotes.
 \describe{
@@ -34,7 +34,7 @@ getCharInfo(
 \item{"CategoryDisplay}{The display name for the category of the characteristic.}
 \item{"Details"}{A description of the characteristic as needed. Stored as a length 1 character vector.}
 \item{"Units"}{The units of measurement of the characteristic. Stored as a length 1 character vector.}
-\item{"Data'}{A \code{data.frame} containing the water quality data. Should have cloumns representing the date, measurment, any QAQC flags etc. for each measurement.}
+\item{"Data'}{A \code{data.frame} containing the water quality data. Should have columns representing the date, measurement, any QAQC flags etc. for each measurement.}
 \item{"LowerPoint","UpperPoint}{Indicates the assessment points. Values lower than the lower point are considered to have failed the assessement, whereas values higher than the higher point are considered failures.}
 \item{"LowerType","UpperType"}{The type of assessment indicated by the lower and upper points.}
 \item{"LowerDescription","UpperDescription"}{A description of the lowerand upper assesements point.}
@@ -53,5 +53,5 @@ getCharInfo(
 Either a vector or a list with information for each character. Only the data option returns a list.
 }
 \description{
-Retreives the metadata from a \code{Site} object or a \code{list} of such objects.
+Retrieves the metadata from a \code{Site} object or a \code{list} of such objects.
 }

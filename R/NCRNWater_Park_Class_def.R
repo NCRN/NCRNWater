@@ -4,7 +4,7 @@
 #' @slot ParkCode A short code to designate the park, typically an NPS 4 letter code. Stored as a length 1 character vector. 
 #' @slot ShortName A short name for the park. Stored as a length 1 character vector. 
 #' @slot LongName  A long, formal name for the park. Stored as a length 1 character vector. 
-#' @slot Network The code for the Inventory & Montoirng network the park belongs to. Stored as a length 1 character vector.
+#' @slot Network The code for the Inventory & Monitoring network the park belongs to. Stored as a length 1 character vector.
 #' @slot Sites A list of \code{Site} objects associated with the park. 
 #' 
 #' @exportClass Park

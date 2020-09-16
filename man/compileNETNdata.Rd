@@ -8,6 +8,8 @@ compileNETNdata(
   path = "./Data/",
   export = TRUE,
   surface = TRUE,
+  active = TRUE,
+  restricted = TRUE,
   cleanEnv = TRUE
 )
 }
@@ -18,6 +20,12 @@ compileNETNdata(
 
 \item{surface}{\code{TRUE} or \code{FALSE}. Return only measurements representing the stream surface or lake epilimnion. 
 If \code{TRUE}, the median of the surface measurements from the top 2m of sampling are returned. Defaults to  \code{TRUE}.}
+
+\item{active}{\code{TRUE} or  \code{FALSE}. If \code{TRUE} only compiles metrics that are actively collected.
+If \code{FALSE} compiles all metrics stored in the database. Defaults to \code{TRUE}.}
+
+\item{restricted}{\code{TRUE} or \code{FALSE}. If \code{TRUE}, metrics within a site that have 4 or fewer
+measurements since monitoring began in 2006 are dropped.}
 
 \item{cleanEnv}{\code{TRUE} or  \code{FALSE}. Allows you to clean the global environment so that 
 only waterDat and MD are kept. Defaults to \code{TRUE}.}
@@ -37,11 +45,10 @@ Currently the Water Data list element can include (1) measurements at all sample
 The latter is to enable examining patterns in the stream surface or lake epilimnion over time and is currently (as of 11/1/2019) the data working 
 in the NCRNwater package.
 }
-\section{Warning}{
-
-}
-
 \examples{
-compileNETNdata(path = "C:/Data/", export = TRUE, surface = TRUE)
+# compile NETN water data for surface measurements and active metrics only,
+# and export to C:/Data.
+compileNETNdata(path = "C:/Data/", export = TRUE, surface = TRUE, active = TRUE, 
+  restricted = TRUE)
 
 }

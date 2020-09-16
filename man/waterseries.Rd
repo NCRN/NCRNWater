@@ -37,7 +37,7 @@ waterseries(
 \item{charname}{Required if \code{object} is not a \code{data.frame}. Name(s), in quotes, of one or more \code{Characteristic}s 
 whose data should be graphed.}
 
-\item{category}{One or more categories of characteristics, in quotes. Only those categories of charateristics will be returned.}
+\item{category}{One or more categories of characteristics, in quotes. Only those categories of characteristics will be returned.}
 
 \item{by}{Indicates how the data for the plot should be grouped. A text variable in quotes. Choices are:
 \describe{
@@ -54,11 +54,11 @@ each one.}
 
 \item{xname}{Text, defaults to \code{NA}. A label for the x-axis. If a \code{Characteristic}, \code{Site}, or \code{Park} 
 object is passed to \code{object}, then the x-label will default to whatever is indicated in \code{by}, 
-unless overwitten by the \code{xname} argument. If a \code{data.frame} is passed then the x-label will either be the text 
+unless overwritten by the \code{xname} argument. If a \code{data.frame} is passed then the x-label will either be the text 
 from \code{xname} or blank if \code{xname} is left as \code{NA}.}
 
 \item{yname}{Text, defaults to \code{NA}. A label for the y-axis. If an \code{Characteristic}, \code{Site}, or \code{Park} object 
-is passed to \code{object}, then the y-label will default to the Display Name and Units for the Characteristic, unless overwitten by the 
+is passed to \code{object}, then the y-label will default to the Display Name and Units for the Characteristic, unless overwritten by the 
 \code{yname} argument. If a \code{data.frame} is passed then the y-label will either be the text from \code{yname} or blank 
 if \code{yname} is left as \code{NA}.}
 
@@ -72,7 +72,7 @@ then the default will depend on the \code{by} argument. "site" will be labeled w
 
 \item{colors}{a character vector with the colors for the points and lines.}
 
-\item{assesscolor}{a length one charactter vector with the color for the assessment lines.}
+\item{assesscolor}{a length one character vector with the color for the assessment lines.}
 
 \item{sizes}{a length 3 numeric vector with the sizes for the points, line connecting the points and assessment lines.}
 
@@ -80,7 +80,7 @@ then the default will depend on the \code{by} argument. "site" will be labeled w
 quantification limit and color codes to distinguish true measurements from detection limits. Defaults to \code{FALSE}.}
 
 \item{deseason}{If \code{FALSE} will plot all data points on the same figure. If \code{TRUE} will split plots by month. 
-Defaults to \code{FALSE}. Currenly only implemented for censored = \code{TRUE}.}
+Defaults to \code{FALSE}.}
 
 \item{legend}{a vector indicating where the legend position. Can be: "none","left","right","top","bottom" or a two element 
 numeric vector.}
