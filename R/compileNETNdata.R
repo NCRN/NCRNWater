@@ -597,7 +597,7 @@ MD <- MD %>% mutate(
                          ParkCode == "MORR" & CharacteristicName == "SO4_ueqL" ~ 5200,
                          ParkCode == "MORR" & CharacteristicName == "Turbidity_NTU" ~ 50),
   Units = ifelse(CharacteristicName == "pH", paste0("pH units"), 
-                 ifelse(CharacteristicName == "PenetrationRatio", paste0("percent"),
+                 ifelse(CharacteristicName == "PenetrationRatio", paste0("pct"),
                         paste0(Units)))
 )
 
