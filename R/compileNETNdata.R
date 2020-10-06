@@ -513,10 +513,10 @@ MD$UpperPoint <- as.numeric(NA) #needs to be Num
 MD$DataName <- MD$CharacteristicName
 
 physical <- c("Discharge_cfs", "DO_mgL", "DOsat_pct", "PenetrationRatio",
-              "pH", "SDepth1_m", "SpCond_uScm", "Temp_C", "Turbidity_NTU")
+              "pH", "SDepth1_m", "SpCond_uScm", "Temp_C")
 nutrients <- c("ANC_ueqL", "ChlA_ugL", "DOC_mgL", "TN_mgL", "TP_ugL") 
 other <- c("Ca_ueqL", "Cl_ueqL", "K_ueqL", "Mg_ueqL", "Na_ueqL", "NH4_mgL", 
-           "NO3_ueqL", "SO4_ueqL") 
+           "NO3_ueqL", "SO4_ueqL", "Turbidity_NTU") 
 
 MD <- MD %>% mutate(Category = case_when(CharacteristicName %in% physical ~ paste0("physical"),
                                          CharacteristicName %in% nutrients ~ paste0("nutrients"),
