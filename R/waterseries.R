@@ -65,9 +65,9 @@
 #' @details  The \code{assessment} argument determines if lines representing the assessment values should be drawn on the graph. 
 #' If \code{FALSE} then no lines will be drawn. If \code{TRUE}, the default, then the upper and lower points indicated in 
 #' \code{object}'s \code{Character} objects will be used to draw the lines. Note that if there are multiple assessment points, 
-#' for example if diffrerent parks have different points, or if there is both an upper and lower point, they will all be drawn. 
-#' If a \code{vector} of numbers is passed to \code{assessemnt} instead then those will serve as the assessment values and lines will 
-#' be drawn accordingly. Note that if \code{obejct} is a \code{data.frame} then the only way to draw assessment lines is by passing a 
+#' for example if different parks have different points, or if there is both an upper and lower point, they will all be drawn. 
+#' If a \code{vector} of numbers is passed to \code{assessment} instead then those will serve as the assessment values and lines will 
+#' be drawn accordingly. Note that if \code{object} is a \code{data.frame} then the only way to draw assessment lines is by passing a 
 #' numeric \code{vector} to \code{assessment}.
 #' 
 #' @export
