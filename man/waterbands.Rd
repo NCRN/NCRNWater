@@ -47,15 +47,6 @@ whose data should be graphed.}
 \item{yname}{Text, defaults to \code{NA}. Used for y axis title}
 
 \item{...}{Additional arguments used to select and filter data passed to \code{\link{getWData}}}
-
-\item{by}{Indicates how the data for the plot should be grouped. A text variable in quotes. Choices are:
-\describe{
-\item{"park"}{If more than one park is included in the graph, this will produce a different line for each park.}
-\item{"site}{If more than one site is included in the graph, this will produce a different line for each site.}
-\item{"category"}{If more than one category is included in the graph, this will prodice a different line for each category.}
-\item{"char"}{The default. If more than one characteristic is included in the graph, this will produce a different line for 
-each one.} 
-}}
 }
 \value{
 Creates a plot that compares current with historic ranges
