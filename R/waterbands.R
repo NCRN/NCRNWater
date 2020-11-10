@@ -18,15 +18,6 @@
 #' 
 #' @param charname Required if \code{object} is not a \code{data.frame}. Name(s), in quotes, of one or more \code{Characteristic}s 
 #' whose data should be graphed.
-#' @param by Indicates how the data for the plot should be grouped. A text variable in quotes. Choices are:
-#' \describe{
-#' \item{"park"}{If more than one park is included in the graph, this will produce a different line for each park.}
-#' \item{"site}{If more than one site is included in the graph, this will produce a different line for each site.}
-#' \item{"category"}{If more than one category is included in the graph, this will prodice a different line for each category.}
-#' \item{"char"}{The default. If more than one characteristic is included in the graph, this will produce a different line for 
-#' each one.} 
-#' }
-#' 
 #' @param assessment Vector indicating if assessment lines will be marked on the graph. See details below.
 #' @param year_current Year that will be plotted separately. 
 #' @param year_historic First year to include in historic range calculations. Last year will be the year prior to year_current.
