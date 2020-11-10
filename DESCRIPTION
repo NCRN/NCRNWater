@@ -1,8 +1,8 @@
 Package: NCRNWater
 Type: Package
 Title: Data analysis and visualization for NPS I&M water monitoring
-Version: 0.26.1
-Date: 2020-08-05
+Version: 0.26.2
+Date: 2020-11-10
 Author: John Paul Schmit, Aaron Weed, Kate Miler
 Maintainer: John Paul Schmit <john_schmit@nps.gov>
 Encoding: UTF-8
@@ -31,7 +31,7 @@ Suggests:
     NADA,
     openair,
     stringr
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Collate:
     'NCRNWater_Park_Class_def.R'
     'NCRNWater_Site_Class_def.R'
@@ -51,6 +51,7 @@ Collate:
     'exceed.R'
     'importNCRNWater.R'
     'nonparTrends.R'
+    'waterbands.R'
     'waterbox.R'
     'waterheat.R'
     'wcosinor.R'
