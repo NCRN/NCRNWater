@@ -10,7 +10,9 @@
 #' @param export \code{TRUE} or \code{FALSE}. Export csv files to specified path. Defaults to \code{TRUE}.
 #' @param surface \code{TRUE} or \code{FALSE}. Return only measurements representing the stream surface or lake epilimnion. 
 #' If \code{TRUE}, the median of the surface measurements from the top 2m of sampling are returned. Defaults to  \code{TRUE}.
-#' @param active \code{TRUE} or  \code{FALSE}. If \code{TRUE} only compiles metrics that are actively collected.
+#' @param active_site \code{TRUE} or  \code{FALSE}. If \code{TRUE} only compiles data for sites that are actively being monitored.
+#' If \code{FALSE} compiles all sites stored in the database. Defaults to \code{TRUE}.
+#' @param active_metric \code{TRUE} or  \code{FALSE}. If \code{TRUE} only compiles metrics that are actively collected.
 #' If \code{FALSE} compiles all metrics stored in the database. Defaults to \code{TRUE}.
 #' @param restricted \code{TRUE} or \code{FALSE}. If \code{TRUE}, metrics within a site that have 4 or fewer
 #'  measurements since monitoring began in 2006 are dropped.
@@ -34,8 +36,8 @@
 #' 
 #' @export
 
-compileNETNdata <- function(path = "./Data/", export = TRUE, surface = TRUE, 
-                            active = TRUE, restricted = TRUE, cleanEnv = TRUE) {
+compileNETNdata <- function(path = "./Data/", export = TRUE, surface = TRUE, active_site = TRUE,
+                            active_metric = TRUE, restricted = TRUE, cleanEnv = TRUE) {
     
   if(!requireNamespace("RODBC", quietly = TRUE)){
     stop("Package 'RODBC' is needed for this function to work. Please install it.", call. = FALSE)
@@ -70,7 +72,7 @@ compileNETNdata <- function(path = "./Data/", export = TRUE, surface = TRUE,
 con <- RODBC::odbcConnect("NETNWQ")
 
 # grab all tables name from DB
-tableList<-RODBC::sqlTables(con)$TABLE_NAME %>% as.vector()
+tableList <- RODBC::sqlTables(con)$TABLE_NAME %>% as.vector()
 
 # BUILD LIST OF tables from DB connection
 dfList <- map(tableList, function(x) RODBC::sqlFetch(con, sqtable = x, rows_at_time = 1))
@@ -139,8 +141,8 @@ try(if(max(as.vector(tapply(
 )
 
 #split into two dataframes - measurments and quality flags.
-Chem_dat <- select(Chem,NPSTORET.Org.ID.Code, StationID, 
-                   Visit.Start.Date, SampleDepth,-contains("Flag"),
+Chem_dat <- select(Chem, NPSTORET.Org.ID.Code, StationID, 
+                   Visit.Start.Date, SampleDepth, -contains("Flag"),
                    contains("mgL"), contains("ugL"), contains("eqL"))
 
 Chem_flag <- select(Chem, StationID, Visit.Start.Date, contains("Flag"))
@@ -179,7 +181,7 @@ test <- suppressWarnings(test %>% mutate(limit = stringr::str_extract(Flag.Value
 
 #clean up
 Chem_long <- test %>%
-	dplyr::filter(!is.na(Result.Value.Text)) %>%  select(col_order)
+	dplyr::filter(!is.na(Result.Value.Text)) %>% select(col_order)
 
 #### Build WQ Insitu table ----
 
@@ -272,7 +274,9 @@ SD_long <- SD %>%
 	mutate(Upper.Quantification.Limit = NA) %>%
 	mutate(Lower.Quantification.Limit = NA) %>%
 	mutate(Depth.Units = NA) %>% 
+  filter(StationID != "NETN_MIMA_SC00") %>% # Discharge not measured in Concord River
   select(col_order)
+
 
 ##### Turbidity table ----
 #select variables of interest from Turbidity table:
@@ -420,6 +424,27 @@ names(waterDat) <- c('Network', 'StationID', 'Visit Start Date',
                      'Result Value/Text', 'Lower Quantification Limit', 
                      'Upper Quantification Limit')
 
+active_sites <- c("NETN_ACAD_ABIN", "NETN_ACAD_ANTB", "NETN_ACAD_BOWL", "NETN_ACAD_BRBK", "NETN_ACAD_BRKB", 
+                  "NETN_ACAD_BRWN", "NETN_ACAD_BUBL", "NETN_ACAD_CADS", "NETN_ACAD_DKLI", "NETN_ACAD_DUCK", 
+                  "NETN_ACAD_EAGL", "NETN_ACAD_ECHO", "NETN_ACAD_HADB", "NETN_ACAD_HNTR", "NETN_ACAD_HODG", 
+                  "NETN_ACAD_HTHB", "NETN_ACAD_JRDO", "NETN_ACAD_KEBO", "NETN_ACAD_LBRK", "NETN_ACAD_LHAD", 
+                  "NETN_ACAD_LKWO", "NETN_ACAD_LONG", "NETN_ACAD_LSIE", "NETN_ACAD_LVYB", "NETN_ACAD_MRSL", 
+                  "NETN_ACAD_OTRC", "NETN_ACAD_ROUN", "NETN_ACAD_SAMP", "NETN_ACAD_SEAL", "NETN_ACAD_SEAW", 
+                  "NETN_ACAD_SGTB", "NETN_ACAD_STNL", "NETN_ACAD_UBRK", "NETN_ACAD_UHAD", "NETN_ACAD_WHOL", 
+                  "NETN_ACAD_WOOD", 
+                  "NETN_MABI_PA00", "NETN_MABI_SA00", 
+                  "NETN_MIMA_SA00", "NETN_MIMA_SB00", "NETN_MIMA_SC00", 
+                  "NETN_MORR_SB00", "NETN_MORR_SD00", "NETN_MORR_SE00", 
+                  "NETN_ROVA_SA00", "NETN_ROVA_SB00", "NETN_ROVA_SD00", "NETN_ROVA_SE00", "NETN_ROVA_SF00", 
+                  "NETN_SAGA_PA00", "NETN_SAGA_SA00", "NETN_SAGA_SB00", 
+                  "NETN_SAIR_SA00", "NETN_SAIR_SB00", 
+                  "NETN_SARA_SA00", "NETN_SARA_SC00", "NETN_SARA_SD00", 
+                  "NETN_WEFA_PA00"
+)
+
+if(active_site == TRUE){
+  waterDat <- waterDat %>% filter(StationID %in% active_sites) %>% droplevels()
+} else {waterDat}
 
 active_metrics <- c('AL_ugL', 'ANC_ueqL', 'BP_mmHg', 'Ca_ueqL', 'ChlA_ugL', 
                     'Cl_ueqL', 'Discharge_cfs', 'DO_mgL', 'DOC_mgL', 
@@ -428,9 +453,10 @@ active_metrics <- c('AL_ugL', 'ANC_ueqL', 'BP_mmHg', 'Ca_ueqL', 'ChlA_ugL',
                     'SO4_ueqL', 'SpCond_uScm', 'Temp_C','TN_mgL',
                     'TP_ugL', 'Turbidity_NTU')
 
-if(active == TRUE){
+if(active_metric == TRUE){
   waterDat <- waterDat %>% filter(`Local Characteristic Name` %in% active_metrics) %>% droplevels()
 } else {waterDat}
+
 
 if(restricted == TRUE){
   waterDat <- waterDat %>% group_by(StationID, `Local Characteristic Name`) %>%
