@@ -82,13 +82,13 @@ setMethod(f = "waterbands", signature = c(object = "NCRNWaterObj"),
     
     wdat_min <- wdat_hist %>% group_by(Park, Site, Characteristic, month, month_num) %>% 
       slice_min(order_by = ValueCen, n = 1) %>% 
-      mutate(year_min = last(year)) %>% 
+      summarize(year_min = last(year)) %>% 
       select(Park, Site, Characteristic, month, month_num, year_min) %>% 
       ungroup() 
     
     wdat_range <- wdat_hist %>% group_by(Park, Site, Characteristic, month, month_num) %>% 
       slice_max(order_by = ValueCen, n = 1) %>% 
-      mutate(year_max = last(year)) %>% 
+      summarize(year_max = last(year)) %>% 
       select(Park, Site, Characteristic, month, month_num, year_max) %>%
       ungroup() %>% 
       full_join(., wdat_min, by = intersect(names(.), names(wdat_min)))
