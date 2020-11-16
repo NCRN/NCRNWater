@@ -12,7 +12,7 @@ waterbands(
   category = NA,
   year_current = NA,
   year_historic = NA,
-  month_range = c(5, 10),
+  months = c(5:10),
   assessment = TRUE,
   param_name = NA,
   unit = NA,
@@ -36,7 +36,8 @@ whose data should be graphed.}
 
 \item{year_historic}{First year to include in historic range calculations. Last year will be the year prior to year_current.}
 
-\item{month_range}{Vector indicating first and last month to plot. Ranges from 1 to 12. Default is c(5, 10) for May to October.}
+\item{months}{A numeric vector corresponding to months of the year. Only data from those months will be returned.
+Ranges from 1 to 12. Default is c(5:10) for May to October.}
 
 \item{assessment}{Vector indicating if assessment lines will be marked on the graph. See details below.}
 
@@ -49,7 +50,7 @@ whose data should be graphed.}
 \item{...}{Additional arguments used to select and filter data passed to \code{\link{getWData}}}
 }
 \value{
-Creates a plot that compares current with historic ranges
+Creates a plot that compares current with historic ranges. If the minimum or maximum values return a tie, the most recent year is returned.
 }
 \description{
 Produces a plot that summarizes the range of historic data and compares with current measurements.
@@ -72,7 +73,7 @@ sitecode = "NETN_MABI_PA00"
 charname = "pH"
 
 waterbands(netnwd, parkcode = parkcode, sitecode = sitecode, charname = charname,
-           year_historic = 2006, year_current = 2019, month_range = c(5, 10), 
+           year_historic = 2006, year_current = 2019, months = c(5:10), 
            assessment = TRUE)
 
 

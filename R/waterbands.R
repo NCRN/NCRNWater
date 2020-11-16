@@ -1,7 +1,7 @@
 #' @include NCRNWater_NCRNWaterObj_Class_def.R 
 #' @include getWData.R
 #' @include getCharInfo.R
-#' @importFrom dplyr arrange between filter full_join group_by mutate n rename select slice_min slice_max summarize ungroup
+#' @importFrom dplyr arrange between filter full_join group_by last mutate n rename select slice_min slice_max summarize ungroup
 #' @importFrom ggplot2 element_line ggplot geom_line geom_point geom_ribbon labs scale_color_identity scale_x_continuous theme  
 #' @importFrom lubridate month year
 #' @importFrom magrittr %>% 
@@ -21,12 +21,13 @@
 #' @param assessment Vector indicating if assessment lines will be marked on the graph. See details below.
 #' @param year_current Year that will be plotted separately. 
 #' @param year_historic First year to include in historic range calculations. Last year will be the year prior to year_current.
-#' @param month_range Vector indicating first and last month to plot. Ranges from 1 to 12. Default is c(5, 10) for May to October.
+#' @param months A numeric vector corresponding to months of the year. Only data from those months will be returned.
+#' Ranges from 1 to 12. Default is c(5:10) for May to October.
 #' @param param_name Text, defaults to \code{NA}. Used for plotly tooltips
 #' @param unit Text, defaults to \code{NA}. Used for plotly tooltips
 #' @param yname Text, defaults to \code{NA}. Used for y axis title
 #' @param ... Additional arguments used to select and filter data passed to \code{\link{getWData}}
-#' @return Creates a plot that compares current with historic ranges
+#' @return Creates a plot that compares current with historic ranges. If the minimum or maximum values return a tie, the most recent year is returned.
 #' 
 #' @details  The \code{assessment} argument determines if lines representing the assessment values should be drawn on the graph. 
 #' If \code{FALSE} then no lines will be drawn. If \code{TRUE}, the default, then the upper and lower points indicated in 
@@ -45,7 +46,7 @@
 #' charname = "pH"
 #'
 #' waterbands(netnwd, parkcode = parkcode, sitecode = sitecode, charname = charname,
-#'            year_historic = 2006, year_current = 2019, month_range = c(5, 10), 
+#'            year_historic = 2006, year_current = 2019, months = c(5:10), 
 #'            assessment = TRUE)
 #'
 #' 
@@ -53,17 +54,17 @@
 
 setGeneric(name = "waterbands", 
   function(object, parkcode = NA, sitecode = NA, charname = NA, category = NA, 
-           year_current = NA, year_historic = NA, month_range = c(5, 10), 
+           year_current = NA, year_historic = NA, months = c(5:10), 
            assessment = TRUE, param_name = NA, unit = NA, yname = NA,  ...)
   {standardGeneric("waterbands")}, signature = c("object"))
 
 
 setMethod(f = "waterbands", signature = c(object = "NCRNWaterObj"),
   function(object, parkcode, sitecode, charname, category, year_current, year_historic, 
-           month_range, assessment, param_name, unit, yname, ...){
+           months, assessment, param_name, unit, yname, ...){
     
     try(wdat <- getWData(object = object, parkcode = parkcode, sitecode = sitecode, 
-                         charname = charname, category = category, 
+                         charname = charname, category = category, months = months,
                          years = year_historic:year_current, ...)) 
     
     if(!exists("wdat") || nrow(wdat) == 0)
@@ -73,7 +74,7 @@ setMethod(f = "waterbands", signature = c(object = "NCRNWaterObj"),
     wdat <- wdat %>% mutate(month = lubridate::month(Date, label = TRUE, abbr = TRUE),
                             month_num = as.numeric(month),
                             year = lubridate::year(Date)) %>% 
-                     filter(between(month_num, month_range[1], month_range[2])) %>% 
+                     #filter(between(month_num, min(months), max(months))) %>% 
                      arrange(Date)
             
     wdat_hist <- wdat[wdat$year < year_current, ] 
@@ -81,15 +82,15 @@ setMethod(f = "waterbands", signature = c(object = "NCRNWaterObj"),
     
     wdat_min <- wdat_hist %>% group_by(Park, Site, Characteristic, month, month_num) %>% 
       slice_min(order_by = ValueCen, n = 1) %>% 
-      mutate(year_min = year) %>% 
+      mutate(year_min = last(year)) %>% 
       select(Park, Site, Characteristic, month, month_num, year_min) %>% 
-      ungroup() %>% droplevels()
+      ungroup() 
     
     wdat_range <- wdat_hist %>% group_by(Park, Site, Characteristic, month, month_num) %>% 
       slice_max(order_by = ValueCen, n = 1) %>% 
-      mutate(year_max = year) %>% 
+      mutate(year_max = last(year)) %>% 
       select(Park, Site, Characteristic, month, month_num, year_max) %>%
-      ungroup() %>% droplevels() %>% 
+      ungroup() %>% 
       full_join(., wdat_min, by = intersect(names(.), names(wdat_min)))
     
     wdat_sum <- wdat_hist %>% group_by(Park, Site, Characteristic, month, month_num) %>% 
@@ -104,9 +105,9 @@ setMethod(f = "waterbands", signature = c(object = "NCRNWaterObj"),
                 lower_50 = ifelse(num_samps >= 4, quantile(ValueCen, 0.25, na.rm = T), NA),
                 upper_50 = ifelse(num_samps >= 4, quantile(ValueCen, 0.75, na.rm = T), NA),
                 .groups = "drop") %>% 
+      full_join(., wdat_range, by = intersect(names(.), names(wdat_range))) %>% 
       filter(!is.na(lower_50)) %>% # if lower_50 is NA, the rest will be too
-      unique() %>% droplevels() %>% ungroup() %>% 
-      full_join(., wdat_range, by = intersect(names(.), names(wdat_range)))
+      unique() %>% droplevels() %>% ungroup() 
     
     wdat_comb <- merge(wdat_sum, wdat_curr, by = intersect(names(wdat_sum), names(wdat_curr)),
                         all.x = TRUE, all.y = TRUE) %>% 
@@ -134,13 +135,7 @@ setMethod(f = "waterbands", signature = c(object = "NCRNWaterObj"),
                                          charname = charname, info = "DisplayName") %>% unique()))
       }
     
-    # if(is.logical(assessment) & assessment){
-    #    assessment <- c(getCharInfo(object, parkcode = parkcode, sitecode = sitecode, charname = charname, 
-    #                                category = category, info = "LowerPoint"),
-    #                    getCharInfo(object, parkcode = parkcode, sitecode = sitecode, charname = charname, 
-    #                                category = category, info = "UpperPoint")) %>% unlist() %>% unique()
-    # } 
-    # 
+
     wdat_final <- wdat_comb %>% mutate(LowerPoint = ifelse(assessment == TRUE, 
                                                            getCharInfo(object, parkcode = parkcode, sitecode = sitecode, 
                                                                 charname = charname, category = category, 
@@ -156,17 +151,17 @@ setMethod(f = "waterbands", signature = c(object = "NCRNWaterObj"),
 
   callGeneric(object = wdat_final, parkcode = parkcode, sitecode = sitecode, charname = charname, 
               category = category, year_current = year_current, year_historic = year_historic, 
-              month_range = month_range, assessment = assessment, param_name = param_name, unit = unit,
+              months = months, assessment = assessment, param_name = param_name, unit = unit,
               yname = yname)
           })
 
 setMethod(f = "waterbands", signature = c(object = "data.frame"),
           function(object, parkcode, sitecode, charname, category, 
-                   year_current, year_historic, month_range, assessment,
+                   year_current, year_historic, months, assessment,
                    param_name, unit, yname){
 
             # set up x axis labels based on month_range 
-            xaxis_breaks <- c(month_range[1]:month_range[2])
+            xaxis_breaks <- c(min(months):max(months))
             xaxis_labels <- lapply(xaxis_breaks, function(x){as.character(lubridate::month(x, label = T))})
 
             monthly_plot <- suppressWarnings( 
