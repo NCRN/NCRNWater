@@ -8,7 +8,8 @@ compileNETNdata(
   path = "./Data/",
   export = TRUE,
   surface = TRUE,
-  active = TRUE,
+  active_site = TRUE,
+  active_metric = TRUE,
   restricted = TRUE,
   cleanEnv = TRUE
 )
@@ -21,7 +22,10 @@ compileNETNdata(
 \item{surface}{\code{TRUE} or \code{FALSE}. Return only measurements representing the stream surface or lake epilimnion. 
 If \code{TRUE}, the median of the surface measurements from the top 2m of sampling are returned. Defaults to  \code{TRUE}.}
 
-\item{active}{\code{TRUE} or  \code{FALSE}. If \code{TRUE} only compiles metrics that are actively collected.
+\item{active_site}{\code{TRUE} or  \code{FALSE}. If \code{TRUE} only compiles data for sites that are actively being monitored.
+If \code{FALSE} compiles all sites stored in the database. Defaults to \code{TRUE}.}
+
+\item{active_metric}{\code{TRUE} or  \code{FALSE}. If \code{TRUE} only compiles metrics that are actively collected.
 If \code{FALSE} compiles all metrics stored in the database. Defaults to \code{TRUE}.}
 
 \item{restricted}{\code{TRUE} or \code{FALSE}. If \code{TRUE}, metrics within a site that have 4 or fewer
