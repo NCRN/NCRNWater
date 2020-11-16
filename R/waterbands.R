@@ -67,8 +67,8 @@ setMethod(f = "waterbands", signature = c(object = "NCRNWaterObj"),
                          charname = charname, category = category, months = months,
                          years = year_historic:year_current, ...)) 
     
-    if(!exists("wdat") || nrow(wdat) == 0)
-      stop("Function arguments did not return a data frame with records.")
+    if(!exists("wdat") || nrow(wdat) == 0){
+      stop("Function arguments did not return a data frame with records.")}
 
     # Add months and censored info for later filter for plotting
     wdat <- wdat %>% mutate(month = lubridate::month(Date, label = TRUE, abbr = TRUE),
@@ -82,13 +82,13 @@ setMethod(f = "waterbands", signature = c(object = "NCRNWaterObj"),
     
     wdat_min <- wdat_hist %>% group_by(Park, Site, Characteristic, month, month_num) %>% 
       slice_min(order_by = ValueCen, n = 1) %>% 
-      summarize(year_min = last(year)) %>% 
+      summarize(year_min = last(year), .groups = "drop") %>% 
       select(Park, Site, Characteristic, month, month_num, year_min) %>% 
       ungroup() 
     
     wdat_range <- wdat_hist %>% group_by(Park, Site, Characteristic, month, month_num) %>% 
       slice_max(order_by = ValueCen, n = 1) %>% 
-      summarize(year_max = last(year)) %>% 
+      summarize(year_max = last(year), .groups = "drop") %>% 
       select(Park, Site, Characteristic, month, month_num, year_max) %>%
       ungroup() %>% 
       full_join(., wdat_min, by = intersect(names(.), names(wdat_min)))
@@ -118,7 +118,7 @@ setMethod(f = "waterbands", signature = c(object = "NCRNWaterObj"),
       param_name <- getCharInfo(object, parkcode = parkcode, sitecode = sitecode,
                                 charname = charname, info = "DisplayName") %>% unique()
       }
-    
+
     if(is.na(unit)){
       unit <- getCharInfo(object, parkcode = parkcode, sitecode = sitecode, 
                           charname = charname, info = "Units") %>% unique()
@@ -144,9 +144,9 @@ setMethod(f = "waterbands", signature = c(object = "NCRNWaterObj"),
                                                            getCharInfo(object, parkcode = parkcode, sitecode = sitecode, 
                                                                 charname = charname, category = category, 
                                                                 info = "UpperPoint"), NA),
-                                       pcolor = ifelse(!is.na(UpperPoint) & !is.na(LowerPoint) & 
-                                                         (ValueCen_curr > UpperPoint | ValueCen_curr < LowerPoint),
-                                                         "orange", "black")
+                                        pcolor = ifelse(!is.na(UpperPoint) & ValueCen_curr > UpperPoint, "orange",
+                                                        ifelse(!is.na(LowerPoint) & ValueCen_curr < LowerPoint, "orange",
+                                                               "black"))
     )
 
   callGeneric(object = wdat_final, parkcode = parkcode, sitecode = sitecode, charname = charname, 
@@ -167,7 +167,7 @@ setMethod(f = "waterbands", signature = c(object = "data.frame"),
             monthly_plot <- suppressWarnings( 
               ggplot(data = object, aes(x = month_num, y = median_val))+
               scale_x_continuous(breaks = xaxis_breaks,
-                                  labels = xaxis_labels)+
+                                 labels = xaxis_labels)+
               
               # Min/max band
               geom_ribbon(aes(ymax = upper_100, ymin = lower_100), 
@@ -243,8 +243,10 @@ setMethod(f = "waterbands", signature = c(object = "data.frame"),
                     legend.key = element_blank(),
                     legend.position = "none")
             )
-            
-            monthly_plotly <- ggplotly(monthly_plot, tooltip = c("text"))
+
+             monthly_plotly <- tryCatch(ggplotly(monthly_plot, tooltip = c("text")), 
+                                 error = function(e) {
+                                 stop("Error: invalid dataset for plotting. Please check that arguments are spelled correctly and that the specified combination of parkcode, sitecode, and charname exists in the data.")})
             
             return(monthly_plotly)
 
