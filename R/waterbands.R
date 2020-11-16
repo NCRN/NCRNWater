@@ -19,8 +19,8 @@
 #' @param charname Required if \code{object} is not a \code{data.frame}. Name(s), in quotes, of one or more \code{Characteristic}s 
 #' whose data should be graphed.
 #' @param assessment Vector indicating if assessment lines will be marked on the graph. See details below.
-#' @param year_current Year that will be plotted separately. 
-#' @param year_historic First year to include in historic range calculations. Last year will be the year prior to year_current.
+#' @param year_current Year that will be plotted separately. Must be numeric and 4 digits.
+#' @param year_historic First year to include in historic range calculations. Last year will be the year prior to year_current. Must be numeric and 4 digits.
 #' @param months A numeric vector corresponding to months of the year. Only data from those months will be returned.
 #' Ranges from 1 to 12. Default is c(5:10) for May to October.
 #' @param param_name Text, defaults to \code{NA}. Used for plotly tooltips
@@ -80,6 +80,14 @@ setMethod(f = "waterbands", signature = c(object = "NCRNWaterObj"),
     wdat_hist <- wdat[wdat$year < year_current, ] 
     wdat_curr <- wdat[wdat$year == year_current, ]
     
+    if(nrow(wdat_curr) == 0){
+      stop(paste0("There are no data available to plot for year_current: ", year_current, "."))
+    }
+    
+    if(nrow(wdat_hist) == 0){
+      stop(paste0("There are no hisotric data available to plot for years: ", year_historic, ":", year_current - 1, "."))
+    }
+    
     wdat_min <- wdat_hist %>% group_by(Park, Site, Characteristic, month, month_num) %>% 
       slice_min(order_by = ValueCen, n = 1) %>% 
       summarize(year_min = last(year), .groups = "drop") %>% 
@@ -106,7 +114,7 @@ setMethod(f = "waterbands", signature = c(object = "NCRNWaterObj"),
                 upper_50 = ifelse(num_samps >= 4, quantile(ValueCen, 0.75, na.rm = T), NA),
                 .groups = "drop") %>% 
       full_join(., wdat_range, by = intersect(names(.), names(wdat_range))) %>% 
-      filter(!is.na(lower_50)) %>% # if lower_50 is NA, the rest will be too
+      filter(!is.na(lower_50)) %>% # if lower_50 is NA, the rest will be NA too
       unique() %>% droplevels() %>% ungroup() 
     
     wdat_comb <- merge(wdat_sum, wdat_curr, by = intersect(names(wdat_sum), names(wdat_curr)),
@@ -160,7 +168,7 @@ setMethod(f = "waterbands", signature = c(object = "data.frame"),
                    year_current, year_historic, months, assessment,
                    param_name, unit, yname){
 
-            # set up x axis labels based on month_range 
+            # set up x axis labels based on months range
             xaxis_breaks <- c(min(months):max(months))
             xaxis_labels <- lapply(xaxis_breaks, function(x){as.character(lubridate::month(x, label = T))})
 
@@ -174,7 +182,7 @@ setMethod(f = "waterbands", signature = c(object = "data.frame"),
                           fill = "#76b4db", alpha = 0.2)+
               geom_line(aes(y = upper_100, 
                             text = paste0("Historic ", month, " Maximum: ", "<br>", 
-                                          param_name, ": ", round(upper_100, 1), " ", unit,#,
+                                          param_name, ": ", round(upper_100, 1), " ", unit,
                                           "<br>", "Year observed: ", year_max)),
                         color = "#76b4db", alpha = 0.2, lwd=3)+
               geom_line(aes(y = lower_100, 
@@ -214,7 +222,6 @@ setMethod(f = "waterbands", signature = c(object = "data.frame"),
                                           param_name, ": ", round(median_val, 1), " ", unit)), 
                         color = "#1378b5")+
               
-              #geom_line(aes(x = mon_num, y = ValueCen_curr), color = "black")+
               # Current measurement
               geom_point(aes(y = ValueCen_curr, color = pcolor, 
                              text = paste0(month, " ", year_curr, "<br>", 
@@ -222,7 +229,7 @@ setMethod(f = "waterbands", signature = c(object = "data.frame"),
                 
               scale_color_identity()+ # color codes points based on whether above/below thresholds
              
-              # Upper and lower points - changed to geom_line to get labels to show throughout line
+              # Upper and lower points 
               {if(assessment == TRUE) geom_line(aes(y = LowerPoint, text = paste("Lower", param_name, "threshold:", LowerPoint, unit)), 
                         linetype = "dashed", color = "#212121")}+
               {if(assessment == TRUE) geom_line(aes(y = UpperPoint, text = paste("Upper", param_name, "threshold:", UpperPoint, unit)),
@@ -236,7 +243,6 @@ setMethod(f = "waterbands", signature = c(object = "data.frame"),
                     panel.grid.major = element_blank(),
                     panel.grid.minor = element_blank(),
                     panel.background = element_rect(color = '#696969', fill = 'white', size = 0.4),
-                    #plot.background = element_blank(),
                     axis.line.x = element_line(color = "#696969", size = 0.4),
                     axis.line.y = element_line(color = "#696969", size = 0.4),
                     axis.ticks = element_line(color = "#696969", size = 0.4),
