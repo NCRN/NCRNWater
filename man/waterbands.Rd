@@ -32,9 +32,9 @@ whose data should be graphed.}
 
 \item{category}{One or more categories of characteristics, in quotes. Only those categories of characteristics will be returned.}
 
-\item{year_current}{Year that will be plotted separately.}
+\item{year_current}{Year that will be plotted separately. Must be numeric and 4 digits.}
 
-\item{year_historic}{First year to include in historic range calculations. Last year will be the year prior to year_current.}
+\item{year_historic}{First year to include in historic range calculations. Last year will be the year prior to year_current. Must be numeric and 4 digits.}
 
 \item{months}{A numeric vector corresponding to months of the year. Only data from those months will be returned.
 Ranges from 1 to 12. Default is c(5:10) for May to October.}
