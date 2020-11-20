@@ -85,7 +85,7 @@ setMethod(f = "waterbands", signature = c(object = "NCRNWaterObj"),
     }
     
     if(nrow(wdat_hist) == 0){
-      stop(paste0("There are no hisotric data available to plot for years: ", year_historic, ":", year_current - 1, "."))
+      stop(paste0("There are no historic data available to plot for years: ", year_historic, ":", year_current - 1, "."))
     }
     
     wdat_min <- wdat_hist %>% group_by(Park, Site, Characteristic, month, month_num) %>% 
