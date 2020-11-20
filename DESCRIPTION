@@ -54,4 +54,5 @@ Collate:
     'waterbands.R'
     'waterbox.R'
     'waterheat.R'
+    'watersite_comps.R'
     'wcosinor.R'
