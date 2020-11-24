@@ -26,6 +26,7 @@
 #' @param yname Text, defaults to \code{NA}. Used for y axis title
 #' @param legend  a vector indicating where the legend position. Can be: "none","left","right","top","bottom" or a two element 
 #' numeric vector.
+#' @param layers Defaults to c("points","line") Indicates which layers you wish to see on the plot. 
 #' @param assessment Vector indicating if assessment lines will be marked on the graph. If multiple thresholds exist among the sites plotted, all will be plotted. See details below.
 #' @param ... Additional arguments used to select and filter data passed to \code{\link{getWData}}
 #' 
@@ -48,7 +49,8 @@
 #' site_list <- getSiteInfo(netnwd, parkcode = parkcode, info = "SiteCode")
 #' 
 #' watersite_comps(netnwd, parkcode = parkcode, sitecode = site_list, charname = charname,
-#'                 year = 2019, months = c(5:10), legend = "none")
+#'                 year = 2019, months = c(5:10), legend = "none", 
+#'                 layers = c("points", "line"), assessment = TRUE)
 #'
 #' 
 #' @export
@@ -56,13 +58,14 @@
 setGeneric(name = "watersite_comps", 
   function(object, parkcode = NA, sitecode = NA, charname = NA, category = NA, 
            year = NA, months = c(5:10), param_name = NA, 
-           unit = NA, yname = NA, legend = "bottom", assessment = TRUE, ...)
+           unit = NA, yname = NA, legend = "bottom", layers = c("points", "line"), 
+           assessment = TRUE, ...)
   {standardGeneric("watersite_comps")}, signature = c("object"))
 
 
 setMethod(f = "watersite_comps", signature = c(object = "NCRNWaterObj"),
   function(object, parkcode, sitecode, charname, category, year, 
-           months, param_name, unit, yname, legend, assessment, ...){
+           months, param_name, unit, yname, legend, layers, assessment, ...){
     
     try(wdat <- getWData(object = object, parkcode = parkcode, sitecode = sitecode, 
                          charname = charname, category = category, months = months,
@@ -119,12 +122,13 @@ setMethod(f = "watersite_comps", signature = c(object = "NCRNWaterObj"),
 
   callGeneric(object = wdat_final, parkcode = parkcode, sitecode = sitecode, charname = charname, 
               category = category, year = year, months = months, 
-              param_name = param_name, unit = unit, yname = yname, legend = legend, assessment = assessment)
+              param_name = param_name, unit = unit, yname = yname, legend = legend, layers = layers,
+              assessment = assessment)
           })
 
 setMethod(f = "watersite_comps", signature = c(object = "data.frame"),
           function(object, parkcode, sitecode, charname, category, year, 
-                   months, param_name, unit, yname, legend, assessment){
+                   months, param_name, unit, yname, legend, layers, assessment){
 
             # set up x axis labels based on months range
             xaxis_breaks <- c(min(months):max(months))
@@ -134,12 +138,15 @@ setMethod(f = "watersite_comps", signature = c(object = "data.frame"),
               ggplot(data = object, aes(x = month_num, y = ValueCen, shape = SiteName, color = SiteName))+
               scale_x_continuous(breaks = xaxis_breaks,
                                  labels = xaxis_labels)+
-              geom_line() +
+             {if("line" %in% layers) geom_line()}+  
+#             geom_line() +
+
               geom_point(aes(text = paste0(SiteName, "<br>",
                                              month, " ", year, "<br>", 
                                              param_name, ": ", round(ValueCen,1), " ", unit)), 
                            size = 2) +
-                geom_point()+
+              {if("points" %in% layers) geom_point()} +
+#             geom_point()+
               #scale_color_manual(values = c("#3288bd", "#212121"), labels = sitename, name = NULL) +
               viridis::scale_color_viridis(discrete = TRUE, option = "D")+
               scale_shape_manual(values = c(16:20))+

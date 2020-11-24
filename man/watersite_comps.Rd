@@ -16,6 +16,7 @@ watersite_comps(
   unit = NA,
   yname = NA,
   legend = "bottom",
+  layers = c("points", "line"),
   assessment = TRUE,
   ...
 )
@@ -46,6 +47,8 @@ Ranges from 1 to 12. Default is c(5:10) for May to October.}
 \item{legend}{a vector indicating where the legend position. Can be: "none","left","right","top","bottom" or a two element 
 numeric vector.}
 
+\item{layers}{Defaults to c("points","line") Indicates which layers you wish to see on the plot.}
+
 \item{assessment}{Vector indicating if assessment lines will be marked on the graph. If multiple thresholds exist among the sites plotted, all will be plotted. See details below.}
 
 \item{...}{Additional arguments used to select and filter data passed to \code{\link{getWData}}}
@@ -74,7 +77,8 @@ charname = "pH"
 site_list <- getSiteInfo(netnwd, parkcode = parkcode, info = "SiteCode")
 
 watersite_comps(netnwd, parkcode = parkcode, sitecode = site_list, charname = charname,
-                year = 2019, months = c(5:10), legend = "none")
+                year = 2019, months = c(5:10), legend = "none", 
+                layers = c("points", "line"), assessment = TRUE)
 
 
 }
