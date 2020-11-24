@@ -529,7 +529,38 @@ MD <- MD %>%
 	CharacteristicName == "Discharge_cfs" ~ "Discharge",
 	CharacteristicName == "Turbidity_NTU" ~ "Turbidity",
 	CharacteristicName == "NO2_mgL" ~ "Nitrite"
-	))
+	),
+	CategoryDisplay = case_when(
+	  CharacteristicName == "Al_ugL" ~ "Al",
+	  CharacteristicName == "ANC_ueqL" ~ "ANC",
+	  CharacteristicName == "Ca_ueqL" ~ "Ca",
+	  CharacteristicName == "Cl_ueqL" ~ "Cl",
+	  CharacteristicName == "DOC_mgL" ~ "DOC",
+	  CharacteristicName == "K_ueqL" ~ "K",
+	  CharacteristicName == "Mg_ueqL" ~ "Mg",
+	  CharacteristicName == "Na_ueqL" ~ "Na",
+	  CharacteristicName == "NH3_mgL" ~ "NH3",
+	  CharacteristicName == "NH4_mgL" ~ "NH4",
+	  CharacteristicName == "NO3_ueqL" ~ "NO3",
+	  CharacteristicName == "SO4_ueqL" ~ "SO4",
+	  CharacteristicName == "TN_mgL" ~ "TN",
+	  CharacteristicName == "BP_mmHg" ~ "Air Press.",
+	  CharacteristicName == "DOsat_pct" ~ "DO % Sat.",
+	  CharacteristicName == "DO_mgL" ~ "DO",
+	  CharacteristicName == "pH" ~ "pH",
+	  CharacteristicName == "SpCond_uScm" ~ "Spec. Cond.",
+	  CharacteristicName == "Temp_C" ~ "Water Temp.",
+	  CharacteristicName == "SDepth1_m" ~ "Secchi Depth",
+	  CharacteristicName == "ChlA_ugL" ~ "Chl. A",
+	  CharacteristicName == "PO4_ugL" ~ "PO4",
+	  CharacteristicName == "TotDissN_mgL" ~ "Total Diss. N",
+	  CharacteristicName == "TotDissP_ugL" ~ "Total Diss. P",
+	  CharacteristicName == "TP_ugL" ~ "TP",
+	  CharacteristicName == "PenetrationRatio" ~ "Light Pen. Ratio",
+	  CharacteristicName == "NO2+NO3_mgL" ~ "NO2+NO3",
+	  CharacteristicName == "Discharge_cfs" ~ "Discharge",
+	  CharacteristicName == "Turbidity_NTU" ~ "Turbidity",
+	  CharacteristicName == "NO2_mgL" ~ "NO2"))
 
 #create extra columns. Column for Data Type: these are all numeric, so I took a shortcut. Will need to be changed if factor or ordinal data are added.
 MD$DataType <- "numeric"
@@ -546,8 +577,7 @@ other <- c("Ca_ueqL", "Cl_ueqL", "K_ueqL", "Mg_ueqL", "Na_ueqL", "NH4_mgL",
 MD <- MD %>% mutate(Category = case_when(CharacteristicName %in% physical ~ paste0("physical"),
                                          CharacteristicName %in% nutrients ~ paste0("nutrients"),
                                          CharacteristicName %in% other ~ paste0("other_chem"), 
-                                         TRUE ~ "other_chem"),
-                    CategoryDisplay = CharacteristicName
+                                         TRUE ~ "other_chem")
                     # CategoryDisplay = case_when(Category == "physical" ~ paste0("In situ physical parameter"), 
                                                 # Category == "nutrients" ~ paste0("Lab-derived nutrient"),
                                                 # Category == "other chemistry" ~ paste0("Other lab-derived parameter"))

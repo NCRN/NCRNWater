@@ -87,7 +87,7 @@ setMethod(f = "watersite_comps", signature = c(object = "NCRNWaterObj"),
     # Set up labels for axis and plotly tooltips
     if(is.na(param_name)){
       param_name <- getCharInfo(object, parkcode = parkcode, sitecode = sitecode,
-                                charname = charname, info = "DisplayName") %>% unique()
+                                charname = charname, info = "CategoryDisplay") %>% unique()
       }
 
     if(is.na(unit)){
@@ -98,12 +98,12 @@ setMethod(f = "watersite_comps", signature = c(object = "NCRNWaterObj"),
     if(is.na(yname)){
       yname <- ifelse(charname != "pH", 
                       paste0(getCharInfo(object, parkcode = parkcode, sitecode = sitecode,
-                                         charname = charname, info = "DisplayName") %>% unique(), " (", 
+                                         charname = charname, info = "CategoryDisplay") %>% unique(), " (", 
                              getCharInfo(object, parkcode = parkcode, sitecode = sitecode,
                                          charname = charname, info = "Units") %>% unique(),                           
                            ")"),
                       paste0(getCharInfo(object, parkcode = parkcode, sitecode = sitecode,
-                                         charname = charname, info = "DisplayName") %>% unique()))
+                                         charname = charname, info = "CategoryDisplay") %>% unique()))
       }
     
 
