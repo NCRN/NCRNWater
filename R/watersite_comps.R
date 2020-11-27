@@ -80,8 +80,8 @@ setMethod(f = "watersite_comps", signature = c(object = "NCRNWaterObj"),
                             year = lubridate::year(Date)) %>% 
                      arrange(Date)
     
-    site.key <- data.frame(Site =  getSiteInfo(netnwd, parkcode = parkcode, info = "SiteCode"),
-                           SiteName =  getSiteInfo(netnwd, parkcode = parkcode, info = "SiteName"))
+    site.key <- data.frame(Site =  getSiteInfo(object, parkcode = parkcode, info = "SiteCode"),
+                           SiteName =  getSiteInfo(object, parkcode = parkcode, info = "SiteName"))
             
     if(nrow(wdat) == 0){
       stop(paste0("There are no data available to plot for year: ", year, "."))
