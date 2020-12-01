@@ -17,6 +17,7 @@ waterbands(
   param_name = NA,
   unit = NA,
   yname = NA,
+  legend = "bottom",
   ...
 )
 }
@@ -46,6 +47,9 @@ Ranges from 1 to 12. Default is c(5:10) for May to October.}
 \item{unit}{Text, defaults to \code{NA}. Used for plotly tooltips}
 
 \item{yname}{Text, defaults to \code{NA}. Used for y axis title}
+
+\item{legend}{a vector indicating where the legend position. Can be: "none","left","right","top","bottom" or a two element 
+numeric vector.}
 
 \item{...}{Additional arguments used to select and filter data passed to \code{\link{getWData}}}
 }
