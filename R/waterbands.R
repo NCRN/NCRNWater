@@ -26,6 +26,8 @@
 #' @param param_name Text, defaults to \code{NA}. Used for plotly tooltips
 #' @param unit Text, defaults to \code{NA}. Used for plotly tooltips
 #' @param yname Text, defaults to \code{NA}. Used for y axis title
+#' @param legend  a vector indicating where the legend position. Can be: "none","left","right","top","bottom" or a two element 
+#' numeric vector.
 #' @param ... Additional arguments used to select and filter data passed to \code{\link{getWData}}
 #' @return Creates a plot that compares current with historic ranges. If the minimum or maximum values return a tie, the most recent year is returned.
 #' 
@@ -55,13 +57,13 @@
 setGeneric(name = "waterbands", 
   function(object, parkcode = NA, sitecode = NA, charname = NA, category = NA, 
            year_current = NA, year_historic = NA, months = c(5:10), 
-           assessment = TRUE, param_name = NA, unit = NA, yname = NA,  ...)
+           assessment = TRUE, param_name = NA, unit = NA, yname = NA, legend = "bottom", ...)
   {standardGeneric("waterbands")}, signature = c("object"))
 
 
 setMethod(f = "waterbands", signature = c(object = "NCRNWaterObj"),
   function(object, parkcode, sitecode, charname, category, year_current, year_historic, 
-           months, assessment, param_name, unit, yname, ...){
+           months, assessment, param_name, unit, yname, legend, ...){
     
     try(wdat <- getWData(object = object, parkcode = parkcode, sitecode = sitecode, 
                          charname = charname, category = category, months = months,
@@ -160,13 +162,13 @@ setMethod(f = "waterbands", signature = c(object = "NCRNWaterObj"),
   callGeneric(object = wdat_final, parkcode = parkcode, sitecode = sitecode, charname = charname, 
               category = category, year_current = year_current, year_historic = year_historic, 
               months = months, assessment = assessment, param_name = param_name, unit = unit,
-              yname = yname)
+              yname = yname, legend = legend)
           })
 
 setMethod(f = "waterbands", signature = c(object = "data.frame"),
           function(object, parkcode, sitecode, charname, category, 
                    year_current, year_historic, months, assessment,
-                   param_name, unit, yname){
+                   param_name, unit, yname, legend){
 
             # set up x axis labels based on months range
             xaxis_breaks <- c(min(months):max(months))
@@ -247,7 +249,7 @@ setMethod(f = "waterbands", signature = c(object = "data.frame"),
                     axis.line.y = element_line(color = "#696969", size = 0.4),
                     axis.ticks = element_line(color = "#696969", size = 0.4),
                     legend.key = element_blank(),
-                    legend.position = "none")
+                    legend.position = legend)
             )
 
              monthly_plotly <- tryCatch(ggplotly(monthly_plot, tooltip = c("text")), 
