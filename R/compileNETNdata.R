@@ -484,7 +484,8 @@ sites_tlu <- sites.temp %>%
   dplyr::filter(SiteCode %in% sites) %>%
   select(c(Network, ParkCode, ShortName, LongName, SiteCode, SiteName, Lat, Long, Type))
 
-sites_tlu$LongName <- ifelse(sites_tlu$ParkCode == "SAGA", paste0("Saint-Gaudens National Historical Park"),
+sites_tlu$LongName <- ifelse(sites_tlu$ParkCode == "SAGA", 
+                             paste0("Saint-Gaudens National Historical Park"),
                              paste0(sites_tlu$LongName))
 
 #create rows only for the variables measured at each site, extract units, and add in site names
