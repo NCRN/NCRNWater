@@ -17,14 +17,14 @@
 #' @param object Either a \code{data.frame} that is the output of \code{getWData}, a \code{Characteristic} object, a \code{Site} object, a \code{Park} object or a \code{list} of such objects.
 #' 
 #' @param charname Required if \code{object} is not a \code{data.frame}. Name(s), in quotes, of one or more \code{Characteristic}s 
-#' whose data should be graphed.
+#' whose data should be graphed. 
 #' @param assessment Vector indicating if assessment lines will be marked on the graph. See details below.
 #' @param year_current Year that will be plotted separately. Must be numeric and 4 digits.
 #' @param year_historic First year to include in historic range calculations. Last year will be the year prior to year_current. Must be numeric and 4 digits.
 #' @param months A numeric vector corresponding to months of the year. Only data from those months will be returned.
 #' Ranges from 1 to 12. Default is c(5:10) for May to October.
 #' @param param_name Text, defaults to \code{NA}. Used for plotly tooltips
-#' @param unit Text, defaults to \code{NA}. Used for plotly tooltips
+#' @param unit Text, defaults to \code{NA}. Note that the function currently can't handle special characters. Used for plotly tooltips
 #' @param yname Text, defaults to \code{NA}. Used for y axis title
 #' @param legend  a vector indicating where the legend position. Can be: "none","left","right","top","bottom" or a two element 
 #' numeric vector.

@@ -44,7 +44,7 @@ Ranges from 1 to 12. Default is c(5:10) for May to October.}
 
 \item{param_name}{Text, defaults to \code{NA}. Used for plotly tooltips}
 
-\item{unit}{Text, defaults to \code{NA}. Used for plotly tooltips}
+\item{unit}{Text, defaults to \code{NA}. Note that the function currently can't handle special characters. Used for plotly tooltips}
 
 \item{yname}{Text, defaults to \code{NA}. Used for y axis title}
 
