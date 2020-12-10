@@ -71,9 +71,12 @@ setMethod(f = "watersite_comps", signature = c(object = "NCRNWaterObj"),
                          charname = charname, category = category, months = months,
                          years = year, ...)) 
     
+    
     if(!exists("wdat") || nrow(wdat) == 0){
       stop("Function arguments did not return a data frame with records.")}
 
+    if(length(year)!=1 | nchar(year)!=4){stop("This function only works for a single year, and year must be 4 digits.")}
+    
     # Add months and censored info for later filter for plotting
     wdat <- wdat %>% mutate(month = lubridate::month(Date, label = TRUE, abbr = TRUE),
                             month_num = as.numeric(month),
@@ -86,10 +89,6 @@ setMethod(f = "watersite_comps", signature = c(object = "NCRNWaterObj"),
                            SiteName =  getSiteInfo(object, parkcode = parkcode, info = "SiteName")) %>% 
                 filter(Site %in% active_sites$Site)
           
-    if(nrow(wdat) == 0){
-      stop(paste0("There are no data available to plot for year: ", year, "."))
-    }
-
     # Set up labels for axis and plotly tooltips
     if(is.na(param_name)){
       param_name <- getCharInfo(object, parkcode = parkcode, sitecode = sitecode,
@@ -122,7 +121,11 @@ setMethod(f = "watersite_comps", signature = c(object = "NCRNWaterObj"),
                                                                   charname = charname, category = category, 
                                                                   info = "UpperPoint"), NA)) %>% 
                   full_join(., site.key, by = "Site") %>% arrange(SiteName, Characteristic)
-
+    
+    if(nrow(wdat_final) == 0){
+      stop(paste0("There are no data available to plot for the sites or parameters specified in year: ", year, "."))
+    }
+    
   callGeneric(object = wdat_final, parkcode = parkcode, sitecode = sitecode, charname = charname, 
               category = category, year = year, months = months, 
               param_name = param_name, unit = unit, yname = yname, legend = legend, layers = layers,
@@ -136,23 +139,21 @@ setMethod(f = "watersite_comps", signature = c(object = "data.frame"),
             # set up x axis labels based on months range
             xaxis_breaks <- c(min(months):max(months))
             xaxis_labels <- lapply(xaxis_breaks, function(x){as.character(lubridate::month(x, label = T))})
-
+            numsites <- length(unique(object$Site))
+            rep_symb <- ifelse(numsites > 5, numsites - 5, 1)
+             
             site_comp_plot <- suppressWarnings( 
               ggplot(data = object, aes(x = month_num, y = ValueCen, shape = SiteName, color = SiteName))+
               scale_x_continuous(breaks = xaxis_breaks,
                                  labels = xaxis_labels)+
-             {if("line" %in% layers) geom_line()}+  
-#             geom_line() +
+              {if("line" %in% layers) geom_line()}+  
 
-              geom_point(aes(text = paste0(SiteName, "<br>",
-                                             month, " ", year, "<br>", 
-                                             param_name, ": ", round(ValueCen,1), " ", unit)), 
-                           size = 2) +
-              {if("points" %in% layers) geom_point()} +
-#             geom_point()+
-              #scale_color_manual(values = c("#3288bd", "#212121"), labels = sitename, name = NULL) +
+              {if("points" %in% layers) geom_point() }+
+              {if("points" %in% layers){geom_point(aes(text = paste0(SiteName, "<br>", month, " ", year, 
+                                                                     "<br>", param_name, ": ", round(ValueCen,1), 
+                                                                     " ", unit)), size = 2)}}+
               viridis::scale_color_viridis(discrete = TRUE, option = "D")+
-              scale_shape_manual(values = c(16:20))+
+              scale_shape_manual(values = rep(c(16,17,18,19,20), times= rep_symb))+
               # Labels
               labs(y = yname, x = NULL, title = NULL) + 
   
