@@ -621,7 +621,7 @@ MD <- MD %>% mutate(
   # I'll figure out a better way to do this after these thresholds settle down
   UpperPoint = case_when(ParkCode == "ACAD" & Type == "Stream" & CharacteristicName == "TP_ugL" ~ 32.6, #EPA new
                          ParkCode == "ACAD" & Type == "Stream" & CharacteristicName == "TN_mgL" ~ 0.482,#EPA new
-                         ParkCode == "ACAD" & Type == "Stream" & CharacteristicName == "SpCond_uScm" ~ 1000,#EPA new
+                         #ParkCode == "ACAD" & Type == "Stream" & CharacteristicName == "SpCond_uScm" ~ 1000,#EPA new
                          ParkCode == "ACAD" & Type == "Lake" & CharacteristicName == "TP_ugL" ~ 22,#EPA new
                          ParkCode == "ACAD" & Type == "Lake" & CharacteristicName == "TN_mgL" ~ 0.6,#EPA new
                          ParkCode == "ACAD" & Type == "Lake" & CharacteristicName == "ChlA_ugL" ~ 7.76,#EPA new
@@ -630,7 +630,7 @@ MD <- MD %>% mutate(
                          ParkCode == "MABI" & Type == "Stream" & CharacteristicName == "Turbidity_NTU" ~ 10,
                          ParkCode == "MABI" & Type == "Stream" & CharacteristicName == "TP_ugL" ~ 32.6, #EPA new
                          ParkCode == "MABI" & Type == "Stream" & CharacteristicName == "TN_mgL" ~ 0.482,#EPA new
-                         ParkCode == "MABI" & Type == "Stream" & CharacteristicName == "SpCond_uScm" ~ 1000,#EPA new
+                         #ParkCode == "MABI" & Type == "Stream" & CharacteristicName == "SpCond_uScm" ~ 1000,#EPA new
                          ParkCode == "MABI" & Type == "Lake" & CharacteristicName == "pH" ~ 8.5,
                          ParkCode == "MABI" & Type == "Lake" & CharacteristicName == "TN_mgL" ~ 5,
                          ParkCode == "MABI" & Type == "Lake" & CharacteristicName == "TP_ugL" ~ 22,#EPA new
@@ -640,7 +640,7 @@ MD <- MD %>% mutate(
                          ParkCode == "SAGA" & Type == "Stream" & CharacteristicName == "pH" ~ 8.0,
                          ParkCode == "SAGA" & Type == "Stream" & CharacteristicName == "TP_ugL" ~ 32.6, #EPA new
                          ParkCode == "SAGA" & Type == "Stream" & CharacteristicName == "TN_mgL" ~ 0.482,#EPA new
-                         ParkCode == "SAGA" & Type == "Stream" & CharacteristicName == "SpCond_uScm" ~ 1000,#EPA new
+                         #ParkCode == "SAGA" & Type == "Stream" & CharacteristicName == "SpCond_uScm" ~ 1000,#EPA new
                          ParkCode == "SAGA" & Type == "Lake" & CharacteristicName == "pH" ~ 8.0,
                          ParkCode == "SAGA" & Type == "Lake" & CharacteristicName == "TP_ugL" ~ 22,#EPA new
                          ParkCode == "SAGA" & Type == "Lake" & CharacteristicName == "TN_mgL" ~ 0.6,#EPA new
@@ -685,7 +685,7 @@ MD <- MD %>% mutate(
                          ParkCode == "MORR" & CharacteristicName == "TP_ugL" ~ 100,
                          #ParkCode == "MORR" & CharacteristicName == "TP_ugL" ~ 32.6, #EPA new; off b/c state thresh exists
                          ParkCode == "MORR" & CharacteristicName == "TN_mgL" ~ 0.482,#EPA new; 
-                         ParkCode == "MORR" & CharacteristicName == "SpCond_uScm" ~ 1000,#EPA new
+                         #ParkCode == "MORR" & CharacteristicName == "SpCond_uScm" ~ 1000,#EPA new
                          ParkCode == "MORR" & CharacteristicName == "Turbidity_NTU" ~ 50),
   Units = ifelse(CharacteristicName == "pH", paste0("pH units"), 
                  ifelse(CharacteristicName == "PenetrationRatio", paste0("pct"),
