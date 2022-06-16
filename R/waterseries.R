@@ -95,9 +95,9 @@ setMethod(f="waterseries", signature=c(object="NCRNWaterObj"),
                                  
 
     PlotData <- PlotData %>% group_by(Category, Characteristic, Site, Park, month) %>% 
-      mutate(num_meas = sum(!is.na(ValueCen)), 
-             pct_true = sum(ifelse(Censored == FALSE, 1, 0))/sum(!is.na(ValueCen)),
-             adjValueCen = ifelse(Censored == TRUE, max(ValueCen, na.rm = TRUE), Value)) %>% 
+      mutate(num_meas = ifelse(censored, sum(!is.na(ValueCen)),sum(!is.na(Value))), 
+             pct_true = sum(ifelse(!censored, 1, 0))/num_meas, #sum(!is.na(ValueCen)),
+             adjValueCen = ifelse(censored == TRUE, max(ValueCen, na.rm = TRUE), Value)) %>% 
       ungroup() %>% arrange(month)
                 
             if(is.na(yname)) yname<-paste0(getCharInfo(object=object, charname=charname, category=category, info="CategoryDisplay")," (",
@@ -152,7 +152,7 @@ setMethod(f="waterseries", signature=c(object="data.frame"),
            OutPlot<-
               if(censored == TRUE){ 
                 if(deseason == FALSE){
-                  ggplot(object, aes(x = Xaxis, y = adjValueCen, color = Censored, group = Censored))+
+                  ggplot(object, aes(x = Xaxis, y = adjValueCen, color = censored, group = censored))+
                     {if ("points" %in% layers) geom_point(size = sizes[1]) }+
                     {if (is.numeric(assessment)) geom_hline(yintercept = assessment, color = assesscolor, 
                                                             linetype = "dashed", size = sizes[3])} +
@@ -168,7 +168,7 @@ setMethod(f="waterseries", signature=c(object="data.frame"),
                   
                   if(nrow(df_mon)==0)stop("Too few data points to plot.")
 
-                  ggplot(df_mon, aes(x = Date, y = adjValueCen, color = Censored, group = Censored))+
+                  ggplot(df_mon, aes(x = Date, y = adjValueCen, color = censored, group = censored))+
                     geom_point(size = sizes[1])+
                     labs(title = title, y = yname, x = xname) +
                     scale_color_manual(values = c("FALSE" = "blue", "TRUE" = "red"),

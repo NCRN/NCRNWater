@@ -179,13 +179,13 @@ setMethod(f = "watersite_comps", signature = c(object = "data.frame"),
                     legend.position = legend)
             )
 
+            return(site_comp_plot)
             
-            
-            site_comp_plotly <- tryCatch(ggplotly(site_comp_plot, tooltip = c("text"), showlegend = ifelse(legend == "none", FALSE, TRUE)), 
-                                 error = function(e) {
-                                 stop("Error: invalid dataset for plotting. Please check that arguments are spelled correctly and that the specified combination of parkcode, sitecode, and charname exists in the data.")})
-            
-            return(site_comp_plotly)
+            # site_comp_plotly <- tryCatch(ggplotly(site_comp_plot, tooltip = c("text"), showlegend = ifelse(legend == "none", FALSE, TRUE)), 
+            #                      error = function(e) {
+            #                      stop("Error: invalid dataset for plotting. Please check that arguments are spelled correctly and that the specified combination of parkcode, sitecode, and charname exists in the data.")})
+            # 
+            # return(site_comp_plotly)
 
 })
 

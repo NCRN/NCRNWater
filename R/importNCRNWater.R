@@ -24,13 +24,29 @@
 #' @export
 
 
-importNCRNWater<-function(Dir, Data="Water Data.csv", MetaData="MetaData.csv"){
+importNCRNWater<-function(Dir, Data="Water Data.csv", MetaData="MetaData.csv", wqx=FALSE){
   
 #### Read in Data ####
+  if(wqx){
+    Indata <- read_csv(paste(Dir, Data, sep="/"), col_types=cols(.default="c")) %>% 
+      rename(SiteCode = MonitoringLocationIdentifier, Date =`ActivityStartDate`, 
+             Characteristic = `CharacteristicName`, Value = `ResultMeasureValue`)%>% 
+      mutate(TextValue=Value)
+    #### Get data ready to make into objects ####
+    Indata$Date<-ymd(Indata$Date)
+  }
+  
+  
+  
+ if(!wqx) {
   Indata <- read_csv(paste(Dir, Data, sep="/"), col_types=cols(.default="c")) %>% 
     rename(SiteCode = StationID, Date =`Visit Start Date`, Characteristic = `Local Characteristic Name`,
            Value = `Result Value/Text`)%>% 
     mutate(TextValue=Value)
+  #### Get data ready to make into objects ####
+  Indata$Date<-mdy(Indata$Date)
+  
+ }
   
   if(any(names(Indata)=="ValueCen") & any(names(Indata)=="Censored")){
     
@@ -40,8 +56,7 @@ importNCRNWater<-function(Dir, Data="Water Data.csv", MetaData="MetaData.csv"){
     
   MetaData<-read_csv(paste(Dir, MetaData, sep="/"), col_types=cols()) #makes function less chatty
   
-#### Get data ready to make into objects ####
-  Indata$Date<-mdy(Indata$Date)
+
 
 #### Check whether MQL and UQL fields (Minimum and Upper Detection Limits) are in Indata. 
    # Add them if not, make them numeric if they are
@@ -52,11 +67,20 @@ importNCRNWater<-function(Dir, Data="Water Data.csv", MetaData="MetaData.csv"){
     Indata$UQL<-as.numeric(Indata$UQL)} else {Indata$UQL<-as.numeric(NA)}
 
 #### Create Data part of each characteristic ####
-  MetaData$Data<-MetaData %>% dplyr::select(SiteCode, DataName) %>% 
-    pmap(.f=function(SiteCode, DataName) {
-    dplyr::filter(Indata, SiteCode == !!SiteCode, Characteristic == DataName) %>% 
+  if(wqx){
+  MetaData$Data<-MetaData %>% dplyr::select(SiteCodeWQX, DataName) %>% 
+    pmap(.f=function(SiteCodeWQX, DataName) {
+    dplyr::filter(Indata, SiteCode == !!SiteCodeWQX, Characteristic == DataName) %>% 
               dplyr::select(-SiteCode,-Characteristic)})
-
+  }
+  
+  if(!wqx){
+    MetaData$Data<-MetaData %>% dplyr::select(SiteCode, DataName) %>% 
+      pmap(.f=function(SiteCode, DataName) {
+        dplyr::filter(Indata, SiteCode == !!SiteCode, Characteristic == DataName) %>% 
+          dplyr::select(-SiteCode,-Characteristic)})
+  }
+  
 #### Change numeric data to numeric, but the leave the rest as character ####
   NumDat<-MetaData$DataType=="numeric"
   MetaData[NumDat,]$Data<-suppressWarnings(MetaData[NumDat,]$Data %>% map(.f=function(x) mutate(x,Value = as.numeric(Value) ))) 

@@ -78,7 +78,8 @@ setMethod(f = "waterbands", signature = c(object = "NCRNWaterObj"),
                             year = lubridate::year(Date)) %>% 
                      #filter(between(month_num, min(months), max(months))) %>% 
                      arrange(Date)
-            
+    
+    if(!exists("ValueCen", wdat)) wdat$ValueCen<-wdat$Value         
     wdat_hist <- wdat[wdat$year < year_current, ] 
     wdat_curr <- wdat[wdat$year == year_current, ]
     
@@ -251,12 +252,13 @@ setMethod(f = "waterbands", signature = c(object = "data.frame"),
                     legend.key = element_blank(),
                     legend.position = legend)
             )
-
-             monthly_plotly <- tryCatch(ggplotly(monthly_plot, tooltip = c("text")), 
-                                 error = function(e) {
-                                 stop("Error: invalid dataset for plotting. Please check that arguments are spelled correctly and that the specified combination of parkcode, sitecode, and charname exists in the data.")})
-            
-            return(monthly_plotly)
+            return(monthly_plot)
+# 
+#              monthly_plotly <- tryCatch(ggplotly(monthly_plot, tooltip = c("text")), 
+#                                  error = function(e) {
+#                                  stop("Error: invalid dataset for plotting. Please check that arguments are spelled correctly and that the specified combination of parkcode, sitecode, and charname exists in the data.")})
+#             
+#             return(monthly_plotly)
 
 })
 
