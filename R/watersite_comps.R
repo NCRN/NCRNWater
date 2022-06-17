@@ -82,6 +82,7 @@ setMethod(f = "watersite_comps", signature = c(object = "NCRNWaterObj"),
                             month_num = as.numeric(month),
                             year = lubridate::year(Date)) %>% 
                      arrange(Date)
+    if(!exists("ValueCen", wdat)) wdat$ValueCen<-wdat$Value   
     
     active_sites <- wdat %>% select(Site) %>% unique()
 
