@@ -58,8 +58,8 @@ setMethod(f="exceed", signature=c(object="data.frame"),
             Category<-if(exists("Category",object)) unique(object$Category) else NA
             Total<-nrow(object)
             Missing<-sum(is.na(object$Value))
-            TooLow<-if(is.na(lower)) NA else sum(object$Value<lower)
-            TooHigh<-if(is.na(upper)) NA else sum(object$Value>upper)
+            TooLow<-if(is.na(lower)) NA else sum(object$Value<lower, na.rm=T)
+            TooHigh<-if(is.na(upper)) NA else sum(object$Value>upper, na.rm = T)
             AllExceed<-sum(TooLow,TooHigh, na.rm=T)
             Acceptable=Total-Missing-AllExceed
             OutVec<-data.frame(Park, Site, Characteristic,Category, Total,Acceptable,TooLow,TooHigh, AllExceed, stringsAsFactors=F)
