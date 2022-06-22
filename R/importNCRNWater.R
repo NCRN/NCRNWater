@@ -8,11 +8,12 @@
 #' @param Dir The directory where the data is found
 #' @param Data The data file. Defaults to "Water Data.csv"
 #' @param MetaData The metadata file. Defaults to "MetaData.csv"
+#' @param wqx Indicates if the data file is in wqx format, defaults to \code{FALSE}.
 #' 
 #' @return Returns \code{Park} objects, one for each park, as a \code{list}.
 #' 
 #' @importFrom dplyr distinct group_by filter mutate rename select ungroup
-#' @importFrom lubridate mdy
+#' @importFrom lubridate mdy ymd
 #' @importFrom magrittr %>%
 #' @importFrom purrr map map2 pmap
 #' @importFrom readr cols read_csv
