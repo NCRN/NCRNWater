@@ -4,7 +4,12 @@
 \alias{importNCRNWater}
 \title{importNCRNWater}
 \usage{
-importNCRNWater(Dir, Data = "Water Data.csv", MetaData = "MetaData.csv")
+importNCRNWater(
+  Dir,
+  Data = "Water Data.csv",
+  MetaData = "MetaData.csv",
+  wqx = FALSE
+)
 }
 \arguments{
 \item{Dir}{The directory where the data is found}
@@ -12,6 +17,8 @@ importNCRNWater(Dir, Data = "Water Data.csv", MetaData = "MetaData.csv")
 \item{Data}{The data file. Defaults to "Water Data.csv"}
 
 \item{MetaData}{The metadata file. Defaults to "MetaData.csv"}
+
+\item{wqx}{Indicates if the data file is in wqx format, defaults to \code{FALSE}.}
 }
 \value{
 Returns \code{Park} objects, one for each park, as a \code{list}.
