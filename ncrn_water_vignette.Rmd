@@ -41,7 +41,7 @@ library(tidyverse)
 
 NCRNWater takes two input CSVs called `metadata` and `waterdata` in this vignette.
 
-Metadata:
+This is the format of NCRNWater metadata:
 
 ```{r}
 metadata <- read.csv("water_data/metadata.csv")
@@ -49,7 +49,7 @@ head(metadata)
 glimpse(metadata)
 ```
 
-Data:
+This is the format of NCRNWater data:
 
 ```{r}
 waterdata <- read.csv("water_data/waterdata.csv")
@@ -58,7 +58,7 @@ glimpse(waterdata)
 ```
 ### Water object constructor
 
-NCRNWater methods interact with one object class that is constructed with the function `NCRNWater::importNCRNWater()`.
+NCRNWater methods interact with one object class that is constructed with the function `NCRNWater::importNCRNWater()`. To use NCRNWater, you must create an NCRNWater object with `NCRNWater::importNCRNWater()`.
 
 ```{r}
 waterobj <- NCRNWater::importNCRNWater(Dir = "water_data/", # str; directory in which Data and MetaData are saved (leave blank if in project working directory)
@@ -84,36 +84,76 @@ Access help for NCRNWater functions
 
 ### `get` methods
 
-NCRNWater accesses data inside a `waterobj` with `get` methods. `get` methods can be used to parse data from `waterobj`. `get` methods were intended to retrieve specific data for analysis and visualization methods. 
+NCRNWater `analysis` and `visualization` methods accesses data inside a `waterobj` with `get` methods. `get` methods can also be used to parse data from `waterobj`. For example, one could retrieve a list of dataframes where each dataframe is a `charname` (e.g., dissolved oxygen "DOmg") with the code below.
 
 ```{r}
 # example get method call
-NCRNWater::getSites(object = waterobj, parkcode = "CATO", sitecode = "NCRN_CATO_BGHC")
+cato_sites <- NCRNWater::getSites(object = waterobj, parkcode = "CATO", sitecode = "NCRN_CATO_BGHC")
+head(cato_sites[["Catoctin"]]@Characteristics[[1]][[1]]@Data)
 ```
 
 ### `analysis` methods
 
+`NCRNWater::exceed()` summarizes `waterobj` records and returns a dataframe of records that exceed a lower or upper bound for a metric. `NCRNWater::exceed()` has one required argument: object; a NCRNWater water object. For example, returns a dataframe summary of records in in park `CATO` where observed `charname` "DOmg" was below "DOmg" lower limit provided in `metadata.csv`.
+```{r}
+NCRNWater::exceed(object = waterobj, parkcode = "CATO", charname = "DOmg", lower = subset(metadata, Category == "DOmg")$LowerPoint[1])
+```
+`NCRNWater::wcosinor()` fits a sin function to data provided in the function arguments. `NCRNWater::wcosinor()` has two required arguments:
+1. object; a NCRNWater water object 
+2. charname; str; review unique(metadata$CharacteristicName) for `characteristic` choices  
+
+`NCRNWater::wcosinor()` returns three outputs:  
+1. R console output with regression coefficients and related informatoin
+2. Data frame of dates and predicted values of `charname`. This can be used for plotting E.g., combine this data frame with NCRNWater::waterseries() for a figure showing predicted vs observed.
+3. Data frame of outlier observations of `charname` values
+```{r}
+cosin_results <- NCRNWater::wcosinor(object = waterobj, parkcode = "CATO", charname = "DOmg")
+preds <- data.frame(date = head(cosin_results[["PredLine"]][["PreDates.Date"]]),
+                    pred = head(cosin_results[["PredLine"]][["Preds"]]))
+preds
+```
 
 
 ### `visualization` methods
 
 `NCRNWater::waterbox()` produces boxplots with year on the horizontal axis, characteristic on the vertical axis. Data are aggregated at the [parkcode] level. `NCRNWater::waterbox()` has three required arguments:  
 1. object; a NCRNWater water object  
-2. parkcode; str; 4-letter NPS park code  
+2. parkcode; str; 4-letter NPS park code, review for `parkcode` choices:    
+```
+for (park in 1:length(waterobj))
+  print(waterobj[[park]]@ParkCode)
+```
 3. charname; str; review unique(metadata$CharacteristicName) for `characteristic` choices  
 ```{r}
 NCRNWater::waterbox(object = waterobj, parkcode = "CATO", charname = "DOmg")
 ```
 
-
 `NCRNWater::waterheat()` produces a heat map with date on the horizontal axis, with a color band corresponding to each date. Data are aggregated at the [parkcode][sitecode] level. `NCRNWater::waterheat()` has four required arguments:  
 1. object; a NCRNWater water object  
-2. parkcode; str; 4-letter NPS park code  
-3. sitecode; str; 
+2. parkcode; str; 4-letter NPS park code, review for `parkcode` choices:    
+```
+for (park in 1:length(waterobj))
+  print(waterobj[[park]]@ParkCode)
+```
+3. sitecode; str; review for `sitecode` choices:
+```
+for (park in 1:length(waterobj))
+  for (site in 1:length(waterobj[[park]]@Sites))
+    print(waterobj[[park]]@Sites[[site]]@SiteCode)
+```
 3. charname; str; review unique(metadata$CharacteristicName) for `characteristic` choices  
 ```{r}
-NCRNWater::waterheat(object = waterobj, parkcode = "CATO", sitecode = "NCRN_CATO_BGHC", charname = "DOmg")
+NCRNWater::waterheat(object = waterobj, parkcode = "CATO", sitecode = "NCRN_CATO_BGHC", charname = "DOmg", years = 2018)
 ```
+
+`NCRNWater::waterseries()` produces a scatterplot with date on the horizontal axis and the value of the `charname` parameter on the vertical axis. Data are aggrated at the [parkcode] level.`NCRNWater::waterheat()` has three required arguments:  
+1. object; a NCRNWater water object  
+2. parkcode; str; 4-letter NPS park code, review for `parkcode` choices:    
+```
+for (park in 1:length(waterobj))
+  print(waterobj[[park]]@ParkCode)
+```
+3. charname; str; review unique(metadata$CharacteristicName) for `characteristic` choices  
 
 ```{r}
 NCRNWater::waterseries(object = waterobj, parkcode = "CATO", charname = "DOmg")
