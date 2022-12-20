@@ -12,7 +12,7 @@ library(stringi)
 library(dplyr)
 
 ##############################
-# metadat
+# metadata
 ##############################
 # the original, real metadata
 metadata <- read.csv("water_data/metadata.csv") # directory excluded from github via .gitignore
@@ -118,10 +118,21 @@ waterdata <- read.csv("water_data/waterdata.csv") # directory excluded from gith
 
 # $OrganizationIdentifier
 head(waterdata$OrganizationIdentifier)
-waterdata$OrganizationIdentifier <- paste(do.call(paste0, Map(stri_rand_strings, n=length(waterdata$OrganizationIdentifier), length=c(2, 6),
-                    pattern = c('[0-9]', '[A-Z]'))),
-                    do.call(paste0, Map(stri_rand_strings, n=length(waterdata$OrganizationIdentifier), length=c(3),
-                                        pattern = c('[A-Z]'))), sep = "_")
+waterdata$OrganizationIdentifier <- paste0(unique(metadata$SiteCodeWQX), "_")
+
+# $OrganizationFormalName
+
+# $ActivityIdentifier
+# need to match this format: "11NPSWRD_WQX-NCRN_MONO_GAMI_20050523011501_02"
+# components:
+### 1) unique(metadata$SiteCodeWQX)
+### 2) cross-ref last two parts of metadata$SiteCode against regex target below
+### 3) YYYMMDD date of waterdata$ActivityStartDate
+
+# working on regex matching:
+# try: [^A-Z]*(-)[^0-9]* at https://regexr.com/
+# target: "MONO", "GAMI"
+# string: 11NPSWRD_WQX-NCRN_MONO_GAMI_20050523011501_02
 
 # $OrganizationFormalName
 head(waterdata$OrganizationFormalName)
@@ -181,6 +192,4 @@ waterdata$ActivityLocation.LongitudeMeasure <- rnorm(length(waterdata$ActivityLo
 head(waterdata$ActivityLocation.LongitudeMeasure)
 
 # save scrubbed data to be included as part of NCRNWater package
-# usethis::use_data_raw() # creates data-raw/DATASET.R directory and file
-
-usethis::use_data(DATASET, overwrite = TRUE)
+usethis::use_data(waterdata, overwrite = TRUE, compress = "xz")
