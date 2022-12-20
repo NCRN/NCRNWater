@@ -56,6 +56,8 @@ waterdata <- read.csv("water_data/waterdata.csv")
 head(waterdata)
 glimpse(waterdata)
 ```
+* note that `waterdata` dataset is in [wqx format](https://www.waterqualitydata.us/)
+
 ### Water object constructor
 
 NCRNWater methods interact with one object class that is constructed with the function `NCRNWater::importNCRNWater()`. To use NCRNWater, you must create an NCRNWater object with `NCRNWater::importNCRNWater()`.
