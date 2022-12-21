@@ -4,12 +4,11 @@
 # Anonymized datasets are available in NCRNWater via data() (i.e., data(metadata) or data(waterdata))
 # reference: https://youtu.be/Bj0gHafa4GE
 
-# install library(usethis)
-renv::install("usethis")
+# packages
 library(usethis)
-renv::install("stringi")
-library(stringi)
 library(dplyr)
+library(stringi)
+library(stringr)
 library(data.table)
 set.seed(1)
 
@@ -72,11 +71,12 @@ lookup <- data.frame(SiteCode = unique(metadata$SiteCode),
                                        sep = "_"
                                        ),
                      SiteCodeWQX = unique(metadata$SiteCodeWQX),
-                     SiteCodeWQX2 = paste("11PPPWRD_WQX", lookup$SiteCode2, sep = "-"),
+                     SiteCodeWQX2 = "11PPPWRD_WQX",
                      SiteName = unique(metadata$SiteName),
                      SiteName2 = paste(do.call(paste0, Map(stri_rand_strings, n=n_sites, length=c(7),
                                                            pattern = c('[A-Z]'))), "creek"))
-
+lookup$SiteCodeWQX2 <- paste0(lookup$SiteCodeWQX2, "-", lookup$SiteCode2)
+lookup_wqx <- lookup
 # join columns from `lookup` to `metadata`
 metadata <- dplyr::left_join(metadata, lookup %>% select(SiteCode, SiteCode2), by = "SiteCode")
 metadata <- dplyr::left_join(metadata, lookup %>% select(SiteCodeWQX, SiteCodeWQX2), by = "SiteCodeWQX")
@@ -133,24 +133,64 @@ usethis::use_data(metadata, overwrite = TRUE, compress = "xz")
 ##############################
 # the original, real data
 waterdata <- read.csv("water_data/waterdata.csv") # directory excluded from github via .gitignore
+waterdata_colnames <- colnames(waterdata) # save colnames as vector for use later
 
 # $OrganizationIdentifier
 head(waterdata$OrganizationIdentifier)
-waterdata$OrganizationIdentifier <- paste0(unique(metadata$SiteCodeWQX), "_")
+length(unique(waterdata$OrganizationIdentifier))
+# waterdata$OrganizationIdentifier should match the beginning of metadata$SiteCodeWQX
+# regex to extract the string we need
+# extract a string that matches these criteria:
+# 1) string starts with (^) two {2} characters [0-9]. Next,
+# 2) string contains six {6} characters [A-Z]. Next,
+# 3) string contains one {1} underscore '_'. Next,
+# 4) string contains three {3} characters [A-Z].
+waterdata$OrganizationIdentifier <- stringr::str_extract(unique(metadata$SiteCodeWQX)[1], "(^[0-9]{2}[A-Z]{6}_{1}[A-Z]{3})") 
 
 # $OrganizationFormalName
+head(waterdata$OrganizationFormalName)
+length(unique(waterdata$OrganizationFormalName))
+# this is not an identifying piece of data, so we leave as-is
 
 # $ActivityIdentifier
-# need to match this format: "11NPSWRD_WQX-NCRN_MONO_GAMI_20050523011501_02"
-# components:
-### 1) unique(metadata$SiteCodeWQX)
-### 2) cross-ref last two parts of metadata$SiteCode against regex target below
-### 3) YYYMMDD date of waterdata$ActivityStartDate
+head(waterdata$ActivityIdentifier)
+# concatenation:
+### 1) waterdata$OrganizationIdentifier
+### 2) "-"
+### 3) lookup_wqx to cross-ref
+### 4) "_"
+### 5) YYYMMDD date of waterdata$ActivityStartDate
+### 6) ?? is this a timestamp?
 
-# working on regex matching:
-# try: [^A-Z]*(-)[^0-9]* at https://regexr.com/
-# target: "MONO", "GAMI"
-# string: 11NPSWRD_WQX-NCRN_MONO_GAMI_20050523011501_02
+# 1) create dummy variable waterdata$SiteCodeWQX
+waterdata$SiteCodeWQX <- NA
+# 2) regex to extract characters from waterdata$ActivityIdentifier into waterdata$SiteCodeWQX
+waterdata$SiteCodeWQX <- stringr::str_extract(waterdata$ActivityIdentifier, "(^[0-9]{2}[A-Z]{6}_{1}[A-Z]{3}-{1}[A-Z]{4}_[A-Z]{4}_[A-Z0-9]{4})")
+# testdf <- waterdata %>% # find any $ActivityIdentifier that the regex couldn't parse
+#   select(ActivityIdentifier, SiteCodeWQX) %>%
+#   subset(is.na(SiteCodeWQX))
+# 3) create dummy variable waterdata$activity_dummy_keep
+waterdata$activity_dummy_keep <- NA
+# 4) regex to extract date string from waterdata$ActivityIdentifier into waterdata$activity_dummy_keep
+waterdata$activity_dummy_keep <- stringr::str_extract(waterdata$ActivityIdentifier, "([0-9]+$)|([0-9]+_{1}[0-9].$)|([0-9]+_{1}[A-Z]+$)|([0-9]+/[0-9]+$)")
+# testdf <- waterdata %>% # find any $ActivityIdentifier that the regex couldn't parse
+#   select(ActivityIdentifier, activity_dummy_keep) %>%
+#   subset(is.na(activity_dummy_keep))
+# 5) delete waterdata$ActivityIdentifier
+waterdata$ActivityIdentifier <- NULL
+# 6) left join waterdata$activity_dummy_match to lookup_wqx$SiteCodeWQX2
+# metadata <- dplyr::left_join(waterdata, lookup_wqx, by.x = "activity_dummy_match", by.y = "SiteCodeWQX2")
+testdf <- dplyr::left_join(waterdata, lookup_wqx %>% select(SiteCodeWQX, SiteCodeWQX2), by = "SiteCodeWQX") %>%
+  select(SiteCodeWQX, SiteCodeWQX2) %>%
+  subset(is.na(SiteCodeWQX2))
+# 7) waterdata$activity_dummy_match <- NULL
+# 8) setnames(waterdata, "SiteCodeWQX2", "ActivityIdentifier")
+# 9) paste0(waterdata$ActivityIdentifier, "_", waterdata$activity_dummy_keep)
+# 10) waterdata$activity_dummy_keep <- NULL
+# 11) waterdata <- waterdata %>% select(waterdata_colnames)
+
+
+
 
 # $OrganizationFormalName
 head(waterdata$OrganizationFormalName)
