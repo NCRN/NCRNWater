@@ -11,6 +11,7 @@ renv::install("stringi")
 library(stringi)
 library(dplyr)
 library(data.table)
+set.seed(1)
 
 ##############################
 # metadata
