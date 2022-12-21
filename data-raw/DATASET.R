@@ -10,6 +10,7 @@ library(usethis)
 renv::install("stringi")
 library(stringi)
 library(dplyr)
+library(data.table)
 
 ##############################
 # metadata
@@ -92,6 +93,7 @@ metadata <- metadata %>% select(metadata_colnames)
 
 # $Lat, Long
 # anonymize sites; replace lat & lon with rnorm() values
+head(metadata$Lat)
 lookup <- data.frame(Lat = unique(metadata$Lat),
                      Lat2 = rnorm(n_sites, (mean(metadata$Lat)-rnorm(1,15,5))),
                      Long = unique(metadata$Long),
@@ -99,14 +101,29 @@ lookup <- data.frame(Lat = unique(metadata$Lat),
 # join columns from `lookup` to `metadata`
 metadata <- dplyr::left_join(metadata, lookup %>% select(Lat, Lat2), by = "Lat")
 metadata <- dplyr::left_join(metadata, lookup %>% select(Long, Long2), by = "Long")
+# delete original columns
+metadata$Lat <- NULL
+metadata$Long <- NULL
 # rename newly joined columns
 setnames(metadata, "Lat2", "Lat")
 setnames(metadata, "Long2", "Long")
 # put columns back in their original order
 metadata <- metadata %>% select(metadata_colnames)
 # $AssessmentDetails
-assessment_choices <- c("", "", "", "Author et al 2156", "Author et al 2122", "Author A and Author B 2432")
-metadata$AssessmentDetails <- sample(assessment_choices, length(metadata$AssessmentDetails), replace = TRUE)
+lookup <- data.frame(AssessmentDetails = unique(metadata$AssessmentDetails),
+                     AssessmentDetail2 = c("",
+                                          "Author et al 2156",
+                                          "Author et al 2122",
+                                          "Author A and Author B 2432",
+                                          "Author 5 et al 2655"))
+# join columns from `lookup` to `metadata`
+metadata <- dplyr::left_join(metadata, lookup, by = "AssessmentDetails")
+# delete original columns
+metadata$AssessmentDetail <- NULL
+# rename newly joined columns
+setnames(metadata, "AssessmentDetail2", "AssessmentDetail")
+# put columns back in their original order
+metadata <- metadata %>% select(metadata_colnames)
 
 usethis::use_data(metadata, overwrite = TRUE, compress = "xz")
 
