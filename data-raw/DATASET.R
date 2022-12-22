@@ -33,9 +33,10 @@ lookup <- data.frame(ParkCode = unique(metadata$ParkCode),
                      ShortName = unique(metadata$ShortName),
                      ShortName2 = paste(do.call(paste0, Map(stri_rand_strings, n=n_parks, length=c(7),
                                                              pattern = c('[A-Z]'))), "park"),
-                     LongName = unique(metadata$LongName),
-                     LongName2 = paste(do.call(paste0, Map(stri_rand_strings, n=n_parks, length=c(7),
-                                                            pattern = c('[A-Z]'))), "National Park"))
+                     LongName = unique(metadata$LongName))
+for (i in 1:length(lookup$LongName)){
+  lookup$LongName2[i] <- paste(stringr::str_extract(lookup$ShortName2[i], "(^[A-Z]{7})"), "National Park")
+}
 # join columns from `lookup` to `metadata`
 metadata <- dplyr::left_join(metadata, lookup %>% select(ParkCode, ParkCode2), by = "ParkCode")
 metadata <- dplyr::left_join(metadata, lookup %>% select(ShortName, ShortName2), by = "ShortName")
@@ -72,9 +73,11 @@ lookup <- data.frame(SiteCode = unique(metadata$SiteCode),
                                        ),
                      SiteCodeWQX = unique(metadata$SiteCodeWQX),
                      SiteCodeWQX2 = "11PPPWRD_WQX",
-                     SiteName = unique(metadata$SiteName),
-                     SiteName2 = paste(do.call(paste0, Map(stri_rand_strings, n=n_sites, length=c(7),
-                                                           pattern = c('[A-Z]'))), "creek"))
+                     SiteName = unique(metadata$SiteName))
+
+for (i in 1:length(lookup$SiteName)){
+  lookup$SiteName2[i] <- paste(stringr::str_extract(lookup$SiteCode2[i], "([A-Z]{4}$)"), "creek")
+}
 lookup$SiteCodeWQX2 <- paste0(lookup$SiteCodeWQX2, "-", lookup$SiteCode2)
 lookup_wqx <- lookup
 # join columns from `lookup` to `metadata`
@@ -112,7 +115,7 @@ setnames(metadata, "Long2", "Long")
 metadata <- metadata %>% select(metadata_colnames)
 # $AssessmentDetails
 lookup <- data.frame(AssessmentDetails = unique(metadata$AssessmentDetails),
-                     AssessmentDetail2 = c("",
+                     AssessmentDetails2 = c("",
                                           "Author et al 2156",
                                           "Author et al 2122",
                                           "Author A and Author B 2432",
@@ -120,9 +123,9 @@ lookup <- data.frame(AssessmentDetails = unique(metadata$AssessmentDetails),
 # join columns from `lookup` to `metadata`
 metadata <- dplyr::left_join(metadata, lookup, by = "AssessmentDetails")
 # delete original columns
-metadata$AssessmentDetail <- NULL
+metadata$AssessmentDetails <- NULL
 # rename newly joined columns
-setnames(metadata, "AssessmentDetail2", "AssessmentDetail")
+setnames(metadata, "AssessmentDetails2", "AssessmentDetails")
 # put columns back in their original order
 metadata <- metadata %>% select(metadata_colnames)
 
