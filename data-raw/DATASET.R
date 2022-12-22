@@ -114,12 +114,12 @@ setnames(metadata, "Long2", "Long")
 # put columns back in their original order
 metadata <- metadata %>% select(metadata_colnames)
 # $AssessmentDetails
-lookup <- data.frame(AssessmentDetails = unique(metadata$AssessmentDetails),
-                     AssessmentDetails2 = c("",
-                                          "Author et al 2156",
-                                          "Author et al 2122",
-                                          "Author A and Author B 2432",
-                                          "Author 5 et al 2655"))
+lookup <- data.frame(AssessmentDetails = unique(metadata$AssessmentDetails))
+for (i in 1:length(lookup$AssessmentDetails)){
+  lookup$AssessmentDetails2[i] <- ifelse(lookup$AssessmentDetails[i] == "",
+                                         "",
+                                         paste("Author et al", rpois(1, 2100)))
+}
 # join columns from `lookup` to `metadata`
 metadata <- dplyr::left_join(metadata, lookup, by = "AssessmentDetails")
 # delete original columns
