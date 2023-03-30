@@ -3,6 +3,7 @@
 #' @include getSites.R
 #' @include getParkInfo.R
 #' @importFrom magrittr %>%
+#' @importFrom purrr map
 #' 
 #' @title getSiteInfo
 #' 
@@ -34,6 +35,11 @@ setGeneric(name="getSiteInfo",function(object,parkcode=NA,sitecode=NA,info){stan
 
 setMethod(f="getSiteInfo", signature=c(object="list"),
           function(object, parkcode, sitecode, info){
+            suppressWarnings( if(!is.na(parkcode)|!is.na(sitecode)) {
+              object<-getSites(object, parkcode = parkcode, sitecode = sitecode)
+              object<-object[object %>% purrr::map_lgl(~class(.x)=="Site")]
+            }
+            )
             lapply(object,FUN=getSiteInfo, parkcode=parkcode, sitecode=sitecode, info=info) %>% unname %>% unlist
 })  
 

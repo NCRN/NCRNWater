@@ -1,8 +1,8 @@
 Package: NCRNWater
 Type: Package
 Title: Data analysis and visualization for NPS I&M water monitoring
-Version: 0.26.2
-Date: 2020-11-10
+Version: 0.27.1
+Date: 2022-06-22
 Author: John Paul Schmit, Aaron Weed, Kate Miler
 Maintainer: John Paul Schmit <john_schmit@nps.gov>
 Encoding: UTF-8
