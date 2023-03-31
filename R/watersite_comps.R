@@ -141,31 +141,36 @@ setMethod(f = "watersite_comps", signature = c(object = "data.frame"),
             xaxis_breaks <- c(min(months):max(months))
             xaxis_labels <- lapply(xaxis_breaks, function(x){as.character(lubridate::month(x, label = T))})
             numsites <- length(unique(object$Site))
-            rep_symb <- ifelse(numsites > 5, numsites - 5, 1)
+            rep_symb <- ifelse(numsites <= 5, 1, numsites * 2) # adds buffer so won't run out.
              
             site_comp_plot <- suppressWarnings( 
-              ggplot(data = object, aes(x = month_num, y = ValueCen, shape = SiteName, color = SiteName))+
+              ggplot(data = object, aes(x = month_num, y = ValueCen, shape = SiteName, 
+                                        color = SiteName))+
               scale_x_continuous(breaks = xaxis_breaks,
                                  labels = xaxis_labels)+
               {if("line" %in% layers) geom_line()}+  
 
-              {if("points" %in% layers) geom_point() }+
-              {if("points" %in% layers){geom_point(aes(text = paste0(SiteName, "<br>", month, " ", year, 
-                                                                     "<br>", param_name, ": ", round(ValueCen,1), 
-                                                                     " ", unit)), size = 2)}}+
+              #{if("points" %in% layers) geom_point() }+  # Not sure why this is here
+              {if("points" %in% layers){
+                geom_point(aes(text = paste0(SiteName, "<br>", month, " ", year, 
+                                             "<br>", param_name, ": ", round(ValueCen,1), 
+                                             " ", unit)), 
+                           size = 2)}}+
               viridis::scale_color_viridis(discrete = TRUE, option = "D")+
-              scale_shape_manual(values = rep(c(16,17,18,19,20), times= rep_symb))+
+              scale_shape_manual(values = rep(c(16,17,18,19,20), times = rep_symb))+ 
               # Labels
               labs(y = yname, x = NULL, title = NULL) + 
   
-              {if(assessment == TRUE) geom_line(aes(y = LowerPoint,
-                                                    text = paste("Lower", param_name, "threshold:", LowerPoint, unit)),
-                                                linetype = "dashed", color = "#212121",
-                                                guide = FALSE)}+
-              {if(assessment == TRUE) geom_line(aes(y = UpperPoint,
-                                                    text = paste("Upper", param_name, "threshold:", UpperPoint, unit)),
-                                                linetype = "dashed", color = "#212121",
-                                                guide = FALSE)}+
+              {if(assessment == TRUE) 
+                geom_line(aes(y = LowerPoint,
+                              text = paste("Lower", param_name, "threshold:", LowerPoint, unit)),
+                          linetype = "dashed", color = "#212121",
+                          guide = FALSE)}+
+              {if(assessment == TRUE) 
+                geom_line(aes(y = UpperPoint,
+                              text = paste("Upper", param_name, "threshold:", UpperPoint, unit)),
+                          linetype = "dashed", color = "#212121",
+                          guide = FALSE)}+
 
               # Themes
               theme(axis.title.y = element_text(size = 10),
