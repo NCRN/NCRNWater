@@ -606,14 +606,14 @@ MD <- MD %>% mutate(
                            CharacteristicName == "DO_mgL" ~ 5.0,
                          ParkCode == "MIMA" & CharacteristicName == "pH" ~ 6.5,
                          ParkCode == "SAIR" & CharacteristicName == "pH" ~ 6.5,
-                         ParkCode == "SAIR" & CharacteristicName == "DO_mgL" ~ 6.0,
+                         #ParkCode == "SAIR" & CharacteristicName == "DO_mgL" ~ 6.0,
                          ParkCode == "SARA" & CharacteristicName == "DO_mgL" ~ 4.0,
                          ParkCode == "SARA" & CharacteristicName == "pH" ~ 6.5,
                          ParkCode == "ROVA" & CharacteristicName == "DO_mgL" ~ 4.0,
                          ParkCode == "ROVA" & CharacteristicName == "pH" ~ 6.5,
                          ParkCode == "WEFA" & CharacteristicName == "DO_mgL" ~ 5.0,
                          ParkCode == "WEFA" & CharacteristicName == "pH" ~ 6.5,
-                         ParkCode == "WEFA" & CharacteristicName == "SDepth1_m" ~ 2,
+                         ParkCode == "WEFA" & CharacteristicName == "SDepth1_m" ~ 4.5,
                          ParkCode == "MORR" & CharacteristicName == "DO_mgL" ~ 7.0,
                          ParkCode == "MORR" & CharacteristicName == "pH" ~ 6.5),
                          
@@ -622,9 +622,9 @@ MD <- MD %>% mutate(
   UpperPoint = case_when(ParkCode == "ACAD" & Type == "Stream" & CharacteristicName == "TP_ugL" ~ 32.6, #EPA new
                          ParkCode == "ACAD" & Type == "Stream" & CharacteristicName == "TN_mgL" ~ 0.482,#EPA new
                          #ParkCode == "ACAD" & Type == "Stream" & CharacteristicName == "SpCond_uScm" ~ 1000,#EPA new
-                         ParkCode == "ACAD" & Type == "Lake" & CharacteristicName == "TP_ugL" ~ 22,#EPA new
-                         ParkCode == "ACAD" & Type == "Lake" & CharacteristicName == "TN_mgL" ~ 0.6,#EPA new
-                         ParkCode == "ACAD" & Type == "Lake" & CharacteristicName == "ChlA_ugL" ~ 7.76,#EPA new
+                         ParkCode == "ACAD" & Type == "Lake" & CharacteristicName == "TP_ugL" ~ 27.9,#EPA new
+                         ParkCode == "ACAD" & Type == "Lake" & CharacteristicName == "TN_mgL" ~ 0.655,#EPA new
+                         ParkCode == "ACAD" & Type == "Lake" & CharacteristicName == "ChlA_ugL" ~ 8.43,#EPA new
                          
                          ParkCode == "MABI" & Type == "Stream" & CharacteristicName == "pH" ~ 8.5,
                          ParkCode == "MABI" & Type == "Stream" & CharacteristicName == "Turbidity_NTU" ~ 10,
@@ -632,19 +632,19 @@ MD <- MD %>% mutate(
                          ParkCode == "MABI" & Type == "Stream" & CharacteristicName == "TN_mgL" ~ 0.482,#EPA new
                          #ParkCode == "MABI" & Type == "Stream" & CharacteristicName == "SpCond_uScm" ~ 1000,#EPA new
                          ParkCode == "MABI" & Type == "Lake" & CharacteristicName == "pH" ~ 8.5,
-                         ParkCode == "MABI" & Type == "Lake" & CharacteristicName == "TN_mgL" ~ 5,
-                         ParkCode == "MABI" & Type == "Lake" & CharacteristicName == "TP_ugL" ~ 22,#EPA new
-                         #ParkCode == "MABI" & Type == "Lake" & CharacteristicName == "TN_mgL" ~ 0.6,#EPA new; off b/c state thresh exists
-                         ParkCode == "MABI" & Type == "Lake" & CharacteristicName == "ChlA_ugL" ~ 7.76,#EPA new
+                         ParkCode == "MABI" & Type == "Lake" & CharacteristicName == "TN_mgL" ~ 0.655, #EPA new
+                         ParkCode == "MABI" & Type == "Lake" & CharacteristicName == "TP_ugL" ~ 27.9, #EPA new
+                         #ParkCode == "MABI" & Type == "Lake" & CharacteristicName == "TN_mgL" ~ 0.6, #EPA new; off b/c state thresh exists
+                         ParkCode == "MABI" & Type == "Lake" & CharacteristicName == "ChlA_ugL" ~ 8.43, #EPA new
                      
                          ParkCode == "SAGA" & Type == "Stream" & CharacteristicName == "pH" ~ 8.0,
                          ParkCode == "SAGA" & Type == "Stream" & CharacteristicName == "TP_ugL" ~ 32.6, #EPA new
                          ParkCode == "SAGA" & Type == "Stream" & CharacteristicName == "TN_mgL" ~ 0.482,#EPA new
                          #ParkCode == "SAGA" & Type == "Stream" & CharacteristicName == "SpCond_uScm" ~ 1000,#EPA new
-                         ParkCode == "SAGA" & Type == "Lake" & CharacteristicName == "pH" ~ 8.0,
-                         ParkCode == "SAGA" & Type == "Lake" & CharacteristicName == "TP_ugL" ~ 22,#EPA new
-                         ParkCode == "SAGA" & Type == "Lake" & CharacteristicName == "TN_mgL" ~ 0.6,#EPA new
-                         ParkCode == "SAGA" & Type == "Lake" & CharacteristicName == "ChlA_ugL" ~ 7.76,#EPA new
+                         ParkCode == "SAGA" & Type == "Lake" & CharacteristicName == "pH" ~ 8.5,
+                         ParkCode == "SAGA" & Type == "Lake" & CharacteristicName == "TP_ugL" ~ 27.9,#EPA new
+                         ParkCode == "SAGA" & Type == "Lake" & CharacteristicName == "TN_mgL" ~ 0.655,#EPA new
+                         ParkCode == "SAGA" & Type == "Lake" & CharacteristicName == "ChlA_ugL" ~ 8.43,#EPA new
                          
                          ParkCode == "MIMA" & SiteName == "Concord River" &
                            CharacteristicName == "Temp_C" ~ 28.3,
@@ -652,10 +652,10 @@ MD <- MD %>% mutate(
                            CharacteristicName == "Temp_C" ~ 20.3,
                          ParkCode == "MIMA" & CharacteristicName == "pH" ~ 8.3,
                          ParkCode == "MIMA" & CharacteristicName == "TP_ugL" ~ 32.6, #EPA new
-                         ParkCode == "MIMA" & CharacteristicName == "TN_mgL" ~ 0.482,#EPA new
-                         ParkCode == "MIMA" & CharacteristicName == "SpCond_uScm" ~ 1000,#EPA new
+                         ParkCode == "MIMA" & CharacteristicName == "TN_mgL" ~ 0.482, #EPA new
+                         #ParkCode == "MIMA" & CharacteristicName == "SpCond_uScm" ~ 1000, #EPA new
                         
-                         ParkCode == "SAIR" & CharacteristicName == "pH" ~ 8.3,
+                         ParkCode == "SAIR" & CharacteristicName == "pH" ~ 8.5,
                          ParkCode == "SAIR" & CharacteristicName == "TP_ugL" ~ 32.6,
                          ParkCode == "SAIR" & CharacteristicName == "TN_mgL" ~ 0.482,
                          ParkCode == "SAIR" & CharacteristicName == "Temp_C" ~ 28.3,
@@ -663,18 +663,18 @@ MD <- MD %>% mutate(
                          ParkCode == "SARA" & CharacteristicName == "pH" ~ 8.5,
                          ParkCode == "SARA" & CharacteristicName == "TP_ugL" ~ 32.6, #EPA new
                          ParkCode == "SARA" & CharacteristicName == "TN_mgL" ~ 0.482,#EPA new
-                         ParkCode == "SARA" & CharacteristicName == "SpCond_uScm" ~ 1000,#EPA new
+                         #ParkCode == "SARA" & CharacteristicName == "SpCond_uScm" ~ 1000,#EPA new
                          
                          ParkCode == "ROVA" & CharacteristicName == "pH" ~ 8.5,
                          ParkCode == "ROVA" & CharacteristicName == "TP_ugL" ~ 32.6, #EPA new
                          ParkCode == "ROVA" & CharacteristicName == "TN_mgL" ~ 0.482,#EPA new
-                         ParkCode == "ROVA" & CharacteristicName == "SpCond_uScm" ~ 1000,#EPA new
+                         #ParkCode == "ROVA" & CharacteristicName == "SpCond_uScm" ~ 1000,#EPA new
                          
                          ParkCode == "WEFA" & CharacteristicName == "Temp_C" ~ 29.4,
                          ParkCode == "WEFA" & CharacteristicName == "pH" ~ 8.0,
-                         ParkCode == "WEFA" & CharacteristicName == "TP_ugL" ~ 50,
-                         ParkCode == "WEFA" & CharacteristicName == "TN_mgL" ~ 1,
-                         ParkCode == "WEFA" & CharacteristicName == "ChlA_ugL" ~ 30,
+                         ParkCode == "WEFA" & CharacteristicName == "TP_ugL" ~ 27.9, #EPA new
+                         ParkCode == "WEFA" & CharacteristicName == "TN_mgL" ~ 0.655, #EPA new
+                         ParkCode == "WEFA" & CharacteristicName == "ChlA_ugL" ~ 8.43, #EPA new
                          
                          #ParkCode == "WEFA" & CharacteristicName == "TP_ugL" ~ 22,#EPA new; off b/c state thresh exists
                          #ParkCode == "WEFA" & CharacteristicName == "TN_mgL" ~ 0.6,#EPA new; off b/c state thresh exists
@@ -682,11 +682,12 @@ MD <- MD %>% mutate(
                          
                          ParkCode == "MORR" & CharacteristicName == "Temp_C" ~ 22.0,
                          ParkCode == "MORR" & CharacteristicName == "pH" ~ 8.5,
-                         ParkCode == "MORR" & CharacteristicName == "TP_ugL" ~ 100,
+                         ParkCode == "MORR" & CharacteristicName == "TP_ugL" ~ 32.6, #EPA new
                          #ParkCode == "MORR" & CharacteristicName == "TP_ugL" ~ 32.6, #EPA new; off b/c state thresh exists
                          ParkCode == "MORR" & CharacteristicName == "TN_mgL" ~ 0.482,#EPA new; 
                          #ParkCode == "MORR" & CharacteristicName == "SpCond_uScm" ~ 1000,#EPA new
-                         ParkCode == "MORR" & CharacteristicName == "Turbidity_NTU" ~ 50),
+                         ParkCode == "MORR" & CharacteristicName == "Turbidity_NTU" ~ 50,
+                         ParkCode == "MORR" & CharacteristicName == "SO4_ueqL" ~ 5208), #EPA new 
   Units = ifelse(CharacteristicName == "pH", paste0("pH units"), 
                  ifelse(CharacteristicName == "PenetrationRatio", paste0("pct"),
                         paste0(Units)))
