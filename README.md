@@ -1,5 +1,23 @@
 # NCRNWater
 
-This is an R package used to process NCRN water quality monitoring data.
+This is an R package used to process water quality monitoring data.
 
-### Inputs
+## Inputs
+
+## NEWS
+
+### NCRNWater 1.0.1 2026-04-39
+
+#### Fixes & Improvements
+- **Bug Fix:** Resolved duplication of `Site` and `Characteristic` outputs for certain `parkcode/sitecode/charname` combinations (e.g., `NACE / NCRN_NACE_OXRU / pH`) by:
+  - Safely flattening lists of S4 objects (`unlist(..., recursive = FALSE)`).
+  - Using robust S4 type checks (`methods::is`).
+  - **Conditionally deduplicating** by identity at list/Park levels:
+    - When any filters are provided (`parkcode`, `sitecode`, `charname`, or `category`), results are deduplicated by identity (`SiteCode` for Sites; `CharName|Category|SampleFraction|Substrate` for Characteristics).
+    - When **no filters** are provided (global calls), results **preserve original concatenation** semantics (no deduplication), maintaining backward compatibility (e.g., `getCharInfo(WaterData, info = "LowerPoint")` returns the full-length numeric vector).
+- **Type Stability:** `getCharInfo()` now returns appropriate scalar types:
+  - Numeric for `LowerPoint`, `UpperPoint`.
+  - Character for descriptive fields (e.g., `LowerDescription`, `Units`).
+  - Lists for `Data`.
+- **API Safety:** `getCharInfo(object = "Site")` method signature now includes `category = NA` to avoid scoping issues.
+
