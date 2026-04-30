@@ -46,139 +46,166 @@ setGeneric(name="getCharInfo",function(object,parkcode=NA, sitecode=NA,charname=
            signature=c("object") )
 
 setMethod(f = "getCharInfo", signature = c(object = "list"),
-  function(object, parkcode = NA, sitecode = NA, charname = NA, category = NA, info = NA) {
-
-    if (is.na(info)) stop("Need to specify 'info'")
-
-    # Get deduped characteristics from list/Park/Site inputs
-    chars <- getChars(object, parkcode = parkcode, sitecode = sitecode,
-                      charname = charname, category = category)
-
-    if (is.null(chars)) {
-      return(if (identical(info, "Data")) list() else character(0))
-    }
-
-    # Flatten safely and keep only Characteristic objects
-    chars <- unlist(chars, recursive = FALSE, use.names = FALSE)
-    chars <- chars[vapply(chars, function(x) methods::is(x, "Characteristic"), logical(1))]
-
-    if (identical(info, "Data")) {
-      # Return a list of data.frames
-      return(lapply(chars, getCharInfo, info = "Data"))
-    } else {
-      # Return a type-stable character vector
-      out <- vapply(chars, function(ch) getCharInfo(ch, info = info), FUN.VALUE = character(1))
-      return(unname(out))
-    }
-  }
+          function(object, parkcode = NA, sitecode = NA, charname = NA, category = NA, info = NA) {
+              if (is.na(info)) stop("Need to specify 'info'")
+              
+              # Choose expected output type for characteristic-level info
+              .fv <- function(info) {
+                  if (identical(info, "Data")) return(NULL)         # handled separately
+                  if (info %in% c("LowerPoint", "UpperPoint")) return(numeric(1))
+                  # All other characteristic-level infos are character scalars
+                  return(character(1))
+              }
+              
+              # Get deduped Characteristic objects from any list/Park/Site inputs
+              chars <- getChars(object, parkcode = parkcode, sitecode = sitecode,
+                                charname = charname, category = category)
+              
+              if (is.null(chars)) {
+                  return(if (identical(info, "Data")) list() else
+                      if (info %in% c("LowerPoint", "UpperPoint")) numeric(0) else character(0))
+              }
+              
+              # Flatten safely and keep only Characteristic objects
+              chars <- unlist(chars, recursive = FALSE, use.names = FALSE)
+              chars <- chars[vapply(chars, function(x) methods::is(x, "Characteristic"), logical(1))]
+              
+              if (identical(info, "Data")) {
+                  # Return list of data.frames
+                  return(lapply(chars, getCharInfo, info = "Data"))
+              } else {
+                  # Type-stable scalar output per characteristic
+                  fv <- .fv(info)
+                  out <- vapply(chars, function(ch) getCharInfo(ch, info = info), FUN.VALUE = fv)
+                  return(unname(out))
+              }
+          }
 )
+
 #### Given one park get the sites and run again ####
 setMethod(f = "getCharInfo", signature = c(object = "Park"),
-  function(object, parkcode = NA, sitecode = NA, charname = NA, category = NA, info = NA) {
-    if (is.na(info)) stop("Need to specify 'info'")
-
-    # Safe scalar extractor: handles NULL, length-0, NA; returns "" for missing
-    .safe1 <- function(x) {
-      if (is.null(x) || length(x) == 0L) return("")
-      y <- x[1]
-      if (is.na(y)) return("")
-      as.character(y)
-    }
-
-    # Stable identity for Characteristic: Name|Category|SampleFraction|Substrate
-    .char_id <- function(ch) {
-      nm  <- .safe1(ch@CharacteristicName)
-      cat <- .safe1(ch@Category)
-      sf  <- .safe1(ch@SampleFraction)
-      sub <- .safe1(ch@Substrate)
-      paste(nm, cat, sf, sub, sep = "|")
-    }
-
-    switch(info,
-
-      #### Park-level info: replicate per UNIQUE Characteristic count
-      ParkCode = ,
-      ParkShortName = ,
-      ParkLongName = ,
-      Network = {
-        chars <- getChars(object = object, parkcode = parkcode, sitecode = sitecode,
-                          charname = charname, category = category)
-        n <- 0L
-        if (!is.null(chars)) {
-          chars <- unlist(chars, recursive = FALSE, use.names = FALSE)
-          # keep only Characteristic objects
-          chars <- chars[vapply(chars, function(x) methods::is(x, "Characteristic"), logical(1))]
-          if (length(chars)) {
-            ids <- vapply(chars, .char_id, character(1))
-            n <- length(unique(ids))
+          function(object, parkcode = NA, sitecode = NA, charname = NA, category = NA, info = NA) {
+              if (is.na(info)) stop("Need to specify 'info'")
+              
+              # Safe scalar extractor: handles NULL, length-0, NA; returns "" for missing
+              .safe1 <- function(x) {
+                  if (is.null(x) || length(x) == 0L) return("")
+                  y <- x[1]
+                  if (is.na(y)) return("")
+                  as.character(y)
+              }
+              
+              # Stable identity for Characteristic: Name|Category|SampleFraction|Substrate
+              .char_id <- function(ch) {
+                  nm  <- .safe1(ch@CharacteristicName)
+                  cat <- .safe1(ch@Category)
+                  sf  <- .safe1(ch@SampleFraction)
+                  sub <- .safe1(ch@Substrate)
+                  paste(nm, cat, sf, sub, sep = "|")
+              }
+              
+              # Expected output type for characteristic-level infos
+              .fv <- function(info) {
+                  if (identical(info, "Data")) return(NULL)
+                  if (info %in% c("LowerPoint", "UpperPoint")) return(numeric(1))
+                  return(character(1))
+              }
+              
+              switch(info,
+                     
+                     #### Park-level info: replicate per UNIQUE Characteristic count
+                     ParkCode = ,
+                     ParkShortName = ,
+                     ParkLongName = ,
+                     Network = {
+                         chars <- getChars(object = object, parkcode = parkcode, sitecode = sitecode,
+                                           charname = charname, category = category)
+                         n <- 0L
+                         if (!is.null(chars)) {
+                             chars <- unlist(chars, recursive = FALSE, use.names = FALSE)
+                             # keep only Characteristic objects
+                             chars <- chars[vapply(chars, function(x) methods::is(x, "Characteristic"), logical(1))]
+                             if (length(chars)) {
+                                 ids <- vapply(chars, .char_id, character(1))
+                                 n <- length(unique(ids))
+                             }
+                         }
+                         pi <- getParkInfo(object, info = info)
+                         return(rep(pi, times = n))
+                     },
+                     
+                     #### Site-level info: for each site, replicate per UNIQUE Characteristic count
+                     SiteCode = ,
+                     SiteName = ,
+                     coords  = ,
+                     type    = {
+                         sites <- getSites(object, parkcode = parkcode, sitecode = sitecode)
+                         if (is.null(sites)) return(character(0))
+                         # Keep only Site objects and dedupe by SiteCode
+                         sites <- sites[vapply(sites, function(x) methods::is(x, "Site"), logical(1))]
+                         sc <- vapply(sites, function(s) s@SiteCode, character(1))
+                         sites <- sites[!duplicated(sc)]
+                         
+                         out <- unlist(lapply(sites, function(st) {
+                             chs <- getChars(st, charname = charname, category = category)
+                             if (is.null(chs)) return(character(0))
+                             chs <- unlist(chs, recursive = FALSE, use.names = FALSE)
+                             chs <- chs[vapply(chs, function(x) methods::is(x, "Characteristic"), logical(1))]
+                             if (!length(chs)) return(character(0))
+                             ids <- vapply(chs, .char_id, character(1))
+                             k <- length(unique(ids))
+                             val <- getSiteInfo(st, info = info)
+                             rep(val, times = k)
+                         }), use.names = FALSE)
+                         
+                         return(out)
+                     },
+                     
+                     #### Data: return a list of data.frames (one per UNIQUE Characteristic)
+                     Data = {
+                         chars <- getChars(object = object, parkcode = parkcode, sitecode = sitecode,
+                                           charname = charname, category = category)
+                         if (is.null(chars)) return(list())
+                         
+                         chars <- unlist(chars, recursive = FALSE, use.names = FALSE)
+                         chars <- chars[vapply(chars, function(x) methods::is(x, "Characteristic"), logical(1))]
+                         if (!length(chars)) return(list())
+                         
+                         # Deduplicate
+                         ids <- vapply(chars, .char_id, character(1))
+                         chars <- chars[!duplicated(ids)]
+                         
+                         return(lapply(chars, getCharInfo, info = "Data"))
+                     },
+                     
+                     #### Default: characteristic-level info (e.g., LowerDescription, Units, LowerPoint, UpperPoint, etc.)
+                     {
+                         chars <- getChars(object = object, parkcode = parkcode, sitecode = sitecode,
+                                           charname = charname, category = category)
+                         if (is.null(chars)) {
+                             return(if (identical(info, "Data")) list() else
+                                 if (info %in% c("LowerPoint", "UpperPoint")) numeric(0) else character(0))
+                         }
+                         
+                         chars <- unlist(chars, recursive = FALSE, use.names = FALSE)
+                         chars <- chars[vapply(chars, function(x) methods::is(x, "Characteristic"), logical(1))]
+                         if (!length(chars)) {
+                             return(if (info %in% c("LowerPoint", "UpperPoint")) numeric(0) else character(0))
+                         }
+                         
+                         # Deduplicate
+                         ids <- vapply(chars, .char_id, character(1))
+                         chars <- chars[!duplicated(ids)]
+                         
+                         fv <- .fv(info)
+                         if (is.null(fv)) {
+                             return(lapply(chars, getCharInfo, info = "Data"))
+                         } else {
+                             return(vapply(chars, function(ch) getCharInfo(ch, info = info), FUN.VALUE = fv))
+                         }
+                     }
+              )
           }
-        }
-        pi <- getParkInfo(object, info = info)
-        return(rep(pi, times = n))
-      },
-
-      #### Site-level info: for each site, replicate per UNIQUE Characteristic count
-      SiteCode = ,
-      SiteName = ,
-      coords  = ,
-      type    = {
-        sites <- getSites(object, parkcode = parkcode, sitecode = sitecode)
-        if (is.null(sites)) return(character(0))
-        # Keep only Site objects and dedupe by SiteCode
-        sites <- sites[vapply(sites, function(x) methods::is(x, "Site"), logical(1))]
-        sc <- vapply(sites, function(s) s@SiteCode, character(1))
-        sites <- sites[!duplicated(sc)]
-
-        out <- unlist(lapply(sites, function(st) {
-          chs <- getChars(st, charname = charname, category = category)
-          if (is.null(chs)) return(character(0))
-          chs <- unlist(chs, recursive = FALSE, use.names = FALSE)
-          chs <- chs[vapply(chs, function(x) methods::is(x, "Characteristic"), logical(1))]
-          if (!length(chs)) return(character(0))
-          ids <- vapply(chs, .char_id, character(1))
-          k <- length(unique(ids))
-          val <- getSiteInfo(st, info = info)
-          rep(val, times = k)
-        }), use.names = FALSE)
-
-        return(out)
-      },
-
-      #### Data: return a list of data.frames (one per UNIQUE Characteristic)
-      Data = {
-        chars <- getChars(object = object, parkcode = parkcode, sitecode = sitecode,
-                          charname = charname, category = category)
-        if (is.null(chars)) return(list())
-
-        chars <- unlist(chars, recursive = FALSE, use.names = FALSE)
-        chars <- chars[vapply(chars, function(x) methods::is(x, "Characteristic"), logical(1))]
-        if (!length(chars)) return(list())
-
-        # Deduplicate
-        ids <- vapply(chars, .char_id, character(1))
-        chars <- chars[!duplicated(ids)]
-
-        return(lapply(chars, getCharInfo, info = "Data"))
-      },
-
-      #### Default: characteristic-level info (e.g., LowerDescription, Units, etc.)
-      {
-        chars <- getChars(object = object, parkcode = parkcode, sitecode = sitecode,
-                          charname = charname, category = category)
-        if (is.null(chars)) return(character(0))
-
-        chars <- unlist(chars, recursive = FALSE, use.names = FALSE)
-        chars <- chars[vapply(chars, function(x) methods::is(x, "Characteristic"), logical(1))]
-        if (!length(chars)) return(character(0))
-
-        # Deduplicate
-        ids <- vapply(chars, .char_id, character(1))
-        chars <- chars[!duplicated(ids)]
-
-        vapply(chars, function(ch) getCharInfo(ch, info = info), FUN.VALUE = character(1))
-      }
-    )
-  }
 )
 
  #### Given one Site get the characteristics and run again ####
