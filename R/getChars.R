@@ -22,26 +22,58 @@
 setGeneric(name="getChars",function(object,parkcode=NA, sitecode=NA,charname=NA, category=NA) {standardGeneric("getChars")},
            signature=c("object") )
 
-setMethod(f="getChars", signature=c(object="list"),
-          function(object,parkcode, sitecode, charname, category){
-            
-            OutList<-lapply(object,getChars, parkcode=parkcode, sitecode=sitecode, charname=charname, category=category)
-            if(all(sapply(OutList, is.null))) return() else
-              return(OutList[!sapply(OutList, is.null)] %>% unlist)
-            
-})  
+setMethod(f = "getChars", signature = c(object = "list"),
+  function(object, parkcode = NA, sitecode = NA, charname = NA, category = NA) {
+
+    OutList <- lapply(object, getChars, parkcode = parkcode, sitecode = sitecode,
+                      charname = charname, category = category)
+
+    if (all(vapply(OutList, is.null, logical(1)))) return(NULL)
+
+    kept <- OutList[!vapply(OutList, is.null, logical(1))]
+
+    flat <- unlist(kept, recursive = FALSE, use.names = FALSE)
+    flat <- flat[vapply(flat, function(x) methods::is(x, "Characteristic"), logical(1))]
+
+    # Safe scalar helper
+    .safe1 <- function(x) {
+      if (is.null(x) || length(x) == 0L) return("")
+      y <- x[1]
+      if (is.na(y)) return("")
+      as.character(y)
+    }
+    # Identity
+    .char_id <- function(ch) {
+      nm  <- .safe1(ch@CharacteristicName)
+      cat <- .safe1(ch@Category)
+      sf  <- .safe1(ch@SampleFraction)
+      sub <- .safe1(ch@Substrate)
+      paste(nm, cat, sf, sub, sep = "|")
+    }
+
+    ids <- vapply(flat, .char_id, character(1))
+    flat <- flat[!duplicated(ids)]
+
+    if (length(flat) == 0L) return(NULL)
+    return(flat)
+  }
+)
 
 
-setMethod(f="getChars", signature=c(object="Park"),
-          function(object,parkcode,sitecode,charname, category){
-            
-            ParkUse<-getParks(object, parkcode=parkcode)
-            if (is.null(ParkUse) ) return() else {
-                 SitesUse<-getSites(ParkUse@Sites, sitecode=sitecode)
-                 if(all(sapply(SitesUse, is.null))) return() else
-                  return(getChars(SitesUse, sitecode=sitecode, charname=charname, category=category ) %>% unlist)
-            }
-})
+
+setMethod(f = "getChars", signature = c(object = "Park"),
+  function(object, parkcode = NA, sitecode = NA, charname = NA, category = NA) {
+
+    ParkUse <- getParks(object, parkcode = parkcode)
+    if (is.null(ParkUse)) return(NULL)
+
+    SitesUse <- getSites(ParkUse@Sites, sitecode = sitecode)
+    if (is.null(SitesUse)) return(NULL)
+
+    # Delegate to list method (which flattens + dedupes)
+    return(getChars(SitesUse, sitecode = sitecode, charname = charname, category = category))
+  }
+)
 
 
 setMethod(f="getChars", signature=c(object="Site"),
