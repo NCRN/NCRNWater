@@ -98,6 +98,7 @@ setMethod(f = "getSiteInfo", signature = c(object = "Park"),
 )
 
 
+
 #### Given one Site get the info ####
 setMethod(f="getSiteInfo", signature=c(object="Site"),
           function(object,info){
