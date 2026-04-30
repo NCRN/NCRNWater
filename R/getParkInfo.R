@@ -17,26 +17,64 @@
 #' 
 #' @export
 
-setGeneric(name="getParkInfo",function(object,parkcode=NA,info="ParkShortName"){standardGeneric("getParkInfo")},signature=c("object") )
+setGeneric(
+    name = "getParkInfo",
+    function(object, parkcode = NA, info = "ParkShortName") {
+        standardGeneric("getParkInfo")
+    },
+    signature = c("object")
+)
 
+# list method: safe flatten + dedupe by ParkCode
+setMethod(f = "getParkInfo", signature = c(object = "list"),
+          function(object, parkcode = NA, info = "ParkShortName") {
+              
+              # If a parkcode is provided, try to subset each element with getParks;
+              # otherwise, keep the element as-is.
+              parks_list <- lapply(object, function(x) {
+                  if (!is.na(parkcode)) getParks(x, parkcode = parkcode) else x
+              })
+              
+              # Drop NULLs
+              parks_list <- parks_list[!vapply(parks_list, is.null, logical(1))]
+              
+              # Flatten ONE level (avoid atomic coercion)
+              flat <- unlist(parks_list, recursive = FALSE, use.names = FALSE)
+              
+              # Keep only Park objects
+              flat <- flat[vapply(flat, function(x) methods::is(x, "Park"), logical(1))]
+              
+              # If nothing left, return empty vector
+              if (!length(flat)) return(character(0))
+              
+              # Deduplicate by ParkCode (fixes both unfiltered and filtered duplication)
+              pc <- vapply(flat, function(p) p@ParkCode, character(1))
+              flat <- flat[!duplicated(pc)]
+              
+              # Map to requested info (type-stable)
+              out <- switch(info,
+                            ParkCode      = vapply(flat, function(p) p@ParkCode,   FUN.VALUE = character(1)),
+                            ParkShortName = vapply(flat, function(p) p@ShortName,  FUN.VALUE = character(1)),
+                            ParkLongName  = vapply(flat, function(p) p@LongName,   FUN.VALUE = character(1)),
+                            Network       = vapply(flat, function(p) p@Network,    FUN.VALUE = character(1)),
+                            stop("Unrecognized info in getParkInfo")
+              )
+              
+              return(unname(out))
+          }
+)
 
-setMethod(f="getParkInfo", signature=c(object="list"),
-          function(object,parkcode, info){
-            OutPark<-sapply(object, FUN=getParkInfo, parkcode=parkcode, info=info)
-            return( unlist (OutPark[!sapply(OutPark, is.null) ]))
-})  
-
-
-
-setMethod(f="getParkInfo", signature=c(object="Park"),
-          function(object, parkcode, info){
-            Park<-getParks(object, parkcode=parkcode)
-            if ( is.null(Park))  return()
-            switch(info,
-                   ParkCode = return(Park@ParkCode),
-                   ParkShortName = return(Park@ShortName),
-                   ParkLongName = return(Park@LongName),
-                   Network = return(Park@Network),
-                   stop("Unrecognized info in getParkInfo")
-            )
-  })
+# Park method: unchanged; returns scalar from a single Park
+setMethod(f = "getParkInfo", signature = c(object = "Park"),
+          function(object, parkcode = NA, info = "ParkShortName") {
+              Park <- getParks(object, parkcode = parkcode)
+              if (is.null(Park)) return()
+              switch(info,
+                     ParkCode      = return(Park@ParkCode),
+                     ParkShortName = return(Park@ShortName),
+                     ParkLongName  = return(Park@LongName),
+                     Network       = return(Park@Network),
+                     stop("Unrecognized info in getParkInfo")
+              )
+          }
+)

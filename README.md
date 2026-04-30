@@ -20,4 +20,10 @@ This is an R package used to process water quality monitoring data.
   - Character for descriptive fields (e.g., `LowerDescription`, `Units`).
   - Lists for `Data`.
 - **API Safety:** `getCharInfo(object = "Site")` method signature now includes `category = NA` to avoid scoping issues.
+- **Bug Fix:** Resolved duplication in `getParkInfo()` for both unfiltered and filtered calls.
+  - The `object = "list"` method now safely flattens (`unlist(..., recursive = FALSE)`), filters to `Park` S4 objects, and **deduplicates by `ParkCode`**.
+  - Unfiltered calls like `getParkInfo(WaterData)` now return **unique** results (e.g., a single "Nat. Cap. Parks - East"), and filtered calls (`parkcode=`) also return deduped scalars.
+- **S4 Robustness:** Uses `methods::is` for type checks, and `vapply` for type‑stable outputs.
+- Related earlier fixes to duplication in `getSiteInfo()` and `getCharInfo()` retained.
+
 
