@@ -19,14 +19,50 @@
 
 setGeneric(name="getSites",function(object,parkcode=NA, sitecode=NA, type=NA){standardGeneric("getSites")},signature=c("object") )
 
-setMethod(f="getSites", signature=c(object="list"),
-          function(object, parkcode, sitecode, type){
-            OutList<-lapply(object,FUN=getSites, parkcode=parkcode, sitecode=sitecode, type=type)
-            if(all(sapply(OutList,is.null))) return(warning("No sites match these criteria."))
-            if(any(lapply(OutList,FUN=class)=="list")) return(OutList[!sapply(OutList, is.null)] %>% 
-                                                                unlist) else
-                                                                  return(OutList[!sapply(OutList, is.null)])  
-          })  
+setMethod(f = "getSites", signature = c(object = "list"),
+          function(object, parkcode = NA, sitecode = NA, type = NA) {
+              # Collect per-element results
+              OutList <- lapply(object, FUN = getSites, parkcode = parkcode, sitecode = sitecode, type = type)
+              
+              # If all are NULL, warn and return NULL
+              if (all(vapply(OutList, is.null, logical(1)))) {
+                  warning("No sites match these criteria.")
+                  return(NULL)
+              }
+              
+              # Drop NULLs
+              kept <- OutList[!vapply(OutList, is.null, logical(1))]
+              
+              # Detect whether elements are lists (lists-of-Site) or scalar Site objects
+              is_list_elem <- vapply(kept, is.list, logical(1))
+              
+              # Flatten one level only; preserve S4 objects (no atomic coercion)
+              flat <- if (any(is_list_elem)) {
+                  unlist(kept, recursive = FALSE, use.names = FALSE)
+              } else {
+                  kept
+              }
+              
+              # Keep only Site objects
+              flat <- flat[vapply(flat, function(x) methods::is(x, "Site"), logical(1))]
+              
+              # Apply filters again here (guard against upstream oddities)
+              if (!is.na(sitecode)) {
+                  flat <- flat[vapply(flat, function(s) getSiteInfo(s, info = "SiteCode") %in% sitecode, logical(1))]
+              }
+              if (!is.na(type)) {
+                  flat <- flat[vapply(flat, function(s) getSiteInfo(s, info = "type") %in% type, logical(1))]
+              }
+              
+              # **Deduplicate by SiteCode** to enforce identity uniqueness
+              sc <- vapply(flat, function(s) s@SiteCode, FUN.VALUE = character(1))
+              flat <- flat[!duplicated(sc)]
+              
+              if (length(flat) == 0L) return(NULL)
+              return(flat)
+          }
+)
+
 
 setMethod(f="getSites", signature=c(object="Park"),
           function(object,parkcode,sitecode, type){
@@ -36,14 +72,18 @@ setMethod(f="getSites", signature=c(object="Park"),
             if(all(sapply(SitesOut,is.null))) return() else return(SitesOut)
 })
 
-setMethod(f="getSites", signature=c(object="Site"),
-          function(object, sitecode, type){
-            OutSites <- if(is.na(sitecode) || getSiteInfo(object, info="SiteCode") %in% sitecode ) (object) else NULL
-            OutSites <- if(!is.null(OutSites) && (is.na(type) || getSiteInfo(object, info="type") %in% type))(object) else NULL
+setMethod(f = "getSites", signature = c(object = "Site"),
+          function(object, sitecode = NA, type = NA) {
+              if (!is.na(sitecode) && !(getSiteInfo(object, info = "SiteCode") %in% sitecode)) {
+                  return(NULL)
+              }
+              if (!is.na(type) && !(getSiteInfo(object, info = "type") %in% type)) {
+                  return(NULL)
+              }
+              return(object)
+          }
+)
 
-            if(!is.null(OutSites)) return(OutSites) else 
-              return()
-})
 
 
 

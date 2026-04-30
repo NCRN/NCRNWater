@@ -33,30 +33,69 @@
 setGeneric(name="getSiteInfo",function(object,parkcode=NA,sitecode=NA,info){standardGeneric("getSiteInfo")},signature=c("object") )
 
 
-setMethod(f="getSiteInfo", signature=c(object="list"),
-          function(object, parkcode, sitecode, info){
-            suppressWarnings( if(!is.na(parkcode)|!is.na(sitecode)) {
-              object<-getSites(object, parkcode = parkcode, sitecode = sitecode)
-              object<-object[object %>% purrr::map_lgl(~class(.x)=="Site")]
-            }
-            )
-            lapply(object,FUN=getSiteInfo, parkcode=parkcode, sitecode=sitecode, info=info) %>% unname %>% unlist
-})  
+setMethod(f = "getSiteInfo", signature = c(object = "list"),
+          function(object, parkcode = NA, sitecode = NA, info) {
+              
+              suppressWarnings({
+                  if (!is.na(parkcode) || !is.na(sitecode)) {
+                      object <- getSites(object, parkcode = parkcode, sitecode = sitecode)
+                  }
+              })
+              
+              if (is.null(object)) {
+                  return(character(0))
+              }
+              
+              # Keep only Site objects
+              object <- object[vapply(object, function(x) methods::is(x, "Site"), logical(1))]
+              
+              # Deduplicate by SiteCode
+              sc <- vapply(object, function(s) s@SiteCode, FUN.VALUE = character(1))
+              object <- object[!duplicated(sc)]
+              
+              # If a specific sitecode was requested, enforce strict match
+              if (!is.na(sitecode)) {
+                  object <- object[vapply(object, function(s) s@SiteCode == sitecode, logical(1))]
+                  if (length(object) == 0L) {
+                      stop(sprintf("No Site found for sitecode '%s'", sitecode))
+                  }
+              }
+              
+              v <- vapply(object, function(s) getSiteInfo(s, info = info), FUN.VALUE = character(1))
+              unname(v)
+          }
+)
 
 
 #### Given one park get the sites and run again ####
-setMethod(f="getSiteInfo", signature=c(object="Park"),
-    function(object, parkcode, sitecode, info){
-      switch(info,
-        ParkCode=, ParkShortName=, ParkLongName=, Network =
-          return(getParkInfo(object, info=info) %>% 
-                   rep(times=getSites(object=object, parkcode=parkcode, sitecode=sitecode) %>% 
-                   length)), #info from Park Object
-      
-        return(sapply(getSites(object=object, parkcode=parkcode, sitecode = sitecode) %>% unname, 
-                      FUN=getSiteInfo, info=info)) #default - info from site object
-       )
-})
+setMethod(f = "getSiteInfo", signature = c(object = "Park"),
+          function(object, parkcode = NA, sitecode = NA, info) {
+              sites <- getSites(object = object, parkcode = parkcode, sitecode = sitecode)
+              
+              if (is.null(sites)) {
+                  return(character(0))
+              }
+              
+              # Keep only Site objects and dedupe
+              sites <- sites[vapply(sites, function(x) methods::is(x, "Site"), logical(1))]
+              sc <- vapply(sites, function(s) s@SiteCode, FUN.VALUE = character(1))
+              sites <- sites[!duplicated(sc)]
+              
+              switch(info,
+                     ParkCode = ,
+                     ParkShortName = ,
+                     ParkLongName = ,
+                     Network = {
+                         pi <- getParkInfo(object, info = info)
+                         return(rep(pi, times = length(sites)))
+                     },
+                     {
+                         v <- vapply(sites, function(s) getSiteInfo(s, info = info), FUN.VALUE = character(1))
+                         return(unname(v))
+                     }
+              )
+          }
+)
 
 
 #### Given one Site get the info ####
