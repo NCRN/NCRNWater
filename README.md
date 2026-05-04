@@ -6,7 +6,7 @@ This is an R package used to process water quality monitoring data.
 
 ## NEWS
 
-### NCRNWater 1.0.1 2026-04-39
+### NCRNWater 1.0.1 2026-04-29
 
 #### Fixes & Improvements
 - **Bug Fix:** Resolved duplication of `Site` and `Characteristic` outputs for certain `parkcode/sitecode/charname` combinations (e.g., `NACE / NCRN_NACE_OXRU / pH`) by:
