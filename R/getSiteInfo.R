@@ -35,37 +35,59 @@ setGeneric(name="getSiteInfo",function(object,parkcode=NA,sitecode=NA,info){stan
 
 setMethod(f = "getSiteInfo", signature = c(object = "list"),
           function(object, parkcode = NA, sitecode = NA, info) {
-              
-              suppressWarnings({
-                  if (!is.na(parkcode) || !is.na(sitecode)) {
-                      object <- getSites(object, parkcode = parkcode, sitecode = sitecode)
-                  }
-              })
-              
-              if (is.null(object)) {
-                  return(character(0))
+            
+            # Detect whether filters are provided
+            filters_provided <- !all(is.na(c(parkcode, sitecode)))
+            
+            # Expected scalar type for Site-level info
+            .fv <- function(info) {
+              if (info %in% c("lat", "long")) return(numeric(1))
+              return(character(1))
+            }
+            
+            if (!filters_provided) {
+              # === Global behavior (original semantics): DO NOT subset with getSites() here.
+              # Iterate over each element (Park objects), call getSiteInfo(Park, ...) and concatenate
+              vals <- lapply(object, FUN = getSiteInfo, parkcode = parkcode, sitecode = sitecode, info = info)
+              # Remove NULLs; then unlist. This preserves numeric type for lat/long and character otherwise.
+              vals <- vals[!vapply(vals, is.null, logical(1))]
+              if (!length(vals)) {
+                # Empty, match original return type: numeric(0) for lat/long, else character(0)
+                return(if (info %in% c("lat", "long")) numeric(0) else character(0))
               }
-              
-              # Keep only Site objects
-              object <- object[vapply(object, function(x) methods::is(x, "Site"), logical(1))]
-              
-              # Deduplicate by SiteCode
-              sc <- vapply(object, function(s) s@SiteCode, FUN.VALUE = character(1))
-              object <- object[!duplicated(sc)]
-              
-              # If a specific sitecode was requested, enforce strict match
-              if (!is.na(sitecode)) {
-                  object <- object[vapply(object, function(s) s@SiteCode == sitecode, logical(1))]
-                  if (length(object) == 0L) {
-                      stop(sprintf("No Site found for sitecode '%s'", sitecode))
-                  }
+              return(unlist(vals, use.names = FALSE))
+            }
+            
+            # === Filtered behavior: subset with getSites(), keep Site objects, dedupe by SiteCode
+            suppressWarnings({
+              object <- getSites(object, parkcode = parkcode, sitecode = sitecode)
+            })
+            
+            if (is.null(object)) {
+              return(if (info %in% c("lat", "long")) numeric(0) else character(0))
+            }
+            
+            # Keep only Site objects
+            object <- object[vapply(object, function(x) methods::is(x, "Site"), logical(1))]
+            
+            # Deduplicate by SiteCode
+            sc <- vapply(object, function(s) s@SiteCode, FUN.VALUE = character(1))
+            object <- object[!duplicated(sc)]
+            
+            # If a specific sitecode was requested, enforce exact match
+            if (!is.na(sitecode)) {
+              object <- object[vapply(object, function(s) s@SiteCode == sitecode, logical(1))]
+              if (length(object) == 0L) {
+                stop(sprintf("No Site found for sitecode '%s'", sitecode))
               }
-              
-              v <- vapply(object, function(s) getSiteInfo(s, info = info), FUN.VALUE = character(1))
-              unname(v)
+            }
+            
+            # Type-stable mapping
+            fv <- .fv(info)
+            out <- vapply(object, function(s) getSiteInfo(s, info = info), FUN.VALUE = fv)
+            return(unname(out))
           }
 )
-
 
 #### Given one park get the sites and run again ####
 setMethod(f = "getSiteInfo", signature = c(object = "Park"),
