@@ -4,6 +4,13 @@ This is an R package used to process water quality monitoring data.
 
 ## Inputs
 
+1) WQX=T
+    - One CSV of water quality monitoring data in Water Quality Portal Export-format
+    - One CSV of metadata
+    - The column names in your files must be identical to those in the example data
+
+## Outputs
+
 ## NEWS
 
 ### NCRNWater 1.0.1 2026-04-29
