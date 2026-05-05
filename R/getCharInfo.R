@@ -47,55 +47,89 @@ setGeneric(name="getCharInfo",function(object,parkcode=NA, sitecode=NA,charname=
 
 setMethod(f = "getCharInfo", signature = c(object = "list"),
           function(object, parkcode = NA, sitecode = NA, charname = NA, category = NA, info = NA) {
-              if (is.na(info)) stop("Need to specify 'info'")
+            if (is.na(info)) stop("Need to specify 'info'")
+            
+            # Filters present?
+            filters_provided <- !all(is.na(c(parkcode, sitecode, charname, category)))
+            
+            # Info categories
+            is_site_info <- info %in% c("SiteCode", "SiteName", "coords", "type")
+            is_park_info <- info %in% c("ParkCode", "ParkShortName", "ParkLongName", "Network")
+            is_data      <- identical(info, "Data")
+            
+            # Helper: get list of Park objects from the top-level list
+            parks <- object[!vapply(object, is.null, logical(1))]
+            parks <- unlist(parks, recursive = FALSE, use.names = FALSE)
+            parks <- parks[vapply(parks, function(x) methods::is(x, "Park"), logical(1))]
+            
+            if (is_site_info || is_park_info) {
+              # Route Site/Park infos to the Park method (not to Characteristic!)
+              vals <- lapply(
+                parks,
+                FUN = getCharInfo,
+                parkcode  = parkcode,
+                sitecode  = sitecode,
+                charname  = charname,
+                category  = category,
+                info      = info
+              )
+              vals <- vals[!vapply(vals, is.null, logical(1))]
+              # Concatenate atomic outputs
+              return(unlist(vals, use.names = FALSE))
+            }
+            
+            # === Characteristic-level infos (including Data) ===
+            
+            # Conditional dedupe mirroring earlier behavior:
+            # - If filters provided: dedupe Characteristics by identity (Name|Category|SampleFraction|Substrate)
+            # - If no filters: preserve legacy concatenation (NO dedupe)
+            if (is_data) {
+              # List of data.frames
+              chars <- getChars(object, parkcode = parkcode, sitecode = sitecode, charname = charname, category = category)
+              if (is.null(chars)) return(list())
               
-              # Detect if any filters are provided (park/site/char/category)
-              filters_provided <- !all(is.na(c(parkcode, sitecode, charname, category)))
-              
-              # Expected output type for characteristic-level infos
-              .fv <- function(info) {
-                  if (identical(info, "Data")) return(NULL)
-                  if (info %in% c("LowerPoint", "UpperPoint")) return(numeric(1))
-                  return(character(1))
-              }
-              
-              if (!filters_provided) {
-                  # === Global behavior (original semantics): do NOT dedupe ===
-                  if (identical(info, "Data")) {
-                      vals <- lapply(object, FUN = getCharInfo, parkcode = parkcode, sitecode = sitecode,
-                                     charname = charname, category = category, info = info)
-                      # Return a flat list of data.frames
-                      return(unlist(vals, recursive = FALSE, use.names = FALSE))
-                  } else {
-                      vals <- lapply(object, FUN = getCharInfo, parkcode = parkcode, sitecode = sitecode,
-                                     charname = charname, category = category, info = info)
-                      # Concatenate per original behavior; type follows child outputs
-                      return(unlist(vals, use.names = FALSE))
-                  }
-              }
-              
-              # === Filtered behavior: dedupe Characteristics by identity ===
-              chars <- getChars(object, parkcode = parkcode, sitecode = sitecode,
-                                charname = charname, category = category)
-              
-              if (is.null(chars)) {
-                  return(if (identical(info, "Data")) list() else
-                      if (info %in% c("LowerPoint", "UpperPoint")) numeric(0) else character(0))
-              }
-              
-              # Flatten safely and keep only Characteristic objects
               chars <- unlist(chars, recursive = FALSE, use.names = FALSE)
               chars <- chars[vapply(chars, function(x) methods::is(x, "Characteristic"), logical(1))]
               
-              if (identical(info, "Data")) {
-                  return(lapply(chars, getCharInfo, info = "Data"))
-              } else {
-                  fv <- .fv(info)
-                  out <- vapply(chars, function(ch) getCharInfo(ch, info = info), FUN.VALUE = fv)
-                  return(unname(out))
+              if (filters_provided) {
+                .safe1 <- function(x) { if (is.null(x) || length(x) == 0L) return(""); y <- x[1]; if (is.na(y)) return(""); as.character(y) }
+                .char_id <- function(ch) paste(.safe1(ch@CharacteristicName),
+                                               .safe1(ch@Category),
+                                               .safe1(ch@SampleFraction),
+                                               .safe1(ch@Substrate), sep = "|")
+                ids <- vapply(chars, .char_id, character(1))
+                chars <- chars[!duplicated(ids)]
               }
+              
+              return(lapply(chars, getCharInfo, info = "Data"))
+            } else {
+              # Scalar (character or numeric) characteristic-level infos
+              # NOTE: If you have numeric characteristic infos (e.g., "LowerPoint"/"UpperPoint"), they are handled
+              # via getCharInfo(object="Characteristic"), which returns numeric scalars there.
+              
+              chars <- getChars(object, parkcode = parkcode, sitecode = sitecode, charname = charname, category = category)
+              if (is.null(chars)) return(character(0))
+              
+              chars <- unlist(chars, recursive = FALSE, use.names = FALSE)
+              chars <- chars[vapply(chars, function(x) methods::is(x, "Characteristic"), logical(1))]
+              
+              if (filters_provided) {
+                .safe1 <- function(x) { if (is.null(x) || length(x) == 0L) return(""); y <- x[1]; if (is.na(y)) return(""); as.character(y) }
+                .char_id <- function(ch) paste(.safe1(ch@CharacteristicName),
+                                               .safe1(ch@Category),
+                                               .safe1(ch@SampleFraction),
+                                               .safe1(ch@Substrate), sep = "|")
+                ids <- vapply(chars, .char_id, character(1))
+                chars <- chars[!duplicated(ids)]
+              }
+              
+              # Map to scalar outputs
+              out <- sapply(chars, function(ch) getCharInfo(ch, info = info))
+              return(unname(out))
+            }
           }
 )
+
 
 
 #### Given one park get the sites and run again ####
