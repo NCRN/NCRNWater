@@ -32,5 +32,6 @@ This is an R package used to process water quality monitoring data.
   - Unfiltered calls like `getParkInfo(WaterData)` now return **unique** results (e.g., a single "Nat. Cap. Parks - East"), and filtered calls (`parkcode=`) also return deduped scalars.
 - **S4 Robustness:** Uses `methods::is` for type checks, and `vapply` for type‑stable outputs.
 - Related earlier fixes to duplication in `getSiteInfo()` and `getCharInfo()` retained.
-
-
+- **`exceed()` alignment & duplication fix:** Thresholds (`LowerPoint`, `UpperPoint`) are now computed **per site–characteristic** group, ensuring exact alignment with `getWData(..., output = "list")`. This eliminates shape mismatches and prevents recycled thresholds producing a single-row output.
+- **Row uniqueness:** Post-aggregation, `exceed()` defensively ensures **one row per `Park` + `Site` + `Characteristic` + `Category`**.
+- Works with earlier routing/deduplication fixes in `getSiteInfo()`, `getCharInfo()`, `getChars()`, and `getParkInfo()`.

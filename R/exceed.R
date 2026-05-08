@@ -30,25 +30,103 @@
 setGeneric(name="exceed",function(object, parkcode=NA, sitecode=NA, charname=NA, category=NA, 
               points="both", lower=NA, upper=NA,all=F, catsum=F,...){standardGeneric("exceed")},signature=c("object") )
 
-setMethod(f="exceed", signature=c(object="NCRNWaterObj"),
-  function(object,parkcode, sitecode, charname, category, points,lower,upper,all, ...){       
-    DataUse<-getWData(object,parkcode=parkcode, sitecode=sitecode, charname=charname, category=category, output="list",...)
-    NotNull<-!sapply(DataUse, is.null)  ### to filter out NULL data
-    lower<-if((points=="lower" |points=="both") & is.na(lower)){
-      getCharInfo(object=object,parkcode=parkcode,sitecode=sitecode,charname=charname,category=category, info='LowerPoint') }else lower
-    upper<-if((points=="upper" |points=="both") & is.na(upper)) {
-      getCharInfo(object=object,parkcode=parkcode,sitecode=sitecode,charname=charname,category=category, info='UpperPoint')} else upper
-    
-    X<-pmap(.l=list(object=DataUse[NotNull],lower=lower[NotNull],upper=upper[NotNull]), .f=exceed ) %>% 
-      bind_rows() %>% 
-      {if (!all) filter(.,!(is.na(TooLow)&is.na(TooHigh))) else .}
-    
-    X<-{if(catsum) X %>% group_by(Park, Site,  Category) %>% summarize(Total=sum(Total), Acceptable=sum(Acceptable),
-                                      TooLow=sum(TooLow), TooHigh=sum(TooHigh), AllExceed=sum(AllExceed)) else X}
-    
-    return (X)
+setMethod(f = "exceed", signature = c(object = "NCRNWaterObj"),
+          function(object, parkcode = NA, sitecode = NA, charname = NA, category = NA,
+                   points = "both", lower = NA, upper = NA, all = FALSE, catsum = FALSE, ...) {
             
-})
+            # 1) Gather per-site/characteristic data frames
+            DataUse <- getWData(object,
+                                parkcode = parkcode, sitecode = sitecode,
+                                charname = charname, category = category,
+                                output   = "list", ...)
+            NotNull <- !sapply(DataUse, is.null)
+            DataUse <- DataUse[NotNull]
+            
+            # Empty short-circuit: return an empty data.frame with the same columns
+            if (length(DataUse) == 0L) {
+              return(data.frame(Park = character(0), Site = character(0),
+                                Characteristic = character(0), Category = character(0),
+                                Total = integer(0), Acceptable = integer(0),
+                                TooLow = integer(0), TooHigh = integer(0), AllExceed = integer(0),
+                                stringsAsFactors = FALSE))
+            }
+            
+            # Helper to grab a scalar from each df's columns (first element)
+            .first_scalar <- function(x) {
+              if (length(x) == 0L) return(NA)
+              x[1]
+            }
+            
+            # 2) Build per-group threshold vectors ONLY when not provided by the user
+            need_lower <- (points %in% c("lower", "both")) && (length(lower) == 1L && is.na(lower))
+            need_upper <- (points %in% c("upper", "both")) && (length(upper) == 1L && is.na(upper))
+            
+            if (need_lower) {
+              lower <- vapply(DataUse, function(df) {
+                getCharInfo(object,
+                            parkcode = .first_scalar(df$Park),
+                            sitecode = .first_scalar(df$Site),
+                            charname = .first_scalar(df$Characteristic),
+                            category = .first_scalar(df$Category),
+                            info     = "LowerPoint")
+              }, FUN.VALUE = numeric(1))
+            }
+            
+            if (need_upper) {
+              upper <- vapply(DataUse, function(df) {
+                getCharInfo(object,
+                            parkcode = .first_scalar(df$Park),
+                            sitecode = .first_scalar(df$Site),
+                            charname = .first_scalar(df$Characteristic),
+                            category = .first_scalar(df$Category),
+                            info     = "UpperPoint")
+              }, FUN.VALUE = numeric(1))
+            }
+            
+            # 3) Validate/recycle user-provided lower/upper (if present)
+            n <- length(DataUse)
+            .recycle_to_n <- function(x, n) {
+              if (length(x) == n) return(x)
+              if (length(x) == 1L) return(rep(x, n))
+              stop(sprintf("Length of threshold vector (%d) does not match number of data groups (%d).", length(x), n))
+            }
+            
+            # If thresholds are not needed (e.g., points=="upper" and lower provided), fill with NA
+            if (!("lower" %in% points)) {
+              # Keep existing lower; if NULL, will be set below to NA vector
+            }
+            if (!("upper" %in% points)) {
+              # Keep existing upper; if NULL, will be set below to NA vector
+            }
+            
+            lower <- if (!is.null(lower)) .recycle_to_n(lower, n) else rep(NA_real_, n)
+            upper <- if (!is.null(upper)) .recycle_to_n(upper, n) else rep(NA_real_, n)
+            
+            # 4) Compute exceedance per group and bind rows
+            X <- purrr::pmap(.l = list(object = DataUse, lower = lower, upper = upper), .f = exceed) %>%
+              dplyr::bind_rows() %>%
+              { if (!all) dplyr::filter(., !(is.na(TooLow) & is.na(TooHigh))) else . }
+            
+            # 5) Optional per-category summary
+            if (catsum) {
+              X <- X %>%
+                dplyr::group_by(Park, Site, Category) %>%
+                dplyr::summarize(
+                  Total      = sum(Total),
+                  Acceptable = sum(Acceptable),
+                  TooLow     = sum(TooLow),
+                  TooHigh    = sum(TooHigh),
+                  AllExceed  = sum(AllExceed),
+                  .groups    = "drop"
+                )
+            }
+            
+            # 6) Ensure one row per Park/Site/Characteristic/Category (defensive)
+            X <- dplyr::distinct(X, Park, Site, Characteristic, Category, .keep_all = TRUE)
+            
+            return(X)
+          }
+)
 
 setMethod(f="exceed", signature=c(object="data.frame"),
           function(object,lower,upper,...){       
