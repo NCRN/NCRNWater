@@ -3,6 +3,8 @@
 export(addChar)
 export(addSite)
 export(compileNETNdata)
+export(congruency)
+export(diagnoseWaterData)
 export(exceed)
 export(getCharInfo)
 export(getChars)
