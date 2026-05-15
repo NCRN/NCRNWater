@@ -32,7 +32,7 @@ Suggests:
     NADA,
     openair,
     stringr
-RoxygenNote: 7.1.1
+RoxygenNote: 7.3.3
 Collate:
     'NCRNWater_Park_Class_def.R'
     'NCRNWater_Site_Class_def.R'
@@ -41,6 +41,8 @@ Collate:
     'addChar.R'
     'addSite.R'
     'compileNETNdata.R'
+    'congruency.R'
+    'diagnose.R'
     'getParks.R'
     'getSites.R'
     'getChars.R'

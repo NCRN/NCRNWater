@@ -1,6 +1,7 @@
 #' @include NCRNWater_Park_Class_def.R
 #' @include NCRNWater_Site_Class_def.R
 #' @include NCRNWater_Characteristic_Class_def.R
+#' @include congruency.R
 #' @title importNCRNWater
 #' 
 #' @description This function imports data from a .csv files exported from NPStoret and saves it as \code{Park} objects. 
@@ -28,6 +29,7 @@ importNCRNWater <- function(Dir, Data = "Water Data.csv", MetaData = "MetaData.c
   
   #### Read in Data ####
   if (wqx) {
+    # congruency(file.path(Dir, Data), file.path(Dir, MetaData))
     Indata <- read_csv(paste(Dir, Data, sep = "/"), col_types = cols(.default = "c")) %>%
       rename(SiteCode = MonitoringLocationIdentifier, Date = `ActivityStartDate`,
              Characteristic = `CharacteristicName`, Value = `ResultMeasureValue`) %>%
