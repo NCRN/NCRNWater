@@ -1,7 +1,7 @@
 #' @include NCRNWater_Park_Class_def.R
 #' @include NCRNWater_Site_Class_def.R
 #' @include NCRNWater_Characteristic_Class_def.R
-#' @include congruency.R
+#' @include diagnose.R
 #' @title importNCRNWater
 #' 
 #' @description This function imports data from a .csv files exported from NPStoret and saves it as \code{Park} objects. 
@@ -104,24 +104,65 @@ importNCRNWater <- function(Dir, Data = "Water Data.csv", MetaData = "MetaData.c
       Type      = trimws(Type)
     )
   
-  ## NEW: Build a canonical Parks data frame (ONE row per ParkCode), warn on conflicts
-  park_conflicts <- MetaData %>%
-    group_by(ParkCode) %>%
-    summarize(
-      n_short = dplyr::n_distinct(ShortName[!is.na(ShortName) & ShortName != ""]),
-      n_long  = dplyr::n_distinct(LongName[!is.na(LongName) & LongName != ""]),
-      n_net   = dplyr::n_distinct(Network[!is.na(Network) & Network != ""]),
+  ## Build a canonical Parks data frame (ONE row per ParkCode), warn on conflicts
+  # Compute distinct values per ParkCode for ShortName, LongName, Network
+  park_field_values <- MetaData %>%
+    dplyr::group_by(ParkCode) %>%
+    dplyr::summarize(
+      short_vals = list(unique(ShortName[!is.na(ShortName) & ShortName != ""])),
+      long_vals  = list(unique(LongName[!is.na(LongName) & LongName != ""])),
+      net_vals   = list(unique(Network[!is.na(Network) & Network != ""])),
       .groups = "drop"
     ) %>%
+    # Count distinct values per field
+    dplyr::mutate(
+      n_short = lengths(short_vals),
+      n_long  = lengths(long_vals),
+      n_net   = lengths(net_vals)
+    )
+  
+  # Filter parks with any conflicts
+  park_conflicts <- park_field_values %>%
     dplyr::filter(n_short > 1 | n_long > 1 | n_net > 1)
   
   if (nrow(park_conflicts) > 0) {
+    # Build an actionable message with per-park, per-field values
+    msg_lines <- purrr::pmap_chr(
+      .l = list(park_conflicts$ParkCode,
+                park_conflicts$short_vals,
+                park_conflicts$long_vals,
+                park_conflicts$net_vals,
+                park_conflicts$n_short,
+                park_conflicts$n_long,
+                park_conflicts$n_net),
+      .f = function(pc, svals, lvals, nvals, ns, nl, nn) {
+        # Helper: format a vector of values concisely
+        fmt_vals <- function(x) {
+          x <- sort(unique(x))
+          if (length(x) <= 4) {
+            paste(x, collapse = '", "')
+          } else {
+            paste(c(x[1:3], "...", x[length(x)]), collapse = '", "')
+          }
+        }
+        parts <- c(
+          if (ns > 1) sprintf('ShortName (%d): "%s"', ns, fmt_vals(svals)),
+          if (nl > 1) sprintf('LongName  (%d): "%s"', nl, fmt_vals(lvals)),
+          if (nn > 1) sprintf('Network   (%d): "%s"', nn, fmt_vals(nvals))
+        )
+        sprintf('[%s] Conflicts -> %s', pc, paste(parts[parts != ""], collapse = " | "))
+      }
+    )
+    
     warning(
-      sprintf("Inconsistent park metadata detected for ParkCode(s): %s; using first non-empty values.",
-              paste(park_conflicts$ParkCode, collapse = ", ")),
+      paste0(
+        "Inconsistent park metadata detected; using first non-empty values per field.\n",
+        paste(msg_lines, collapse = "\n")
+      ),
       call. = FALSE
     )
   }
+  
   
   ParksDf <- MetaData %>%
     group_by(ParkCode) %>%
@@ -135,26 +176,55 @@ importNCRNWater <- function(Dir, Data = "Water Data.csv", MetaData = "MetaData.c
   #### Create Park objects (one per ParkCode)
   Parks <- pmap(.l = ParksDf, .f = new, Class = "Park")
   
-  ## NEW: Build canonical Site rows (ONE row per ParkCode + SiteCode), merge & dedupe characteristics
-  site_conflicts <- MetaData %>%
-    group_by(ParkCode, SiteCode) %>%
-    summarize(
-      n_name = dplyr::n_distinct(SiteName[!is.na(SiteName) & SiteName != ""]),
-      n_type = dplyr::n_distinct(Type[!is.na(Type) & Type != ""]),
-      n_lat  = dplyr::n_distinct(Lat[!is.na(Lat) & Lat != ""]),
-      n_long = dplyr::n_distinct(Long[!is.na(Long) & Long != ""]),
+  ## Build canonical Site rows (ONE row per ParkCode + SiteCode), merge & dedupe characteristics
+  ## report which site fields differ (SiteName, Type, Lat, Long) for a (ParkCode, SiteCode)
+  site_field_values <- MetaData %>%
+    dplyr::group_by(ParkCode, SiteCode) %>%
+    dplyr::summarize(
+      name_vals = list(unique(SiteName[!is.na(SiteName) & SiteName != ""])),
+      type_vals = list(unique(Type[!is.na(Type) & Type != ""])),
+      lat_vals  = list(unique(Lat[!is.na(Lat)])),
+      long_vals = list(unique(Long[!is.na(Long)])),
       .groups = "drop"
+    ) %>%
+    dplyr::mutate(
+      n_name = lengths(name_vals),
+      n_type = lengths(type_vals),
+      n_lat  = lengths(lat_vals),
+      n_long = lengths(long_vals)
     ) %>%
     dplyr::filter(n_name > 1 | n_type > 1 | n_lat > 1 | n_long > 1)
   
-  if (nrow(site_conflicts) > 0) {
+  if (nrow(site_field_values) > 0) {
+    msg_lines <- purrr::pmap_chr(
+      list(site_field_values$ParkCode, site_field_values$SiteCode,
+           site_field_values$name_vals, site_field_values$type_vals,
+           site_field_values$lat_vals,  site_field_values$long_vals,
+           site_field_values$n_name,    site_field_values$n_type,
+           site_field_values$n_lat,     site_field_values$n_long),
+      function(pc, sc, nvals, tvals, lats, longs, nn, nt, nla, nlo) {
+        fmt_vals <- function(x) {
+          x <- sort(unique(x))
+          if (length(x) <= 4) paste(x, collapse = '", "')
+          else paste(c(x[1:3], "...", x[length(x)]), collapse = '", "')
+        }
+        parts <- c(
+          if (nn  > 1) sprintf('SiteName (%d): "%s"', nn,  fmt_vals(nvals)),
+          if (nt  > 1) sprintf('Type     (%d): "%s"', nt,  fmt_vals(tvals)),
+          if (nla > 1) sprintf('Lat      (%d): "%s"', nla, fmt_vals(lats)),
+          if (nlo > 1) sprintf('Long     (%d): "%s"', nlo, fmt_vals(longs))
+        )
+        sprintf('[%s:%s] Conflicts -> %s', pc, sc, paste(parts[parts != ""], collapse = " | "))
+      }
+    )
     warning(
-      sprintf("Inconsistent site metadata for %d site(s); using first non-empty values per field.",
-              nrow(site_conflicts)),
+      paste0(
+        "Inconsistent site metadata detected; using first non-empty values per field.\n",
+        paste(msg_lines, collapse = "\n")
+      ),
       call. = FALSE
     )
   }
-  
   
   AllSites <- MetaData %>%
     group_by(ParkCode, SiteCode) %>%
@@ -261,6 +331,8 @@ importNCRNWater <- function(Dir, Data = "Water Data.csv", MetaData = "MetaData.c
     if (anyDuplicated(short_names)) short_names <- make.unique(short_names, sep = "_")
   }
   names(Parks) <- short_names
+  
+  diagnoseWaterData(Parks, verbose_chars = F)
   
   return(Parks)
 }
