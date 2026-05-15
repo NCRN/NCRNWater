@@ -163,10 +163,13 @@ importNCRNWater <- function(Dir, Data = "Water Data.csv", MetaData = "MetaData.c
       Lat      = suppressWarnings(as.numeric(dplyr::first(na.omit(Lat)))),
       Long     = suppressWarnings(as.numeric(dplyr::first(na.omit(Long)))),
       Type     = dplyr::first(na.omit(Type)),
+      
       Characteristics = list({
         cs <- unlist(Characteristics, recursive = FALSE)
-        if (length(cs) == 0) cs else {
-          # Prefer the accessor; fallback to the actual slot name if needed
+        if (length(cs) == 0) {
+          cs
+        } else {
+          # Get characteristic names (prefer accessor, fallback to slot)
           char_names <- vapply(
             cs,
             function(c) {
@@ -177,8 +180,23 @@ importNCRNWater <- function(Dir, Data = "Water Data.csv", MetaData = "MetaData.c
             },
             FUN.VALUE = character(1)
           )
+          
+          # De-duplicate by characteristic name
           keep <- !duplicated(char_names)
-          cs[keep]
+          cs <- cs[keep]
+          char_names <- char_names[keep]
+          
+          # Disambiguate if duplicates still present (rare, but safe)
+          dup_mask <- duplicated(char_names) | duplicated(char_names, fromLast = TRUE)
+          if (any(dup_mask)) {
+            cat_suffix <- vapply(cs, function(c) c@Category, FUN.VALUE = character(1))
+            char_names[dup_mask] <- paste0(char_names[dup_mask], "_", cat_suffix[dup_mask])
+            if (anyDuplicated(char_names)) char_names <- make.unique(char_names, sep = "_")
+          }
+          
+          # Name the list elements by characteristic name
+          names(cs) <- char_names
+          cs
         }
       }),
       .groups = "drop"
@@ -187,12 +205,12 @@ importNCRNWater <- function(Dir, Data = "Water Data.csv", MetaData = "MetaData.c
   
   ###### Make a list of sites with each park a nested list
   PSites <- purrr::map(Parks, function(Park) {
-    SiteDf <- dplyr::filter(AllSites, ParkCode == Park@ParkCode) %>% dplyr::select(-ParkCode)
+    SiteDf   <- dplyr::filter(AllSites, ParkCode == Park@ParkCode) %>% dplyr::select(-ParkCode)
     SiteList <- pmap(.l = SiteDf, .f = new, Class = "Site")
     
     ## Name sites by SiteCode and gracefully disambiguate duplicates
     site_names <- SiteDf$SiteCode
-    dup_mask <- duplicated(site_names) | duplicated(site_names, fromLast = TRUE)
+    dup_mask   <- duplicated(site_names) | duplicated(site_names, fromLast = TRUE)
     if (any(dup_mask)) {
       warning("Duplicate SiteCode values detected within a park; disambiguating site list element names.", call. = FALSE)
       site_suffix <- if ("SiteName" %in% names(SiteDf)) SiteDf$SiteName else seq_along(site_names)
@@ -202,6 +220,31 @@ importNCRNWater <- function(Dir, Data = "Water Data.csv", MetaData = "MetaData.c
       if (anyDuplicated(site_names)) site_names <- make.unique(site_names, sep = "_")
     }
     names(SiteList) <- site_names
+    
+    ## --- BELT & SUSPENDERS: ensure characteristics are named for each site ---
+    SiteList <- lapply(SiteList, function(s) {
+      cs <- s@Characteristics
+      if (length(cs)) {
+        # If names are missing or blank, (re)name from the slot; disambiguate duplicates
+        if (is.null(names(cs)) || any(!nzchar(names(cs)))) {
+          char_names <- vapply(cs, function(c) c@CharacteristicName, FUN.VALUE = character(1))
+          
+          # Duplicate-safe disambiguation using Category as suffix (then make.unique as final guard)
+          dup_mask <- duplicated(char_names) | duplicated(char_names, fromLast = TRUE)
+          if (any(dup_mask)) {
+            cat_suffix <- vapply(cs, function(c) c@Category, FUN.VALUE = character(1))
+            char_names[dup_mask] <- paste0(char_names[dup_mask], "_", cat_suffix[dup_mask])
+            if (anyDuplicated(char_names)) char_names <- make.unique(char_names, sep = "_")
+          }
+          
+          names(cs) <- char_names
+          s@Characteristics <- cs
+        }
+      }
+      s
+    })
+    ## --- END BELT & SUSPENDERS ---
+    
     SiteList
   })
   
