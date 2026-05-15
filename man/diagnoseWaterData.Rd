@@ -2,56 +2,142 @@
 % Please edit documentation in R/diagnose.R
 \name{diagnoseWaterData}
 \alias{diagnoseWaterData}
-\title{Diagnose park/site uniqueness and characteristic counts in NCRNWater data}
+\title{Diagnose park/site uniqueness and characteristic consistency}
 \usage{
-diagnoseWaterData(ParksList)
-}
-\arguments{
-\item{ParksList}{A list of S4 `Park` objects as produced by [importNCRNWater()].
-Each `Park` should contain a `@ParkCode`, `@ShortName`, `@LongName`, and a
-`@Sites` list of S4 `Site` objects. Each `Site` should contain a `@SiteCode`
-and a `@Characteristics` list of S4 `Characteristic` objects.}
+diagnoseWaterData(ParksList, verbose_chars = TRUE, show_char_details = FALSE)
 }
 \value{
-A list returned **invisibly** (`invisible(...)`) with one element per park.
-Each element is a list containing:
+Invisibly returns a named list with four elements summarizing all diagnostics:
+
 \describe{
-  \item{park}{Character scalar: the park `@ParkCode`.}
-  \item{n_sites}{Integer: total number of sites in the park.}
-  \item{n_unique}{Integer: number of unique site codes in the park.}
-  \item{dup_site}{Character vector: any duplicated `SiteCode` values (empty if none).}
-  \item{char_cnt}{Summary of the per-site characteristic counts (an object of class
-  `"table"` as produced by `summary(integer_vector)`).}
+
+  \item{sites}{
+    A list with one element per park, each containing:
+      \describe{
+        \item{park}{The park’s `ParkCode`.}
+        \item{n_sites}{Total number of sites in the park.}
+        \item{n_unique}{Number of unique site codes.}
+        \item{dup_site}{A vector of duplicated site codes (empty if none).}
+        \item{char_cnt}{`summary()` on the number of characteristics per site.}
+      }
+  }
+
+  \item{chars}{
+    A nested list of per‑site characteristic diagnostics:
+
+    \preformatted{
+    chars[[ParkCode]][[SiteCode]]
+    }
+
+    Each element contains:
+      \describe{
+        \item{site}{The site’s `SiteCode`.}
+        \item{n_chars}{Number of characteristics at this site.}
+        \item{unnamed}{TRUE if any list elements in `@Characteristics` were unnamed.}
+        \item{dup_slot}{Duplicated names based on the S4 slot `@CharacteristicName`.}
+        \item{dup_list}{Duplicated names of the characteristic list elements.}
+        \item{per_char}{A list of per‑characteristic summaries, each including:
+            \describe{
+              \item{name_list}{List-element name (after disambiguation).}
+              \item{name_slot}{Underlying `@CharacteristicName`.}
+              \item{category}{Characteristic category.}
+              \item{n_rows}{Number of data rows.}
+              \item{has_date}{Whether the data contains a `Date` column.}
+              \item{has_value}{Whether the data contains a `Value` column.}
+              \item{date_is_Date}{Whether `Date` is of class `Date`.}
+              \item{value_is_num}{Whether `Value` is numeric.}
+              \item{all_value_na}{TRUE if all `Value` entries are `NA`.}
+              \item{all_date_na}{TRUE if all `Date` entries are `NA`.}
+            }
+        }
+      }
+  }
+
+  \item{problems}{
+    Integer count of total diagnostic problems encountered.  
+    When this value is 0, the function prints:
+    \preformatted{OK to proceed!}
+    Otherwise, a message reports the number of problems found.
+  }
+
+  \item{msgs}{
+    A character vector containing all warning messages issued during diagnostics.
+  }
+
 }
 }
 \description{
-`diagnoseWaterData()` performs lightweight diagnostics on an imported NCRNWater
-object (i.e., the list returned by [importNCRNWater()]). It checks for:
-- **Park-level** uniqueness by `@ParkCode`
-- **Site-level** uniqueness (within each park) by `@SiteCode`
-- **Per-site characteristic counts**
+`diagnoseWaterData()` provides structured diagnostics for objects created by
+[importNCRNWater()]. It checks for uniqueness, naming consistency, structural
+validity, and data integrity at three levels:
 
-The function prints a concise summary to the console (via `message()`), and
-emits warnings (via `warning()`) when duplicates are detected. It does **not**
-modify the input. A structured summary is returned **invisibly** for programmatic
-use.
-}
-\details{
-This function is intended for quick, interactive diagnostics after importing
-water data with [importNCRNWater()]. It helps surface upstream metadata issues
-(e.g., inconsistent labels, whitespace/casing differences) that can manifest
-as duplicate parks or sites. Use this alongside the import function’s warnings
-to identify and resolve metadata inconsistencies.
+* Parks
+* Sites within each park
+* Characteristics within each site
 
-The function relies on direct slot access to NCRNWater S4 classes:
-`Park` (`@ParkCode`, `@Sites`), `Site` (`@SiteCode`, `@Characteristics`), and
-`Characteristic` (counted via length of `@Characteristics`). It does not mutate
-any objects.
+Human‑readable messages are printed during evaluation, and all diagnostic
+results are returned invisibly for programmatic inspection.
 }
+\section{Structure}{
+
+The return value is a nested list summarizing all diagnostic findings.
+Conceptually, it looks like:
+
+\preformatted{
+list(
+  sites    = list(
+                [[1]] = list(
+                           park     = "ANTI",
+                           n_sites  = 1,
+                           n_unique = 1,
+                           dup_site = character(0),
+                           char_cnt = table(...)
+                         ),
+                [[2]] = list(...),
+                ...
+             ),
+
+  chars    = list(
+                ANTI = list(
+                          NCRN_ANTI_SHCK = list(
+                              site      = "NCRN_ANTI_SHCK",
+                              n_chars   = 17,
+                              unnamed   = FALSE,
+                              dup_slot  = character(0),
+                              dup_list  = character(0),
+                              per_char  = list(
+                                  [[1]] = list(
+                                               name_list     = "AirTemp",
+                                               name_slot     = "AirTemp",
+                                               category      = "Physical",
+                                               n_rows        = 120,
+                                               has_date      = TRUE,
+                                               has_value     = TRUE,
+                                               date_is_Date  = TRUE,
+                                               value_is_num  = TRUE,
+                                               all_value_na  = FALSE,
+                                               all_date_na   = FALSE
+                                            ),
+                                  ...
+                              )
+                          ),
+                          ...
+                      ),
+                ...
+             ),
+
+  problems = <integer>,
+
+  msgs     = character vector of warning messages
+)
+}
+}
+
 \examples{
 \dontrun{
 library(NCRNWater)
 
+# Import WQP data in NCRNWater format
 Network <- "NCRN"
 wd <- importNCRNWater(
   Dir      = file.path("Data", Network),
@@ -60,17 +146,30 @@ wd <- importNCRNWater(
   wqx      = TRUE
 )
 
-# Print diagnostic summary to the console and capture structured results
+# Basic diagnostics (park → site → characteristic)
 diag <- diagnoseWaterData(wd)
 
-# Inspect the first park's diagnostics
-diag[[1]]$park
-diag[[1]]$n_sites
-diag[[1]]$n_unique
-diag[[1]]$dup_site
-diag[[1]]$char_cnt
+# Suppress per-site characteristic messaging (good for large networks)
+diag <- diagnoseWaterData(wd, verbose_chars = FALSE)
+
+# Enable detailed per-characteristic row/column/type messages
+diag <- diagnoseWaterData(wd, show_char_details = TRUE)
+
+# Inspect diagnostic structure programmatically:
+diag$sites[[1]]       # Park-level summary
+diag$chars[[1]]       # Characteristic-level summary
+diag$problems         # Number of issues detected
+diag$msgs             # All collected warning messages
+
+# Users may check:
+if (diag$problems == 0) {
+  cat("No problems detected; OK to proceed!\n")
+}
 }
 }
 \seealso{
-[importNCRNWater()], [getParkInfo()], [getSiteInfo()], [getWData()]
+\describe{
+    \item{\code{\link{importNCRNWater}}}{Import NCRNWater objects from WQP data + metadata.}
+    \item{\code{\link{congruency}}}{Validate raw data + metadata files before import.}
+  }
 }
