@@ -99,22 +99,75 @@ setMethod(f="getWData", signature=c(object="Park"),
 
 #### Given one Site get the characteristics and run again ####
 setMethod(f="getWData", signature=c(object="Site"),
-  function(object,charname,category,mindate,maxdate,months,years,wyears,minvalue,maxvalue,minobs,output){
-  
-    OutData<-getChars(object=object, charname=charname, category = category) %>% 
-      lapply(.,FUN=function(x){getWData(object=x, mindate=mindate, maxdate=maxdate, months=months, years=years, wyears=wyears,
-            minvalue=minvalue,maxvalue=maxvalue,minobs=minobs)
-      }) 
-      
-    OutData<-lapply(OutData, FUN=function(x){if(is.null(x)) x else mutate(x, Site=getSiteInfo(object, info="SiteCode")) })  
-        
-    if(output=="list") return(OutData) else {
-      OutData %>% 
-      bind_rows %>%
-      as.data.frame(stringsAsFactors=F) %>% 
-      return
-    }
-})
+          function(object, charname, category, mindate, maxdate, months, years, wyears, minvalue, maxvalue, minobs, output){
+            
+            ## --- NEW: validate requested charname(s) when provided ---
+            if (!all(is.na(charname))) {
+              # Get all available Character objects (respecting category)
+              available_chars <- getChars(object = object, charname = NA, category = category)
+              
+              # Extract the available characteristic names
+              available_names <- vapply(
+                available_chars,
+                FUN = function(x) getCharInfo(x, info = "CharName"),
+                FUN.VALUE = character(1)
+              ) %>% unique()
+              
+              # Normalize requested names to a character vector
+              requested <- as.character(charname)
+              
+              # Compute valid/invalid splits
+              valid_requested   <- intersect(requested, available_names)
+              invalid_requested <- setdiff(requested,  available_names)
+              
+              # Warn for any invalid requested names
+              if (length(invalid_requested) > 0L) {
+                warning(
+                  sprintf(
+                    "The following `charname` value(s) are not valid: %s. Valid names include: %s",
+                    paste(invalid_requested, collapse = ", "),
+                    paste(available_names, collapse = ", ")
+                  ),
+                  call. = FALSE
+                )
+              }
+              
+              # If none of the requested names are valid, return empty immediately
+              if (length(valid_requested) == 0L) {
+                if (identical(output, "list")) {
+                  return(list())    # empty list for list output
+                } else {
+                  return(data.frame())  # 0x0 data.frame, as requested
+                }
+              }
+              
+              # Use only the valid subset downstream
+              charname <- valid_requested
+            }
+            ## --- END NEW validation block ---
+            
+            OutData <- getChars(object = object, charname = charname, category = category) %>%
+              lapply(., FUN = function(x) {
+                getWData(
+                  object = x, mindate = mindate, maxdate = maxdate,
+                  months = months, years = years, wyears = wyears,
+                  minvalue = minvalue, maxvalue = maxvalue, minobs = minobs
+                )
+              })
+            
+            OutData <- lapply(OutData, FUN = function(x) {
+              if (is.null(x)) x else mutate(x, Site = getSiteInfo(object, info = "SiteCode"))
+            })
+            
+            if (output == "list") {
+              return(OutData)
+            } else {
+              OutData %>%
+                bind_rows %>%
+                as.data.frame(stringsAsFactors = FALSE) %>%
+                return()
+            }
+          })
 
 
 #### Given one Characteristic get the data ####
