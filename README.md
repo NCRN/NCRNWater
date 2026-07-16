@@ -13,7 +13,11 @@ This is an R package used to process water quality monitoring data.
 
 ## NEWS
 
-### NCRNWater 1.0.1 2026-04-29
+### NCRNWater 1.0.1 2026-07-16
+
+#### New features
+- **congruency()** Gives the user feedback about the quality of WQP data before creating a NCRNWater object. Reports inconsistencies between WQP-formatted inputs (e.g., wqp.csv, wqp_ncrnwater_metadata.csv) and known-correct templates. See `?NCRNWater::congruency` for details and usage examples.
+- **diagnoseWaterData()** Gives the user feedback about the quality of the NCRNWater object. Reports inconsistencies like disagreements in site attributes (names, lat/lon) and characteristic attributes (names) in a WaterData object. See `?NCRNWater::diagnoseWaterData` for details and usage examples.
 
 #### Fixes & Improvements
 - **Bug Fix:** Resolved duplication of `Site` and `Characteristic` outputs for certain `parkcode/sitecode/charname` combinations (e.g., `NACE / NCRN_NACE_OXRU / pH`) by:
