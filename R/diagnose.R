@@ -282,6 +282,56 @@ diagnoseWaterData <- function(ParksList, verbose_chars = TRUE, show_char_details
           error = function(e) cobj@Data
         )
         
+        # Defensive checks on LowerPointCondition, UpperPointCondition
+        allowed_ops <- c("<", "<=", ">", ">=")
+        
+        lower_point <- tryCatch(getCharInfo(cobj, info = "LowerPoint"), error = function(e) cobj@LowerPoint)
+        upper_point <- tryCatch(getCharInfo(cobj, info = "UpperPoint"), error = function(e) cobj@UpperPoint)
+        
+        lower_op <- tryCatch(getCharInfo(cobj, info = "LowerPointCondition"), error = function(e) cobj@LowerPointCondition)
+        upper_op <- tryCatch(getCharInfo(cobj, info = "UpperPointCondition"), error = function(e) cobj@UpperPointCondition)
+        
+        # Normalize empty strings to NA for checks
+        norm <- function(x) if (is.null(x) || (is.character(x) && !nzchar(x))) NA_character_ else x
+        lower_op <- norm(lower_op); upper_op <- norm(upper_op)
+        
+        # 1) Allowed-operator checks (only when present)
+        if (!is.na(lower_op) && !(lower_op %in% allowed_ops)) {
+          add_warn(sprintf("[%s:%s:%s] Invalid LowerPointCondition: '%s' (allowed: %s).",
+                           park_id, site_id, cname_list, lower_op, paste(allowed_ops, collapse = ", ")))
+        }
+        if (!is.na(upper_op) && !(upper_op %in% allowed_ops)) {
+          add_warn(sprintf("[%s:%s:%s] Invalid UpperPointCondition: '%s' (allowed: %s).",
+                           park_id, site_id, cname_list, upper_op, paste(allowed_ops, collapse = ", ")))
+        }
+        
+        # Helper: scalar numeric?
+        is_scalar_num <- function(x) is.numeric(x) && length(x) == 1L && !is.na(x)
+        
+        # 2) Threshold present but operator missing -> warn; exceed() will default
+        if (is_scalar_num(lower_point) && is.na(lower_op)) {
+          add_warn(sprintf("[%s:%s:%s] LowerPoint present but LowerPointCondition missing; default '<' will be used.",
+                           park_id, site_id, cname_list))
+        }
+        if (is_scalar_num(upper_point) && is.na(upper_op)) {
+          add_warn(sprintf("[%s:%s:%s] UpperPoint present but UpperPointCondition missing; default '>' will be used.",
+                           park_id, site_id, cname_list))
+        }
+        
+        # 3) Bounds sanity (scalar thresholds only)
+        if (is_scalar_num(lower_point) && is_scalar_num(upper_point) && (lower_point > upper_point)) {
+          add_warn(sprintf("[%s:%s:%s] LowerPoint (%.3f) > UpperPoint (%.3f); check metadata.",
+                           park_id, site_id, cname_list, lower_point, upper_point))
+        }
+        
+        # 4) Semantic contradiction warning (non-fatal)
+        is_lower_reversed <- !is.na(lower_op) && lower_op %in% c(">", ">=")
+        is_upper_reversed <- !is.na(upper_op) && upper_op %in% c("<", "<=")
+        if (is_lower_reversed && is_upper_reversed) {
+          add_warn(sprintf("[%s:%s:%s] Lower/Upper operators appear reversed (lower uses '>'/'>=', upper uses '<'/'<=').",
+                           park_id, site_id, cname_list))
+        }
+        
         # Defensive checks on cdata
         n_rows           <- tryCatch(nrow(cdata), error = function(e) NA_integer_)
         has_date         <- !is.null(cdata) && "Date"  %in% names(cdata)
