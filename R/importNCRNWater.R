@@ -90,7 +90,9 @@ importNCRNWater <- function(Dir, Data = "Water Data.csv", MetaData = "MetaData.c
   MetaData$Characteristics <- MetaData %>%
     dplyr::select(CharacteristicName, DisplayName, Units, Category,
                   CategoryDisplay, LowerPoint, UpperPoint, LowerDescription,
-                  UpperDescription, AssessmentDetails, Data) %>%
+                  UpperDescription, AssessmentDetails,
+                  LowerPointCondition, UpperPointCondition,
+                  Data) %>%
     pmap(.f = new, Class = "Characteristic")
   
   ## NEW: Standardize codes/names to prevent pseudo-duplicates

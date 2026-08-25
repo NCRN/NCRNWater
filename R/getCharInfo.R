@@ -36,6 +36,7 @@
 #' \item{"ParkShortName"}{ The default. Returns the short name of the park the site is in.}
 #' \item{"ParkLongName"}{Returns the long name of the park the site is in.}
 #' \item{"Network}{Returns the network code for the network the site is in.}
+#' \item{"LowerPointCondition","UpperPointCondition"}{Comparator strings used for lower/upper assessment points (one of "<", "<=", ">", ">="). Returned as length-1 character vectors.}
 #' } 
 #' 
 #' @return Either a vector or a list with information for each character. Only the data option returns a list.
@@ -283,28 +284,36 @@ setMethod(f = "getCharInfo", signature = c(object = "Park"),
 
 
 #### Given one Characteristic get the info ####
-setMethod(f="getCharInfo", signature=c(object="Characteristic"),
-          function(object,info){
-            if (is.na(info)) stop("Need to specify 'info'" )
+setMethod(f = "getCharInfo", signature = c(object = "Characteristic"),
+          function(object, info) {
+            if (is.na(info)) stop("Need to specify 'info'")
             switch(info,
-                   CharName = return(object@CharacteristicName),
-                   DisplayName=return(object@DisplayName),
-                   Substrate=return(object@Substrate),
-                   SampleFraction=return(object@SampleFraction),
-                   Category=return(object@Category),
-                   CategoryDisplay=return(object@CategoryDisplay), 
-                   Details=return(object@Details),
-                   Units=return(object@Units),
-                   Data=return(object@Data),
-                   LowerPoint=return(object@LowerPoint),
-                   UpperPoint=return(object@UpperPoint),
-                   LowerType=return(object@LowerType),
-                   UpperType=return(object@UpperType),
-                   LowerDescription=return(object@LowerDescription),
-                   UpperDescription=return(object@UpperDescription),
-                   AssessmentDetails=return(object@AssessmentDetails),
-                   SiteCode=,SiteName=,coords=,type= return("No Site object provided, cannot retrieve information"),
-                   ParkCode=, ParkShortName=, ParkLongName=, Network = return('No Park object provided, cannot retrieve information'),
+                   CharName            = return(object@CharacteristicName),
+                   DisplayName         = return(object@DisplayName),
+                   Substrate           = return(object@Substrate),
+                   SampleFraction      = return(object@SampleFraction),
+                   Category            = return(object@Category),
+                   CategoryDisplay     = return(object@CategoryDisplay),
+                   Details             = return(object@Details),
+                   Units               = return(object@Units),
+                   Data                = return(object@Data),
+                   LowerPoint          = return(object@LowerPoint),
+                   UpperPoint          = return(object@UpperPoint),
+                   
+                   LowerPointCondition = return(object@LowerPointCondition),
+                   UpperPointCondition = return(object@UpperPointCondition),
+                   
+                   LowerType           = return(object@LowerType),
+                   UpperType           = return(object@UpperType),
+                   LowerDescription    = return(object@LowerDescription),
+                   UpperDescription    = return(object@UpperDescription),
+                   AssessmentDetails   = return(object@AssessmentDetails),
+                   
+                   SiteCode=, SiteName=, coords=, type =
+                     return("No Site object provided, cannot retrieve information"),
+                   ParkCode=, ParkShortName=, ParkLongName=, Network =
+                     return("No Park object provided, cannot retrieve information"),
                    stop("Unrecognized info in getCharInfo")
             )
-})
+          }
+)

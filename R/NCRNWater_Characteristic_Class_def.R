@@ -25,45 +25,57 @@ setClassUnion(name="Num_or_DF",members= c("numeric","data.frame"))
 #' 
 #' @exportClass Characteristic
 
+setClassUnion(name = "Num_or_DF", members = c("numeric", "data.frame"))
 
-#setOldClass("data.frame")
-
-
-setClass(Class="Characteristic",
-          slots=c(CharacteristicName="character",
-                 DisplayName="character",
-                 Substrate="character",
-                 SampleFraction="character",
-                 Category="character",
-                 CategoryDisplay="character",
-                 Details="character",
-                 Units="character",
-                 Data="data.frame",
-                 LowerPoint="Num_or_DF",
-                 LowerType="character",
-                 LowerDescription="character",
-                 UpperPoint="Num_or_DF",
-                 UpperType="character",
-                 UpperDescription="character",
-                 AssessmentDetails="character"
-                ),
+setClass(Class = "Characteristic",
+         slots = c(
+           CharacteristicName   = "character",
+           DisplayName          = "character",
+           Substrate            = "character",
+           SampleFraction       = "character",
+           Category             = "character",
+           CategoryDisplay      = "character",
+           Details              = "character",
+           Units                = "character",
+           Data                 = "data.frame",
+           
+           LowerPoint           = "Num_or_DF",
+           LowerType            = "character",
+           LowerDescription     = "character",
+           
+           UpperPoint           = "Num_or_DF",
+           UpperType            = "character",
+           UpperDescription     = "character",
+           
+           AssessmentDetails    = "character",
+           
+           ## NEW: per-characteristic comparator strings
+           LowerPointCondition  = "character",
+           UpperPointCondition  = "character"
+         ),
          
-          prototype=list(CharacteristicName=character(), 
-                        DisplayName=character(),
-                        Substrate=character(), 
-                        SampleFraction=character(),
-                        Category=character(),
-                        CategoryDisplay=character(),
-                        Details=character(),
-                        Units=character(),
-                        Data=data.frame(),
-                        LowerPoint=numeric(),
-                        LowerType=character(),
-                        LowerDescription=character(),
-                        UpperPoint=numeric(),
-                        UpperType=character(),
-                        UpperDescription=character(),
-                        AssessmentDetails=character()
+         prototype = list(
+           CharacteristicName   = character(),
+           DisplayName          = character(),
+           Substrate            = character(),
+           SampleFraction       = character(),
+           Category             = character(),
+           CategoryDisplay      = character(),
+           Details              = character(),
+           Units                = character(),
+           Data                 = data.frame(),
+           
+           LowerPoint           = numeric(),
+           LowerType            = character(),
+           LowerDescription     = character(),
+           
+           UpperPoint           = numeric(),
+           UpperType            = character(),
+           UpperDescription     = character(),
+           
+           AssessmentDetails    = character(),
+           
+           LowerPointCondition  = character(),
+           UpperPointCondition  = character()
          )
 )
-
