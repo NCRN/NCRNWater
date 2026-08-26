@@ -1,15 +1,16 @@
 #' @include NCRNWater_Park_Class_def.R
 #' @include NCRNWater_Site_Class_def.R
 #' @include NCRNWater_Characteristic_Class_def.R
+#' @include filterActive.R
 #' @include diagnose.R
 #' @title importNCRNWater
 #' 
-#' @description This function imports data from a .csv files exported from NPStoret and saves it as \code{Park} objects. 
+#' @description This function imports data from .csv files. The csv files can be in WQP format or NPStoret format. The function parses data into \code{Park} objects which exposes methods for exploring and analyzing data. 
 #' 
 #' @param Dir The directory where the data is found
-#' @param Data The data file. Defaults to "Water Data.csv"
-#' @param MetaData The metadata file. Defaults to "MetaData.csv"
-#' @param wqx Indicates if the data file is in wqx format, defaults to \code{FALSE}.
+#' @param Data The data file. Defaults to "wqp.csv"
+#' @param MetaData The metadata file. Defaults to "wqp_ncrnwater_metadata.csv"
+#' @param wqx Indicates if the data file is in wqx format, defaults to \code{T}.
 #' 
 #' @return Returns \code{Park} objects, one for each park, as a \code{list}.
 #' 
@@ -25,29 +26,42 @@
 #' 
 #' @export
 #' 
-importNCRNWater <- function(Dir, Data = "Water Data.csv", MetaData = "MetaData.csv", wqx = FALSE){
+importNCRNWater <- function(Dir, Data = "wqp.csv", MetaData = "wqp_ncrnwater_metadata.csv", wqx = T){
+  
+  
+  fa <- filterActive(
+    network           = basename(Dir),             # e.g., "NCRN"
+    metadata_filename = MetaData,                  # or the basename if you prefer
+    data_filename     = Data,
+    dir               = dirname(Dir),              # base dir
+    wqx               = wqx,
+    out_dir           = Dir
+  )
+  
+  # Replace inputs with filtered copies
   
   #### Read in Data ####
   if (wqx) {
     # congruency(file.path(Dir, Data), file.path(Dir, MetaData))
-    Indata <- read_csv(paste(Dir, Data, sep = "/"), col_types = cols(.default = "c")) %>%
+    Indata <- readr::read_csv(fa$data_path, col_types = readr::cols(.default = "c")) %>%
       rename(SiteCode = MonitoringLocationIdentifier, Date = `ActivityStartDate`,
              Characteristic = `CharacteristicName`, Value = `ResultMeasureValue`) %>%
       mutate(TextValue = Value)
     Indata$Date <- ymd(Indata$Date)
+    MetaData <- readr::read_csv(fa$meta_path, col_types = readr::cols())
   } else {
     Indata <- read_csv(paste(Dir, Data, sep = "/"), col_types = cols(.default = "c")) %>%
       rename(SiteCode = StationID, Date = `Visit Start Date`, Characteristic = `Local Characteristic Name`,
              Value = `Result Value/Text`) %>%
       mutate(TextValue = Value)
     Indata$Date <- mdy(Indata$Date)
+    MetaData <- read_csv(paste(Dir, MetaData, sep = "/"), col_types = cols())  # makes function less chatty
   }
   
   if (any(names(Indata) == "ValueCen") & any(names(Indata) == "Censored")) {
     Indata <- Indata %>% mutate(ValueCen = as.numeric(ValueCen), Censored = as.logical(Censored))
   }
   
-  MetaData <- read_csv(paste(Dir, MetaData, sep = "/"), col_types = cols())  # makes function less chatty
   # After: MetaData <- read_csv(...)
   # Add this normalization block:
   normalize_op <- function(x) {
