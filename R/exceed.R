@@ -147,6 +147,18 @@ setMethod(f = "exceed", signature = c(object = "NCRNWaterObj"),
             if (need_lower_op) lower_op <- .fill_default(lower_op, "<")
             if (need_upper_op) upper_op <- .fill_default(upper_op, ">")
             .validate_ops <- function(op) {
+              normalize_op <- function(x) {
+                x <- as.character(x)
+                x <- trimws(x)
+                x <- gsub("&lt;=", "<=", x, fixed = TRUE)
+                x <- gsub("&gt;=", ">=", x, fixed = TRUE)
+                x <- gsub("&lt;",  "<",  x, fixed = TRUE)
+                x <- gsub("&gt;",  ">",  x, fixed = TRUE)
+                x
+              }
+              
+              op <- normalize_op(op)
+              
               bad <- !is.na(op) & !op %in% allowed_ops
               if (any(bad)) stop(sprintf("Invalid comparator(s): %s. Allowed: %s",
                                          paste(unique(op[bad]), collapse = ", "),
@@ -197,6 +209,19 @@ setMethod(f = "exceed", signature = c(object = "data.frame"),
             mode <- if (!is.null(dots$mode)) match.arg(dots$mode, c("summary", "rows")) else "summary"
             lower_op <- dots$lower_op
             upper_op <- dots$upper_op
+            
+            normalize_op <- function(x) {
+              x <- as.character(x)
+              x <- trimws(x)
+              x <- gsub("&lt;=", "<=", x, fixed = TRUE)
+              x <- gsub("&gt;=", ">=", x, fixed = TRUE)
+              x <- gsub("&lt;",  "<",  x, fixed = TRUE)
+              x <- gsub("&gt;",  ">",  x, fixed = TRUE)
+              x
+            }
+            
+            lower_op <- normalize_op(lower_op)
+            upper_op <- normalize_op(upper_op)
             
             Park           <- if ("Park" %in% names(object)) unique(object$Park) else NA
             Site           <- if ("Site" %in% names(object)) unique(object$Site) else NA
