@@ -52,6 +52,7 @@ Collate:
     'getWData.R'
     'waterseries.R'
     'exceed.R'
+    'filterActive.R'
     'importNCRNWater.R'
     'nonparTrends.R'
     'waterbands.R'
@@ -59,4 +60,3 @@ Collate:
     'waterheat.R'
     'watersite_comps.R'
     'wcosinor.R'
-    'filterActive.R'

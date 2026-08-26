@@ -13,8 +13,8 @@ exceed(
   points = "both",
   lower = NA,
   upper = NA,
-  all = F,
-  catsum = F,
+  all = FALSE,
+  catsum = FALSE,
   ...
 )
 }
