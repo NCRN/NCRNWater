@@ -27,8 +27,14 @@
 #' 
 #' @export
 
-setGeneric(name="exceed",function(object, parkcode=NA, sitecode=NA, charname=NA, category=NA, 
-              points="both", lower=NA, upper=NA,all=F, catsum=F,...){standardGeneric("exceed")},signature=c("object") )
+setGeneric(
+  name = "exceed",
+  function(object, parkcode = NA, sitecode = NA, charname = NA, category = NA,
+           points = "both", lower = NA, upper = NA, all = FALSE, catsum = FALSE, ...) {
+    standardGeneric("exceed")
+  },
+  signature = c("object")
+)
 
 setMethod(f = "exceed", signature = c(object = "NCRNWaterObj"),
           function(object, parkcode = NA, sitecode = NA, charname = NA, category = NA,
@@ -45,13 +51,13 @@ setMethod(f = "exceed", signature = c(object = "NCRNWaterObj"),
             NotNull <- !sapply(DataUse, is.null)
             DataUse <- DataUse[NotNull]
             
-            # If NO data groups at all: return appropriate zero-row schema
+            # Zero-data short-circuit
             if (length(DataUse) == 0L) {
               if (mode == "rows") {
                 return(data.frame(
                   Park = character(0), Site = character(0),
                   Characteristic = character(0), Category = character(0),
-                  Date = as.Date(character(0)),  # typical; ok to be empty
+                  Date = as.Date(character(0)),
                   Value = numeric(0),
                   LowerPoint = numeric(0), UpperPoint = numeric(0),
                   LowerPointCondition = character(0), UpperPointCondition = character(0),
@@ -60,18 +66,19 @@ setMethod(f = "exceed", signature = c(object = "NCRNWaterObj"),
                   stringsAsFactors = FALSE
                 ))
               }
-              # Legacy summary schema
-              return(data.frame(Park = character(0), Site = character(0),
-                                Characteristic = character(0), Category = character(0),
-                                Total = integer(0), Acceptable = integer(0),
-                                TooLow = integer(0), TooHigh = integer(0), AllExceed = integer(0),
-                                stringsAsFactors = FALSE))
+              return(data.frame(
+                Park = character(0), Site = character(0),
+                Characteristic = character(0), Category = character(0),
+                Total = integer(0), Acceptable = integer(0),
+                TooLow = integer(0), TooHigh = integer(0), AllExceed = integer(0),
+                stringsAsFactors = FALSE
+              ))
             }
             
             .first_scalar <- function(x) if (length(x) == 0L) NA else x[1]
+            n <- length(DataUse)
             
             # 2) Thresholds: derive from metadata only when not provided
-            n <- length(DataUse)
             need_lower <- (points %in% c("lower", "both")) && (length(lower) == 1L && is.na(lower))
             need_upper <- (points %in% c("upper", "both")) && (length(upper) == 1L && is.na(upper))
             
@@ -135,12 +142,10 @@ setMethod(f = "exceed", signature = c(object = "NCRNWaterObj"),
               )
             } else upper_op <- rep(NA_character_, n)
             
-            # Default missing ops to legacy
+            # Defaults & validation
             .fill_default <- function(op, default) { op[is.na(op) | op == ""] <- default; op }
             if (need_lower_op) lower_op <- .fill_default(lower_op, "<")
             if (need_upper_op) upper_op <- .fill_default(upper_op, ">")
-            
-            # Validate
             .validate_ops <- function(op) {
               bad <- !is.na(op) & !op %in% allowed_ops
               if (any(bad)) stop(sprintf("Invalid comparator(s): %s. Allowed: %s",
@@ -149,12 +154,14 @@ setMethod(f = "exceed", signature = c(object = "NCRNWaterObj"),
             }
             .validate_ops(lower_op); .validate_ops(upper_op)
             
-            # 4) Map to the data.frame method
+            # 4) Map to data.frame method
             X <- purrr::pmap(
               .l = list(object = DataUse,
-                        lower = lower, upper = upper,
-                        lower_op = lower_op, upper_op = upper_op,
-                        mode = mode, points = points),
+                        parkcode = rep(NA, n), sitecode = rep(NA, n),
+                        charname = rep(NA, n), category = rep(NA, n),
+                        points = points, lower = lower, upper = upper,
+                        all = FALSE, catsum = FALSE,
+                        mode = mode, lower_op = lower_op, upper_op = upper_op),
               .f = exceed
             ) %>% dplyr::bind_rows()
             
@@ -175,30 +182,31 @@ setMethod(f = "exceed", signature = c(object = "NCRNWaterObj"),
                   )
               }
               X <- dplyr::distinct(X, Park, Site, Characteristic, Category, .keep_all = TRUE)
-            } else {
-              # rows mode: do not summarize; X already has the union schema
-              # If absolutely NO groups produced any output, X will be a 0-row df
-              # constructed by the per-group zero-row templates (see data.frame method).
             }
             
             return(X)
-          })
-
+          }
+)
 
 setMethod(f = "exceed", signature = c(object = "data.frame"),
-          function(object, lower, upper, lower_op = NULL, upper_op = NULL,
-                   mode = "summary", points = "both", ...) {
+          function(object, parkcode = NA, sitecode = NA, charname = NA, category = NA,
+                   points = "both", lower = NA, upper = NA, all = FALSE, catsum = FALSE, ...) {
+            
+            # Read new controls from ...
+            dots <- list(...)
+            mode <- if (!is.null(dots$mode)) match.arg(dots$mode, c("summary", "rows")) else "summary"
+            lower_op <- dots$lower_op
+            upper_op <- dots$upper_op
             
             Park           <- if ("Park" %in% names(object)) unique(object$Park) else NA
             Site           <- if ("Site" %in% names(object)) unique(object$Site) else NA
             Characteristic <- if ("Characteristic" %in% names(object)) unique(object$Characteristic) else NA
             Category       <- if ("Category" %in% names(object)) unique(object$Category) else NA
             
-            vals <- object$Value
-            Total <- nrow(object)
+            vals    <- object$Value
+            Total   <- nrow(object)
             Missing <- sum(is.na(vals))
             
-            mode   <- match.arg(mode,   c("summary", "rows"))
             points <- match.arg(points, c("lower", "upper", "both"))
             
             allowed_ops <- c("<", "<=", ">", ">=")
@@ -221,9 +229,7 @@ setMethod(f = "exceed", signature = c(object = "data.frame"),
             if (mode == "rows") {
               keep <- low_flag | high_flag
               
-              # --- Zero-row schema initializer (per-group) ---
-              # Start from the original measurement columns to preserve schema,
-              # then append the context columns with correct types (length 0).
+              # Zero-row schema initializer
               template <- object[FALSE, , drop = FALSE]
               template$LowerPoint          <- numeric(0)
               template$UpperPoint          <- numeric(0)
@@ -238,7 +244,6 @@ setMethod(f = "exceed", signature = c(object = "data.frame"),
               }
               
               out <- object[keep, , drop = FALSE]
-              # Attach per-group scalars
               out$LowerPoint          <- if (!is.na(lower)) lower else NA_real_
               out$UpperPoint          <- if (!is.na(upper)) upper else NA_real_
               out$LowerPointCondition <- lower_op
@@ -251,7 +256,7 @@ setMethod(f = "exceed", signature = c(object = "data.frame"),
               return(out)
             }
             
-            # Legacy summary mode (computed from flags; keeps backward behavior)
+            # Legacy summary mode
             TooLow     <- if (points != "upper" && !is.na(lower)) sum(low_flag) else if (points == "upper") NA_integer_ else NA_integer_
             TooHigh    <- if (points != "lower" && !is.na(upper)) sum(high_flag) else if (points == "lower") NA_integer_ else NA_integer_
             AllExceed  <- sum(TooLow, TooHigh, na.rm = TRUE)
@@ -260,4 +265,5 @@ setMethod(f = "exceed", signature = c(object = "data.frame"),
             data.frame(Park, Site, Characteristic, Category,
                        Total, Acceptable, TooLow, TooHigh, AllExceed,
                        stringsAsFactors = FALSE)
-          })
+          }
+)
