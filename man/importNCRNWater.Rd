@@ -6,25 +6,25 @@
 \usage{
 importNCRNWater(
   Dir,
-  Data = "Water Data.csv",
-  MetaData = "MetaData.csv",
-  wqx = FALSE
+  Data = "wqp.csv",
+  MetaData = "wqp_ncrnwater_metadata.csv",
+  wqx = T
 )
 }
 \arguments{
 \item{Dir}{The directory where the data is found}
 
-\item{Data}{The data file. Defaults to "Water Data.csv"}
+\item{Data}{The data file. Defaults to "wqp.csv"}
 
-\item{MetaData}{The metadata file. Defaults to "MetaData.csv"}
+\item{MetaData}{The metadata file. Defaults to "wqp_ncrnwater_metadata.csv"}
 
-\item{wqx}{Indicates if the data file is in wqx format, defaults to \code{FALSE}.}
+\item{wqx}{Indicates if the data file is in wqx format, defaults to \code{T}.}
 }
 \value{
 Returns \code{Park} objects, one for each park, as a \code{list}.
 }
 \description{
-This function imports data from a .csv files exported from NPStoret and saves it as \code{Park} objects.
+This function imports data from .csv files. The csv files can be in WQP format or NPStoret format. The function parses data into \code{Park} objects which exposes methods for exploring and analyzing data.
 }
 \examples{
 ncrnwd<-importNCRNWater(Dir = "./Data/NCRN", Data = "Water Data.csv", MetaData = "VizMetaData.csv")

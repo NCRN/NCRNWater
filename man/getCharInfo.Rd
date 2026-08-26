@@ -47,6 +47,7 @@ getCharInfo(
 \item{"ParkShortName"}{ The default. Returns the short name of the park the site is in.}
 \item{"ParkLongName"}{Returns the long name of the park the site is in.}
 \item{"Network}{Returns the network code for the network the site is in.}
+\item{"LowerPointCondition","UpperPointCondition"}{Comparator strings used for lower/upper assessment points (one of "<", "<=", ">", ">="). Returned as length-1 character vectors.}
 }}
 }
 \value{
