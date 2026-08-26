@@ -48,6 +48,27 @@ importNCRNWater <- function(Dir, Data = "Water Data.csv", MetaData = "MetaData.c
   }
   
   MetaData <- read_csv(paste(Dir, MetaData, sep = "/"), col_types = cols())  # makes function less chatty
+  # After: MetaData <- read_csv(...)
+  # Add this normalization block:
+  normalize_op <- function(x) {
+    x <- as.character(x)                 # ensure character
+    x <- trimws(x)                       # strip spaces
+    # Replace HTML entities in the right order (>= / <= first)
+    x <- gsub("&lt;=", "<=", x, fixed = TRUE)
+    x <- gsub("&gt;=", ">=", x, fixed = TRUE)
+    x <- gsub("&lt;",  "<",  x, fixed = TRUE)
+    x <- gsub("&gt;",  ">",  x, fixed = TRUE)
+    # Optional: empty to NA for diagnostics
+    x[nchar(x) == 0L] <- NA_character_
+    x
+  }
+  
+  MetaData <- MetaData %>%
+    dplyr::mutate(
+      LowerPointCondition = normalize_op(LowerPointCondition),
+      UpperPointCondition = normalize_op(UpperPointCondition)
+    )
+  
   
   #### Check whether MQL and UQL fields (Minimum and Upper Detection Limits) are in Indata. 
   # Add them if not, make them numeric if they are
