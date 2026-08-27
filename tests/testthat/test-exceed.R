@@ -5,8 +5,8 @@ test_that("exceed returns per-site rows aligned with thresholds and is deduped",
   Network <- "NCRN"
   WaterData <- importNCRNWater(
     file.path("Data", Network),
-    Data     = "wqp_activeonly.csv",
-    MetaData = "wqp_ncrnwater_metadata_activeonly.csv",
+    Data     = "wqp_active.csv",
+    MetaData = "wqp_ncrnwater_metadata_active.csv",
     wqx      = TRUE
   )
   
