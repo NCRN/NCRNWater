@@ -7,17 +7,30 @@
 example_paths(network = "NCRN")
 }
 \arguments{
-\item{network}{Character (default: "NCRN"). Subdirectory under \code{inst/extdata}.}
+\item{network}{Character (default: "NCRN").}
 }
 \value{
-A named list with elements \code{data} (wqp.csv) and \code{metadata} (wqp_ncrnwater_metadata.csv).
+A named list:
+  \describe{
+    \item{dir}{Directory containing the example files.}
+    \item{data}{Full path to wqp.csv.}
+    \item{metadata}{Full path to wqp_ncrnwater_metadata.csv.}
+  }
 }
 \description{
 Returns a named list of fully-qualified file paths for the example WQP data
-and metadata that ship under \code{inst/extdata/NCRN/}.
+and metadata that ship under \code{inst/extdata/<network>/}. Also returns
+the directory path that can be used directly in \code{importNCRNWater()}.
 }
 \examples{
 paths <- example_paths()
-paths$data      # absolute path to wqp.csv
-paths$metadata  # absolute path to wqp_ncrnwater_metadata.csv
+paths$dir           # directory to pass into importNCRNWater(Dir = paths$dir)
+paths$data          # WQP file name
+paths$metadata      # metadata file name
+paths$data_fp       # full WQP file path
+paths$metadata_fp   # full metadata file path
+
+# Quick use:
+wd <- importNCRNWater(paths$dir, Data = basename(paths$data), MetaData = basename(paths$metadata))
+
 }
