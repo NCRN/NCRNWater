@@ -16,6 +16,11 @@ This is an R package used to process water quality monitoring data.
 ### NCRNWater 1.0.2 2026-08-25
 
 #### New features
+Example data are provided:
+- **NCRNWater::use_example_data(assign = TRUE)** Reads example data into dataframes: `wqp` and `wqp_metadata`.
+- **NCRNWater::use_example_data(assign = FALSE)** Reads example into a list of dataframes: `example$wqp` and `example$wqp_metadata`.
+- **wd <- NCRNWater::example_ncrnwater()** Build a ready-to-use NCRNWater object from example data.
+
 - **congruency()** Gives the user feedback about the quality of WQP data before creating a NCRNWater object. Reports inconsistencies between WQP-formatted inputs (e.g., wqp.csv, wqp_ncrnwater_metadata.csv) and known-correct templates. See `?NCRNWater::congruency` for details and usage examples.
 - **diagnoseWaterData()** Gives the user feedback about the quality of the NCRNWater object. Reports inconsistencies like disagreements in site attributes (names, lat/lon) and characteristic attributes (names) in a WaterData object. See `?NCRNWater::diagnoseWaterData` for details and usage examples.
 
