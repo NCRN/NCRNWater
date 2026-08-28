@@ -15,7 +15,7 @@
 #' @return A list with elements \code{wqp} and \code{wqp_metadata}.
 #' @examples
 #' # Return in-memory tibbles (no assignment)
-#' ex <- use_example_data(assign = FALSE)
+#' ex <- example_data(assign = FALSE)
 #' dplyr::glimpse(ex$wqp)
 #'
 #' # Assign to global env as 'wqp' and 'wqp_metadata'
@@ -23,7 +23,7 @@
 #' ls()  # should show 'wqp' and 'wqp_metadata'
 #'
 #' @export
-use_example_data <- function(network = "NCRN",
+example_data <- function(network = "NCRN",
                              reader = c("readr", "utils"),
                              as_tibble = TRUE,
                              assign = FALSE,
