@@ -17,8 +17,8 @@ This is an R package used to process water quality monitoring data.
 
 #### New features
 Example data are provided:
-- **NCRNWater::use_example_data(assign = TRUE)** Reads example data into dataframes: `wqp` and `wqp_metadata`.
-- **NCRNWater::use_example_data(assign = FALSE)** Reads example into a list of dataframes: `example$wqp` and `example$wqp_metadata`.
+- **NCRNWater::example_data(assign = TRUE)** Reads example data into dataframes: `wqp` and `wqp_metadata`.
+- **NCRNWater::example_data(assign = FALSE)** Reads example into a list of dataframes: `example$wqp` and `example$wqp_metadata`.
 Build a ready-to-use NCRNWater object from example data.
 *Option 1*
 - **mydata <- NCRNWater::example_ncrnwater()**
