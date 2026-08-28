@@ -1,44 +1,43 @@
 #' Locate NCRNWater example CSVs installed with the package
 #'
 #' @description
-#' Returns a named list of fully-qualified file paths for the example WQP data
-#' and metadata that ship under \code{inst/extdata/<network>/}. Also returns
-#' the directory path that can be used directly in \code{importNCRNWater()}.
+#' Returns:
+#'   - dir: directory under inst/extdata/<network>/
+#'   - data_fp / metadata_fp: full paths to example CSVs
+#'   - data / metadata: basenames parsed from those paths
 #'
-#' @param network Character (default: "NCRN").
+#' @param network Character. Default: "NCRN".
 #'
-#' @return A named list:
+#' @return A named list with:
 #'   \describe{
 #'     \item{dir}{Directory containing the example files.}
-#'     \item{data}{Full path to wqp.csv.}
-#'     \item{metadata}{Full path to wqp_ncrnwater_metadata.csv.}
+#'     \item{data_fp}{Absolute path to the WQP example data file.}
+#'     \item{metadata_fp}{Absolute path to the example metadata file.}
+#'     \item{data}{Filename (basename) of the WQP data file.}
+#'     \item{metadata}{Filename (basename) of the metadata file.}
 #'   }
 #'
 #' @examples
 #' paths <- example_paths()
-#' paths$dir           # directory to pass into importNCRNWater(Dir = paths$dir)
-#' paths$data          # WQP file name
-#' paths$metadata      # metadata file name
-#' paths$data_fp       # full WQP file path
-#' paths$metadata_fp   # full metadata file path
-#'
-#' # Quick use:
-#' wd <- importNCRNWater(paths$dir, Data = basename(paths$data), MetaData = basename(paths$metadata))
+#' importNCRNWater(
+#'     Dir      = paths$dir,
+#'     Data     = paths$data,
+#'     MetaData = paths$metadata,
+#'     wqx      = TRUE
+#' )
 #'
 #' @export
 example_paths <- function(network = "NCRN") {
   
-  # Directory containing the extdata resources
+  # Directory containing example data
   dir_fp <- system.file("extdata", network, package = "NCRNWater")
-  data_fname <- "wqp.csv"
-  metadata_fname <- "wqp_ncrnwater_metadata.csv"
-  
   if (!nzchar(dir_fp) || !dir.exists(dir_fp)) {
-    stop("Example directory for network '", network, "' not found in inst/extdata/.")
+    stop("Example directory for network '", network, "' not found under inst/extdata/")
   }
   
-  data_fp <- system.file("extdata", network, data_fname, package = "NCRNWater")
-  meta_fp <- system.file("extdata", network, metadata_fname, package = "NCRNWater")
+  # Full file paths
+  data_fp <- system.file("extdata", network, "wqp.csv", package = "NCRNWater")
+  meta_fp <- system.file("extdata", network, "wqp_ncrnwater_metadata.csv", package = "NCRNWater")
   
   if (!nzchar(data_fp) || !file.exists(data_fp)) {
     stop("Example WQP data file not found: ", data_fp)
@@ -46,6 +45,10 @@ example_paths <- function(network = "NCRN") {
   if (!nzchar(meta_fp) || !file.exists(meta_fp)) {
     stop("Example metadata file not found: ", meta_fp)
   }
+  
+  # Filenames
+  data_fname     <- basename(data_fp)
+  metadata_fname <- basename(meta_fp)
   
   list(
     dir         = dir_fp,

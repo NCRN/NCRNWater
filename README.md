@@ -23,7 +23,7 @@ Build a ready-to-use NCRNWater object from example data.
 *Option 1*
 - **mydata <- NCRNWater::example_ncrnwater()**
 *Option 2*
--**paths <- NCRNWater::example_paths()**
+- **paths <- NCRNWater::example_paths()**
 - **mydata <- NCRNWater::importNCRNWater(paths$dir, paths$data, paths$metadata, T)**
 
 - **congruency()** Gives the user feedback about the quality of WQP data before creating a NCRNWater object. Reports inconsistencies between WQP-formatted inputs (e.g., wqp.csv, wqp_ncrnwater_metadata.csv) and known-correct templates. See `?NCRNWater::congruency` for details and usage examples.
