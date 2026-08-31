@@ -164,6 +164,7 @@
 #'   cat("No problems detected; OK to proceed!\n")
 #' }
 #' }
+#' @include utils_ops.R
 #' @export
 #' 
 
@@ -282,55 +283,63 @@ diagnoseWaterData <- function(ParksList, verbose_chars = TRUE, show_char_details
           error = function(e) cobj@Data
         )
         
-        # Defensive checks on LowerPointCondition, UpperPointCondition
-        allowed_ops <- c("<", "<=", ">", ">=")
+        # --- Begin enum-based operator checks (replace your current allowed_ops block) ---
         
+        # Pull thresholds
         lower_point <- tryCatch(getCharInfo(cobj, info = "LowerPoint"), error = function(e) cobj@LowerPoint)
         upper_point <- tryCatch(getCharInfo(cobj, info = "UpperPoint"), error = function(e) cobj@UpperPoint)
         
-        lower_op <- tryCatch(getCharInfo(cobj, info = "LowerPointCondition"), error = function(e) cobj@LowerPointCondition)
-        upper_op <- tryCatch(getCharInfo(cobj, info = "UpperPointCondition"), error = function(e) cobj@UpperPointCondition)
-        
-        # Normalize empty strings to NA for checks
-        norm <- function(x) if (is.null(x) || (is.character(x) && !nzchar(x))) NA_character_ else x
-        lower_op <- norm(lower_op); upper_op <- norm(upper_op)
-        
-        # 1) Allowed-operator checks (only when present)
-        if (!is.na(lower_op) && !(lower_op %in% allowed_ops)) {
-          add_warn(sprintf("[%s:%s:%s] Invalid LowerPointCondition: '%s' (allowed: %s).",
-                           park_id, site_id, cname_list, lower_op, paste(allowed_ops, collapse = ", ")))
+        # Pull condition fields (support new schema and any legacy)
+        lower_raw <- tryCatch(getCharInfo(cobj, info = "LowerPointCode"),        error = function(e) NA_character_)
+        if (is.na(lower_raw) || !nzchar(lower_raw)) {
+          lower_raw <- tryCatch(getCharInfo(cobj, info = "LowerPointCondition"), error = function(e) cobj@LowerPointCondition)
         }
-        if (!is.na(upper_op) && !(upper_op %in% allowed_ops)) {
-          add_warn(sprintf("[%s:%s:%s] Invalid UpperPointCondition: '%s' (allowed: %s).",
-                           park_id, site_id, cname_list, upper_op, paste(allowed_ops, collapse = ", ")))
+        upper_raw <- tryCatch(getCharInfo(cobj, info = "UpperPointCode"),        error = function(e) NA_character_)
+        if (is.na(upper_raw) || !nzchar(upper_raw)) {
+          upper_raw <- tryCatch(getCharInfo(cobj, info = "UpperPointCondition"), error = function(e) cobj@UpperPointCondition)
         }
         
-        # Helper: scalar numeric?
+        # Normalize to enum codes
+        lower_code <- normalize_to_enum(lower_raw)
+        upper_code <- normalize_to_enum(upper_raw)
+        
+        # Validate (non-NA entries must be lt/le/gt/ge)
+        validate_enum(lower_code, "LowerPoint* comparator code")
+        validate_enum(upper_code, "UpperPoint* comparator code")
+        
+        # Helpers
         is_scalar_num <- function(x) is.numeric(x) && length(x) == 1L && !is.na(x)
         
-        # 2) Threshold present but operator missing -> warn; exceed() will default
-        if (is_scalar_num(lower_point) && is.na(lower_op)) {
-          add_warn(sprintf("[%s:%s:%s] LowerPoint present but LowerPointCondition missing; default '<' will be used.",
+        # 1) Threshold present but operator missing -> warn; exceed() will default ('lt' for lower, 'gt' for upper)
+        if (is_scalar_num(lower_point) && (is.na(lower_code) || !nzchar(lower_code))) {
+          add_warn(sprintf("[%s:%s:%s] LowerPoint present but comparator code missing; default 'lt' will be used.",
                            park_id, site_id, cname_list))
         }
-        if (is_scalar_num(upper_point) && is.na(upper_op)) {
-          add_warn(sprintf("[%s:%s:%s] UpperPoint present but UpperPointCondition missing; default '>' will be used.",
+        if (is_scalar_num(upper_point) && (is.na(upper_code) || !nzchar(upper_code))) {
+          add_warn(sprintf("[%s:%s:%s] UpperPoint present but comparator code missing; default 'gt' will be used.",
                            park_id, site_id, cname_list))
         }
         
-        # 3) Bounds sanity (scalar thresholds only)
+        # 2) Bounds sanity (scalar thresholds only)
         if (is_scalar_num(lower_point) && is_scalar_num(upper_point) && (lower_point > upper_point)) {
           add_warn(sprintf("[%s:%s:%s] LowerPoint (%.3f) > UpperPoint (%.3f); check metadata.",
                            park_id, site_id, cname_list, lower_point, upper_point))
         }
         
-        # 4) Semantic contradiction warning (non-fatal)
-        is_lower_reversed <- !is.na(lower_op) && lower_op %in% c(">", ">=")
-        is_upper_reversed <- !is.na(upper_op) && upper_op %in% c("<", "<=")
+        # 3) Semantic contradiction (non-fatal):
+        # lower uses 'gt'/'ge' (i.e., exceed when value > lower), upper uses 'lt'/'le' (i.e., exceed when value < upper)
+        # This combo is likely reversed semantics; warn for visibility.
+        is_lower_reversed <- !is.na(lower_code) && lower_code %in% c("gt", "ge")
+        is_upper_reversed <- !is.na(upper_code) && upper_code %in% c("lt", "le")
         if (is_lower_reversed && is_upper_reversed) {
-          add_warn(sprintf("[%s:%s:%s] Lower/Upper operators appear reversed (lower uses '>'/'>=', upper uses '<'/'<=').",
-                           park_id, site_id, cname_list))
+          # Optional: show pretty symbols in the message
+          lc_sym <- symbol_from_enum(lower_code)
+          uc_sym <- symbol_from_enum(upper_code)
+          add_warn(sprintf("[%s:%s:%s] Lower/Upper comparator codes appear reversed (lower uses '%s', upper uses '%s').",
+                           park_id, site_id, cname_list, lc_sym, uc_sym))
         }
+        
+        # --- End enum-based operator checks ---
         
         # Defensive checks on cdata
         n_rows           <- tryCatch(nrow(cdata), error = function(e) NA_integer_)
