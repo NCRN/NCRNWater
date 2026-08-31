@@ -39,16 +39,16 @@ example_data <- function(network = "NCRN",
     if (!requireNamespace("readr", quietly = TRUE)) {
       stop("Package 'readr' is not installed; use reader = 'utils' or install 'readr'.")
     }
-    wqp <- readr::read_csv(paths$data, show_col_types = FALSE)
-    wqp_md <- readr::read_csv(paths$metadata, show_col_types = FALSE)
+    wqp <- readr::read_csv(paths$data_fp, show_col_types = FALSE)
+    wqp_md <- readr::read_csv(paths$metadata_fp, show_col_types = FALSE)
     if (!as_tibble) {
       wqp   <- as.data.frame(wqp)
       wqp_md <- as.data.frame(wqp_md)
     }
   } else {
     # Base R fallback
-    wqp   <- utils::read.csv(paths$data, stringsAsFactors = FALSE, check.names = FALSE)
-    wqp_md <- utils::read.csv(paths$metadata, stringsAsFactors = FALSE, check.names = FALSE)
+    wqp   <- utils::read.csv(paths$data_fp, stringsAsFactors = FALSE, check.names = FALSE)
+    wqp_md <- utils::read.csv(paths$metadata_fp, stringsAsFactors = FALSE, check.names = FALSE)
   }
   
   # Optional assignment into user environment

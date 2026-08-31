@@ -15,8 +15,8 @@ example_ncrnwater <- function(wqx = TRUE) {
   
   td <- withr::local_tempdir()
   dir.create(file.path(td, "NCRN"), recursive = TRUE)
-  file.copy(paths$data,     file.path(td, "NCRN", "wqp.csv"))
-  file.copy(paths$metadata, file.path(td, "NCRN", "wqp_ncrnwater_metadata.csv"))
+  file.copy(paths$data_fp,     file.path(td, "NCRN", "wqp.csv"))
+  file.copy(paths$metadata_fp, file.path(td, "NCRN", "wqp_ncrnwater_metadata.csv"))
   
   fn <- filterActive(network = "NCRN",
                      metadata_filename = "wqp_ncrnwater_metadata.csv",
