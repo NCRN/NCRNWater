@@ -42,6 +42,7 @@ Collate:
     'addSite.R'
     'compileNETNdata.R'
     'congruency.R'
+    'utils_ops.R'
     'diagnose.R'
     'example_data.R'
     'example_ncrnwater_obj.R'
