@@ -99,3 +99,36 @@ reset_waterdata_fixture <- function() {
   }
   invisible(TRUE)
 }
+
+# Find all valid (park, site, param) combos with non-empty Date/Value
+list_valid_combos <- function(wd, max_per_site = 2L) {
+  out <- list()
+  parks <- names(wd)
+  for (pk in parks) {
+    sites <- names(wd[[pk]]@Sites)
+    for (st in sites) {
+      chars <- names(wd[[pk]]@Sites[[st]]@Characteristics)
+      # Optional cap per site to keep test time reasonable
+      take <- head(chars, max_per_site)
+      for (ch in take) {
+        df <- NCRNWater::getWData(wd, parkcode = pk, sitecode = st, charname = ch, output = "data.frame")
+        if (is.data.frame(df) && all(c("Date","Value") %in% names(df)) && nrow(df) > 0) {
+          out[[length(out) + 1L]] <- list(park = pk, site = st, param = ch)
+        }
+      }
+    }
+  }
+  out
+}
+
+# Sample N parameterized cases; defaults allow overriding via option/env
+sample_valid_combos <- function(wd,
+                                n_cases = getOption("ncrnwater.test.n_cases", 5L),
+                                max_per_site = getOption("ncrnwater.test.max_per_site", 2L),
+                                seed = getOption("ncrnwater.test.seed", NULL)) {
+  cases <- list_valid_combos(wd, max_per_site = max_per_site)
+  if (length(cases) == 0L) stop("No valid cases found in fixture.")
+  if (!is.null(seed)) set.seed(seed)
+  if (length(cases) <= n_cases) return(cases)
+  cases[sample.int(length(cases), n_cases)]
+}
