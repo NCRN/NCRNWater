@@ -29,24 +29,23 @@ exceed(
 
 \item{category}{One or more categories of characteristics, in quotes. Only those categories of characteristics will be returned.}
 
-\item{points}{What assessment points to use when determining if there are exceedances. There are three options
+\item{points}{One of \code{"lower"}, \code{"upper"}, \code{"both"} (default).}
+
+\item{lower, upper}{Numeric thresholds; \code{NA} means use metadata thresholds.}
+
+\item{all}{Logical, default \code{FALSE}. In summary mode, whether to include characteristics without applicable thresholds.}
+
+\item{catsum}{Logical, default \code{FALSE}. In summary mode, summarize by Category instead of Characteristic.}
+
+\item{...}{Controls:
 \describe{
-\item{"lower"}{Only assess the data against the lower reference point}
-\item{"upper"}{Only assess the data against the upper reference point}
-\item{"both"}{The default. Assess the data against both reference points}
+  \item{\code{mode}}{\code{"summary"} or \code{"rows"}}
+  \item{\code{lower_op}, \code{upper_op}}{Comparator overrides; accepted forms:
+    enum codes (\code{"lt","le","gt","ge"}), symbols (\code{"<","<=",">",">="}),
+    HTML entities, or words (\code{"less_than"}, \code{"greater_than_or_equal_to"}).}
 }}
-
-\item{lower, upper}{The lower and uppers assessment points. Either a number specified by the user, or if \code{NA}, the default,
-the assessment point is determined by the \code{LowerPoint} and \code{UpperPoint} slots in the \code{Characteristic} objects.}
-
-\item{all}{Logical, defaults to \code{FALSE}. Not used when \code{object} is a \code{data.frame}. If \code{all} is \code{FALSE} 
-characteristics without upper or lower references points will not be included in the results. If \code{all} is \code{TRUE} such characteristics will be included.}
-
-\item{catsum}{Logical, defaults to \code{False}. When true summarizes by category rather than a characteristic. Not used if 
-\code{object} is a \code{data.frame}}
-
-\item{...}{Additional commands passed to \code{\link{getWData}} for filtering or subsetting the data.}
 }
 \description{
-Determines if water data contains observations that exceed a upper and/or lower assessment points.
+Determines if water data contains observations that exceed lower and/or upper assessment points.
+Supports \code{mode="summary"} (default) and \code{mode="rows"}.
 }
