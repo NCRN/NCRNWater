@@ -290,14 +290,8 @@ diagnoseWaterData <- function(ParksList, verbose_chars = TRUE, show_char_details
         upper_point <- tryCatch(getCharInfo(cobj, info = "UpperPoint"), error = function(e) cobj@UpperPoint)
         
         # Pull condition fields (support new schema and any legacy)
-        lower_raw <- tryCatch(getCharInfo(cobj, info = "LowerPointCode"),        error = function(e) NA_character_)
-        if (is.na(lower_raw) || !nzchar(lower_raw)) {
-          lower_raw <- tryCatch(getCharInfo(cobj, info = "LowerPointCondition"), error = function(e) cobj@LowerPointCondition)
-        }
-        upper_raw <- tryCatch(getCharInfo(cobj, info = "UpperPointCode"),        error = function(e) NA_character_)
-        if (is.na(upper_raw) || !nzchar(upper_raw)) {
-          upper_raw <- tryCatch(getCharInfo(cobj, info = "UpperPointCondition"), error = function(e) cobj@UpperPointCondition)
-        }
+        lower_raw <- tryCatch(getCharInfo(cobj, info = "LowerPointCondition"), error = function(e) cobj@LowerPointCondition)
+        upper_raw <- tryCatch(getCharInfo(cobj, info = "UpperPointCondition"), error = function(e) cobj@UpperPointCondition)
         
         # Normalize to enum codes
         lower_code <- normalize_to_enum(lower_raw)
