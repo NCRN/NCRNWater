@@ -1,5 +1,7 @@
 # tests/testthat/test-exceedances-helpers.R
 #
+# Unit tests for helper-functions that make parts of the exceedances tab in the shiny app
+#
 # Run just this file:
 #   testthat::test_file("tests/testthat/test-exceedances-helpers.R")
 # Or via devtools filter:
@@ -7,31 +9,6 @@
 
 library(testthat)
 library(NCRNWater)
-
-# Use shared fixture; suppress benign filterActive warnings during staging
-getWD <- function() {
-  suppressWarnings(get_waterdata_fixture())
-}
-
-# Helper: find a valid (park, site, param) that produces non-empty data
-pick_valid_combo <- function(wd) {
-  # Iterate parks -> sites -> characteristics until we find a data.frame with Date & Value
-  parks <- names(wd)
-  for (pk in parks) {
-    sites <- names(wd[[pk]]@Sites)
-    for (st in sites) {
-      # Pull characteristics available at this site
-      chars <- names(wd[[pk]]@Sites[[st]]@Characteristics)
-      for (ch in chars) {
-        df <- NCRNWater::getWData(wd, parkcode = pk, sitecode = st, charname = ch, output = "data.frame")
-        if (is.data.frame(df) && all(c("Date","Value") %in% names(df)) && nrow(df) > 0) {
-          return(list(park = pk, site = st, param = ch))
-        }
-      }
-    }
-  }
-  stop("Could not find a valid (park, site, param) with non-empty Date/Value data in the fixture.")
-}
 
 # -------------------------
 # vec_format() tests
