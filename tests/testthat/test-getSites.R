@@ -11,7 +11,7 @@ library(NCRNWater)
 wd <- getWD()
 
 # Select parameterized cases
-cases <- sample_valid_combos(wd)  # configurable via options()
+cases <- sample_n_valid_combos(wd)
 
 # ---- List method: dedup + filter by sitecode/type ---------------------------------
 
