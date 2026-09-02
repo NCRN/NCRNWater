@@ -162,6 +162,7 @@ setMethod(
       .f = exceed
     ) %>% dplyr::bind_rows()
     
+    
     if (mode == "summary") {
       if (!all) {
         X <- dplyr::filter(X, !(is.na(TooLow) & is.na(TooHigh)))
@@ -177,8 +178,12 @@ setMethod(
             AllExceed  = sum(AllExceed),
             .groups    = "drop"
           )
+        # Distinct on park/site/category only (Characteristic was collapsed)
+        X <- dplyr::distinct(X, Park, Site, Category, .keep_all = TRUE)
+      } else {
+        # Distinct with Characteristic only when not catsum
+        X <- dplyr::distinct(X, Park, Site, Characteristic, Category, .keep_all = TRUE)
       }
-      X <- dplyr::distinct(X, Park, Site, Characteristic, Category, .keep_all = TRUE)
     }
     
     return(X)
