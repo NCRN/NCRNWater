@@ -1,12 +1,45 @@
-# tests/testthat/test-exceedances-helpers.R
+# ------------------------------------------------------------------------------
+# Test module: test-exceedances-helpers.R
 #
-# Unit tests for helper-functions that make parts of the exceedances tab in the shiny app
+# Test coverage summary for R/exceedances_helpers.R
 #
-# Run just this file:
+# This suite validates small composable helpers used by the Shiny orchestration:
+# site_info, site_data, exceed_rows, yearly_summary, add_difference, compose_text,
+# build_plot, and build_site_package. Tests assert schema, types, and basic
+# invariants across sampled fixture cases.
+#
+# Covered behaviors:
+#   • site_info/site_data: return expected fields and measurable columns (Date/Value).
+#   • exceed_rows:
+#       - Rows-mode schema, Exceed_* flags, and Exceed_Type consistency.
+#   • yearly_summary:
+#       - ntot/nex, percent_ex, formatted_percent_ex computed correctly.
+#   • add_difference:
+#       - Numeric Difference exists; non-NA when rows exceed.
+#   • compose_text:
+#       - Returns grammar snippets and year bounds; robust formatting via vec_format().
+#   • build_plot:
+#       - ggplot object with expected aesthetics.
+#   • build_site_package:
+#       - Assembles per-site package with expected components.
+#
+# Notes:
+#   • Uses getWD() and sample_n_valid_combos() (fast) or list_all_valid_combos()
+#     (exhaustive) to select cases. Known benign warnings muffled via quiet wrappers.
+#
+# Run:
+#
+#   # Fast (sampled cases)
+#   devtools::test(filter = "exceedances-helpers")
+#
+#   # Exhaustive (all combinations)
+#   options(ncrnwater.test.exhaustive = TRUE)
+#   devtools::test(filter = "exceedances-helpers")
+#
+#   # Run this file only
 #   testthat::test_file("tests/testthat/test-exceedances-helpers.R")
-# Or via devtools filter:
-#   devtools::test(filter = "exceedances")
-
+#
+# ------------------------------------------------------------------------------
 library(testthat)
 library(NCRNWater)
 

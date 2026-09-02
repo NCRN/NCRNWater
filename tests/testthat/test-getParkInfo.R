@@ -1,58 +1,44 @@
-# tests/testthat/test-getParkInfo.R
-#
 # ------------------------------------------------------------------------------
+# Test module: test-getParkInfo.R
+#
 # Test coverage summary for R/getParkInfo.R
 #
-# This test file exercises park-level metadata retrieval from NCRNWater objects
-# and confirms correct behavior for both filtered and unfiltered calls across
-# sampled or exhaustive sets of parks.
+# This suite validates park-level metadata retrieval (ShortName, LongName,
+# Network, Code), deduplication under mixed inputs, and filtered vs. unfiltered
+# calls. Parameterized tests run over sampled or exhaustive park sets from the
+# shared fixture.
 #
 # Covered behaviors:
-#
-#   • Unfiltered calls:
-#       - getParkInfo(object, info = "ShortName") returns one ShortName per park.
-#       - getParkInfo(object, info = "Code") returns unique ParkCodes.
-#       - Validates deduplication when multiple Park objects appear in mixed input.
-#
-#   • Filtered calls (parkcode specified):
-#       - All requested fields (ShortName, LongName, Network) return a scalar,
-#         length-1 character string.
-#       - Names must be non-empty and correctly scoped to the chosen park.
-#
-#   • Mixed input (list of Park objects + duplicates):
-#       - Confirms getParkInfo() maintains uniqueness by ParkCode.
-#       - Filtered requests return exactly one deduped result.
-#
-#   • Compatibility behavior:
-#       - Tests use a fallback helper to handle both old-style ("ParkShortName")
-#         and new-style ("ShortName"/"LongName"/"Code") metadata fields.
-#
+#   • Unfiltered:
+#       - Unique ParkShortName (ShortName) and ParkCode vectors; no duplicates.
+#   • Filtered by parkcode:
+#       - Scalar fields (ShortName, LongName, Network) return length-1 character.
+#   • Mixed inputs:
+#       - Park list + duplicates dedupe by ParkCode; filtered result remains scalar.
 #   • Non-existent park:
-#       - getParkInfo() behaves gracefully when no matches exist, returning either
-#         NULL or an empty character vector (depending on implementation).
-#
-#   • Shape checks across all parks:
-#       - Ensures that ShortName/LongName lengths match the number of unique ParkCodes
-#         for the unfiltered call.
+#       - Returns NULL or empty character vector gracefully; warning muffled.
+#   • Shape across all parks:
+#       - ShortName/LongName length equals number of unique ParkCodes.
 #
 # Notes:
-#   • Tests are parameterized over parks using sample_n_valid_combos() or
-#     list_all_valid_combos(), depending on run-mode knobs.
-#   • Summary assertions validate deduplication, scalar return shape, and naming
-#     behavior without relying on specific parkname strings.
-# ------------------------------------------------------------------------------
-# 
-# Example usage:
-#   testthat::test_file("tests/testthat/test-getParkInfo.R")
+#   • Uses getWD() and sampled/exhaustive park selection via setup-runmode.R.
+#   • A compatibility helper may fall back to legacy field names (“ParkShortName”)
+#     if needed; tests remain resilient to internal naming.
+#
+# Run:
+#
+#   # Fast (sampled parks)
 #   devtools::test(filter = "getParkInfo")
-# 
-# # Sampled (fast)
-# devtools::test()
-# 
-# # Exhaustive (pre-deploy)
-# options(ncrnwater.test.exhaustive = TRUE)
-# devtools::test(filter = "getParkInfo")
-# 
+#
+#   # Exhaustive (all parks)
+#   options(ncrnwater.test.exhaustive = TRUE)
+#   devtools::test(filter = "getParkInfo")
+#
+#   # Run this file only
+#   testthat::test_file("tests/testthat/test-getParkInfo.R")
+#
+# ------------------------------------------------------------------------------
+
 library(testthat)
 library(NCRNWater)
 

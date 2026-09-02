@@ -1,10 +1,37 @@
-# tests/testthat/test-operators.R
+# ------------------------------------------------------------------------------
+# Test module: test-operators.R
 #
-# Run just this file:
+# Test coverage summary for R/utils_ops.R
+#
+# This suite validates operator normalization, enum validation, comparator function
+# semantics, and symbol mapping. Internal helpers are accessed via triple-colons
+# (NCRNWater:::).
+#
+# Covered behaviors:
+#   • normalize_to_enum():
+#       - Symbols/HTML entities/worded aliases → enum codes ('lt','le','gt','ge').
+#   • validate_enum():
+#       - Accepts allowed codes and ignores NA; errors on invalid tokens.
+#   • cmp_fun_enum():
+#       - Correct semantics for <, <=, >, >=; vectorized checks via vapply.
+#   • symbol_from_enum():
+#       - Maps enum codes to display symbols "<", "<=", ">", ">=".
+#   • allowed_enums:
+#       - Canonical set equals c("lt","le","gt","ge").
+#
+# Notes:
+#   • Tests call internal helpers via NCRNWater::: to match suite style.
+#   • Assertions prefer base types (expect_type/is.numeric) for atomic vectors.
+#
+# Run:
+#
+#   # Run just this file
 #   testthat::test_file("tests/testthat/test-operators.R")
-# Or via devtools filter:
+#
+#   # Or via devtools
 #   devtools::test(filter = "operators")
-
+#
+# ------------------------------------------------------------------------------
 library(testthat)
 library(NCRNWater)
 
