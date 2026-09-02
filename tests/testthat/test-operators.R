@@ -9,7 +9,7 @@ library(testthat)
 library(NCRNWater)
 
 test_that("[ops] metadata conditions limited to lt/le/gt/ge/NA", {
-  wd <- get_waterdata_fixture()
+  wd <- getwd()
   # pull some condition values via getCharInfo if you like
   # (or read the example metadata file and check unique values)
   expect_setequal(NCRNWater:::allowed_enums, c("lt", "le", "gt", "ge"))
