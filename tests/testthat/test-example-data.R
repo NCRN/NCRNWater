@@ -1,9 +1,51 @@
+# ------------------------------------------------------------------------------
 # tests/testthat/test-example-data.R
-# 
-# Example usage:
-# testthat::test_file("tests/testthat/test-example-data.R")
-# 
-
+#
+# Test coverage summary for R/example_data.R and R/example_ncrnwater_obj.R
+#
+# This suite validates loading and staging of package-shipped example data—
+# including raw example CSVs, metadata files, and the construction of an
+# NCRNWater object via example_ncrnwater(). These tests ensure example paths
+# exist, example data loads cleanly, staging produces sensible objects, and
+# quiet wrappers suppress benign filterActive() warnings during CI and
+# exhaustive runs.
+#
+# Covered behaviors:
+#   • example_paths():
+#       - Returns valid absolute file paths for example data and metadata.
+#       - All referenced files exist in the installed package.
+#
+#   • example_data(assign = FALSE):
+#       - Loads example WQP and metadata CSVs as data.frames.
+#       - Reader abstraction (“utils”, “readr”, etc.) behaves consistently.
+#
+#   • example_ncrnwater():
+#       - Builds a complete NCRNWater object from package example data.
+#       - Top-level structure is a list of S4 Park objects with ≥1 entries.
+#       - At least one element is an S4 "Park" instance.
+#       - quiet_example_ncrnwater() muffles benign filterActive() staging warnings
+#         so logs remain clean during test runs.
+#
+# Notes:
+#   • Uses quiet_example_ncrnwater() to prevent noisy filterActive() messages,
+#     while still testing the full example data → staging → NCRNWater object
+#     workflow.
+#   • Tests rely on package-installed example data, not the fixture created by
+#     getWD(), because example_ncrnwater() is part of the user-facing API.
+#
+# Run:
+#
+#   # Fast (standard dev cycle)
+#   devtools::test(filter = "example")
+#
+#   # Exhaustive (recommended pre-deploy)
+#   options(ncrnwater.test.exhaustive = TRUE)
+#   devtools::test(filter = "example")
+#
+#   # Run this file only
+#   testthat::test_file("tests/testthat/test-example-data.R")
+#
+# ------------------------------------------------------------------------------
 library(NCRNWater)
 library(testthat)
 
