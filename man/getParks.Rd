@@ -9,12 +9,15 @@ getParks(object, parkcode = NA)
 \arguments{
 \item{object}{Either a \code{Park} object or a \code{list} of such objects.}
 
-\item{parkcode}{Park code of one or more parks, in quotes.}
+\item{parkcode}{Park code of one or more parks, in quotes. A single NA means
+"unfiltered". In mixed vectors (e.g., c("NACE", NA)), NA is ignored and
+matching is done on the provided codes.}
 }
 \value{
-A list of one or more park objects. If \code{parkcode} is specified, only parks with those park codes will be returned. 
-If no parks are matched by \code{parkcode} then the function will return \code{NULL}
+A list of one or more Park S4 objects, or a single Park S4 object.
+  If \code{parkcode} is specified and no parks match, returns \code{NULL}.
 }
 \description{
-Retrieves one or more parks from a \code{list} of such objects.
+Retrieves one or more parks from a \code{list} of such objects,
+or filters a single \code{Park} object by its \code{ParkCode}.
 }
