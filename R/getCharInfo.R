@@ -93,7 +93,7 @@ setMethod(f = "getCharInfo", signature = c(object = "list"),
               chars <- chars[vapply(chars, function(x) methods::is(x, "Characteristic"), logical(1))]
               
               if (filters_provided) {
-                .safe1 <- function(x) { if (is.null(x) || length(x) == 0L) return(""); y <- x[1]; if (is.na(y)) return(""); as.character(y) }
+                .safe1   <- function(x) { if (is.null(x) || length(x) == 0L) return(""); y <- x[1]; if (is.na(y)) return(""); as.character(y) }
                 .char_id <- function(ch) paste(.safe1(ch@CharacteristicName),
                                                .safe1(ch@Category),
                                                .safe1(ch@SampleFraction),
@@ -103,19 +103,31 @@ setMethod(f = "getCharInfo", signature = c(object = "list"),
               }
               
               return(lapply(chars, getCharInfo, info = "Data"))
+              
             } else {
               # Scalar (character or numeric) characteristic-level infos
-              # NOTE: If you have numeric characteristic infos (e.g., "LowerPoint"/"UpperPoint"), they are handled
-              # via getCharInfo(object="Characteristic"), which returns numeric scalars there.
+              # NOTE: Numeric characteristic infos (e.g., "LowerPoint"/"UpperPoint")
+              # are returned as numeric scalars by getCharInfo(object="Characteristic").
               
               chars <- getChars(object, parkcode = parkcode, sitecode = sitecode, charname = charname, category = category)
-              if (is.null(chars)) return(character(0))
+              
+              # ---- PATCH: type-correct empty returns when no matches ----
+              if (is.null(chars)) {
+                return(if (info %in% c("LowerPoint", "UpperPoint")) numeric(0) else character(0))
+              }
+              # ------------------------------------------------------------
               
               chars <- unlist(chars, recursive = FALSE, use.names = FALSE)
               chars <- chars[vapply(chars, function(x) methods::is(x, "Characteristic"), logical(1))]
               
+              # ---- PATCH: type-correct empty returns when no matches ----
+              if (!length(chars)) {
+                return(if (info %in% c("LowerPoint", "UpperPoint")) numeric(0) else character(0))
+              }
+              # ------------------------------------------------------------
+              
               if (filters_provided) {
-                .safe1 <- function(x) { if (is.null(x) || length(x) == 0L) return(""); y <- x[1]; if (is.na(y)) return(""); as.character(y) }
+                .safe1   <- function(x) { if (is.null(x) || length(x) == 0L) return(""); y <- x[1]; if (is.na(y)) return(""); as.character(y) }
                 .char_id <- function(ch) paste(.safe1(ch@CharacteristicName),
                                                .safe1(ch@Category),
                                                .safe1(ch@SampleFraction),
@@ -130,8 +142,6 @@ setMethod(f = "getCharInfo", signature = c(object = "list"),
             }
           }
 )
-
-
 
 #### Given one park get the sites and run again ####
 setMethod(f = "getCharInfo", signature = c(object = "Park"),
