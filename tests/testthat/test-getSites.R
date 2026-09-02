@@ -1,9 +1,45 @@
-# tests/testthat/test-getSites.R
+# ------------------------------------------------------------------------------
+# Test module: test-getSites.R
+#
+# Test coverage summary for R/getSites.R
+#
+# This suite validates site retrieval across list/Park/Site inputs, including
+# filtering by parkcode/sitecode/type, identity deduplication by SiteCode, and
+# shape/uniqueness invariants. Parameterized tests run on sampled or exhaustive
+# sets of (park, site) combinations from the shared fixture.
+#
+# Covered behaviors:
+#   • getSites(list): returns Site objects; dedupes by SiteCode under filters.
+#   • Filtering:
+#       - parkcode/sitecode/type filters return the expected subset.
+#       - sitecode filter yields exactly one Site when present.
+#   • Mixed inputs:
+#       - Mixed list (Park + Site objects) flattens one level and dedupes.
+#   • Site method:
+#       - getSites(Site) returns the Site or NULL depending on filters.
+#   • Names & uniqueness:
+#       - SiteName vectors match the count of unique site codes per park.
+#
+# Notes:
+#   • Uses getWD() and sample_n_valid_combos() (fast dev) or list_all_valid_combos()
+#     (exhaustive), as set in setup-runmode.R.
+#   • Known minimum scenario (≥2 sites for dedupe) uses skip-once semantics:
+#       - Skips once per park if insufficient sites; subsequent cases succeed().
+#   • Benign warnings (“No sites match these criteria.”) may be muffled to keep logs clean.
 #
 # Run:
-#   testthat::test_file("tests/testthat/test-getSites.R")
+#
+#   # Fast (sampled cases)
 #   devtools::test(filter = "getSites")
-
+#
+#   # Exhaustive (all combinations)
+#   options(ncrnwater.test.exhaustive = TRUE)
+#   devtools::test(filter = "getSites")
+#
+#   # Run this file only
+#   testthat::test_file("tests/testthat/test-getSites.R")
+#
+# ------------------------------------------------------------------------------
 library(testthat)
 library(NCRNWater)
 

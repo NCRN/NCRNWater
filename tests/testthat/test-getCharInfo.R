@@ -1,51 +1,48 @@
-# tests/testthat/test-getCharInfo.R
-#
 # ------------------------------------------------------------------------------
+# Test module: test-getCharInfo.R
+#
 # Test coverage summary for R/getCharInfo.R
 #
-# This test suite validates getCharInfo() across list, Park, Site, and
-# Characteristic inputs—covering scalar metadata fields, thresholds,
-# comparator codes, and Data retrieval—under both sampled (fast) and
-# exhaustive (pre-deploy) modes.
+# This suite validates getCharInfo() across list/Park/Site/Characteristic inputs:
+# scalar characteristic fields, thresholds, comparator codes, Data frames, site/
+# park routing, and non-existent filters. Parameterized tests run on sampled or
+# exhaustive (park, site, param) combinations from the shared fixture.
 #
 # Covered behaviors:
 #   • Scalar characteristic fields:
-#       - CharName, DisplayName, Units, Category return length-1 character (or sensible scalar).
-#       - LowerPoint/UpperPoint return numeric scalars or NA.
-#       - LowerPointCondition/UpperPointCondition return enum codes ('lt','le','gt','ge') or NA.
-#
-#   • Data retrieval:
-#       - info = "Data" returns list(data.frame) per characteristic; a data.frame has Date/Value columns.
-#
-#   • Site-level info (list input routed via Park method):
-#       - SiteCode/SiteName/type replicate per characteristic count (when filters provided);
-#         all values equal the requested site’s metadata; length >= 1.
-#
-#   • Park-level info (list input routed via Park method):
+#       - CharName/DisplayName/Units/Category; thresholds numeric or NA;
+#         comparator codes are enum ('lt','le','gt','ge') or NA.
+#   • Data retrieval (info="Data"):
+#       - Returns list(data.frame); each has Date/Value columns.
+#   • Site-level info:
+#       - SiteCode/SiteName/type replicate per characteristic count; match getSiteInfo().
+#   • Park-level info:
 #       - ParkCode/ShortName/LongName/Network replicate per characteristic count;
-#         all values match getParkInfo() for the requested park; length >= 1.
-#
+#         match getParkInfo().
+#   • Characteristic object:
+#       - Scalar getters return length-1; comparator codes valid when present.
 #   • Non-existent filters:
-#       - Returns empty vector (numeric(0)/character(0)) or list() for "Data";
-#         muffle benign "No sites match these criteria." warnings.
-#
+#       - Empty outputs of type correct (numeric(0)/character(0)/list()) returned without errors.
 #   • Error path:
-#       - Missing 'info' parameter throws an informative error.
+#       - Missing 'info' throws informative error.
 #
 # Notes:
-#   • Parameterized using sample_n_valid_combos() (fast) or list_all_valid_combos() (exhaustive),
-#     based on run-mode knobs in setup-runmode.R.
-#   • Warning-muffling wrappers keep test logs clean while asserting behavior.
-# ------------------------------------------------------------------------------
-# 
+#   • Uses getWD() and sample_n_valid_combos()/list_all_valid_combos() via setup-runmode.R.
+#   • A quiet wrapper muffles only benign warnings to keep logs clean.
+#
 # Run:
-# 
-# # Fast
-# devtools::test(filter = "getCharInfo")
-# # Exhaustive
-# options(ncrnwater.test.exhaustive = TRUE)
-# devtools::test(filter = "getCharInfo")
-# 
+#
+#   # Fast (sampled cases)
+#   devtools::test(filter = "getCharInfo")
+#
+#   # Exhaustive (all combinations)
+#   options(ncrnwater.test.exhaustive = TRUE)
+#   devtools::test(filter = "getCharInfo")
+#
+#   # Run this file only
+#   testthat::test_file("tests/testthat/test-getCharInfo.R")
+#
+# ------------------------------------------------------------------------------
 library(testthat)
 library(NCRNWater)
 

@@ -1,52 +1,43 @@
-# tests/testthat/test-getChars.R
-#
 # ------------------------------------------------------------------------------
-# Test coverage summary for R/getChars.R and getCharInfo()
+# Test module: test-getChars.R
 #
-# This test file exercises characteristic-level retrieval from NCRNWater objects
-# at list/Park/Site scopes, and validates filtering, deduplication, and metadata
-# access via getCharInfo().
+# Test coverage summary for R/getChars.R and getCharInfo() scalar fields
+#
+# This suite validates characteristic retrieval at list/Park/Site scope, identity
+# deduplication when filters are applied, category filtering, and scalar metadata
+# via getCharInfo(). Parameterized tests run on sampled/exhaustive (park, site, param).
 #
 # Covered behaviors:
-#   • getChars(list/Park/Site) with filters:
-#       - Returns only Characteristic objects for the selected (park, site, param).
-#       - Filtered calls dedupe by characteristic identity (CharName + Category +
-#         SampleFraction + Substrate).
-#       - Unfiltered calls may return duplicates; we only assert non-null lists.
-#
-#   • Filtering by charname and category:
-#       - charname filters down to the requested Characteristic (scalar identity).
-#       - category filters include only the selected categories.
-#
-#   • getCharInfo() fields:
-#       - Retrieves thresholds (LowerPoint/UpperPoint) and comparator codes
-#         (LowerPointCondition/UpperPointCondition) where present.
-#       - Types: numeric or NA for thresholds; enum code ('lt','le','gt','ge') or NA
-#         for comparator conditions.
-#
+#   • getChars(list/Park/Site) + filters:
+#       - Returns only Characteristic objects; filtered calls dedupe by identity
+#         (CharName|Category|SampleFraction|Substrate).
+#   • Category filter:
+#       - Includes only selected categories; Category values match filter input.
+#   • getCharInfo() scalar fields:
+#       - CharName/DisplayName/Units/Category present (length-1/0); thresholds
+#         are numeric or NA; comparator codes are enum ('lt','le','gt','ge') or NA.
 #   • Mixed inputs:
-#       - Calling getChars() on a mixed list (Park + duplicate Site/Characteristic)
-#         still produces a deduped list when filters are provided.
-#
+#       - Mixed list (Park + duplicate Site/Characteristic) dedupe under filters.
 #   • Non-existent filters:
-#       - No matches (e.g., fake site or charname) return NULL gracefully.
-#       - Known benign warnings ("No sites match these criteria.") are muffled.
+#       - Returns NULL or empty list; warning muffled.
 #
 # Notes:
-#   • Tests are parameterized using sample_n_valid_combos() (fast dev) or
-#     list_all_valid_combos() (exhaustive), depending on run-mode knobs.
-#   • Compatibility helpers handle CharName vs. CharacteristicName to keep tests
-#     resilient across internal naming.
-# ------------------------------------------------------------------------------
-# 
+#   • Uses getWD() and sample_n_valid_combos()/list_all_valid_combos() from setup-runmode.R.
+#   • Compatibility helper handles CharName vs CharacteristicName across datasets.
+#
 # Run:
-#   testthat::test_file("tests/testthat/test-getChars.R")
+#
+#   # Fast (sampled cases)
 #   devtools::test(filter = "getChars")
 #
-#   # Exhaustive (pre-deploy)
+#   # Exhaustive (all combinations)
 #   options(ncrnwater.test.exhaustive = TRUE)
 #   devtools::test(filter = "getChars")
-
+#
+#   # Run this file only
+#   testthat::test_file("tests/testthat/test-getChars.R")
+#
+# ------------------------------------------------------------------------------
 library(testthat)
 library(NCRNWater)
 

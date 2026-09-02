@@ -1,61 +1,52 @@
-# tests/testthat/test-exceed.R
-# 
 # ------------------------------------------------------------------------------
-# Test coverage summary
+# Test module: test-exceed.R
 #
-# This test file exercises both summary- and rows-mode paths of exceed(), and
-# validates behavior under different arguments, thresholds, and operator settings.
+# Test coverage summary for R/exceed.R
+#
+# This suite exercises both summary- and rows-mode paths of exceed(), validating
+# schema, deduplication, points behavior, operator overrides, zero-exceed, and
+# empty-selection handling. Parameterized tests run on sampled or exhaustive
+# (park, site, param) combinations.
 #
 # Covered behaviors:
-#   • Summary schema: Ensures the output contains
-#     Park, Site, Characteristic, Category, Total, Acceptable, TooLow, TooHigh, AllExceed.
-#     Also verifies no duplicate rows by the key Park|Site|Characteristic|Category.
-#
+#   • Summary schema:
+#       - Park, Site, Characteristic, Category, Total, Acceptable, TooLow, TooHigh, AllExceed.
+#       - Key dedupe: Park|Site|Characteristic|Category (or Park|Site|Category when catsum=TRUE).
 #   • points argument:
-#       - points = "lower": TooHigh must be NA (upper comparisons disabled).
-#       - points = "upper": TooLow must be NA (lower comparisons disabled).
-#
-#   • catsum = TRUE:
-#       - Confirms grouping by Park/Site/Category with deduped rows under that key.
-#
-#   • all = TRUE:
-#       - Characteristics without thresholds are included; row count is non-decreasing
-#         compared to the default (all = FALSE).
-#
+#       - points="lower" → TooHigh is NA; points="upper" → TooLow is NA.
+#   • catsum=TRUE:
+#       - Groups by Park/Site/Category; distinct on those columns.
+#   • all=TRUE:
+#       - Includes characteristics without thresholds; row count non-decreasing vs. default.
 #   • Rows-mode schema:
-#       - Validates presence of LowerPoint, UpperPoint, LowerPointCondition,
-#         UpperPointCondition, Exceed_Lower, Exceed_Upper, Exceed_Type.
-#       - If rows exist, checks Exceed_Type is consistent with flags:
-#         "both" when both flags TRUE; "lower"/"upper" when exactly one is TRUE.
-#
-#   • Operator overrides (le/ge):
-#       - Exercises boundary semantics: equality at thresholds counts as exceed
-#         when lower_op = "le" or upper_op = "ge".
-#       - If no equality cases exist for a park, the test skips once per park to
-#         keep logs concise while still documenting the absence of equality cases.
-#
-#   • Zero-exceed path:
-#       - With impossible bounds (lower = -Inf, upper = Inf), verifies rows-mode
-#         returns an empty data frame (nrow == 0) with the full schema intact.
-#
+#       - LowerPoint, UpperPoint, LowerPointCondition, UpperPointCondition,
+#         Exceed_Lower, Exceed_Upper, Exceed_Type; Type consistent with flags.
+#   • Operator overrides:
+#       - lower_op="le"/upper_op="ge" treat equality as exceed; skipped once per park if no equality occurs.
+#   • Zero-exceed:
+#       - Impossible bounds (-Inf/Inf) produce empty data frame with full rows-mode schema.
 #   • Empty selection:
-#       - When filters select no data (e.g., non-existent site), summary-mode
-#         returns an empty data frame with the correct schema (no errors).
+#       - Non-existent filters yield empty summary schema without errors; warning muffled.
 #
 # Notes:
-#   • Tests are parameterized over (park, site, param) combinations using shared
-#     helpers and respect local run-mode knobs (sampled vs. exhaustive).
-#   • Skip-once behavior is used where a minimum scenario is required (e.g., equality
-#     at thresholds) to keep output readable without hiding coverage intent.
-# ------------------------------------------------------------------------------
-# 
-# Example usage:
-#   testthat::test_file("tests/testthat/test-exceed.R")
+#   • Uses getWD() and sample_n_valid_combos()/list_all_valid_combos() and
+#     list_all_threshold_combos() (for rows mode).
+#   • Equality checks employ skip-once semantics to avoid chatty logs.
+#   • Known benign warnings (staging, “No sites match…”) can be muffled via a quiet wrapper.
+#
+# Run:
+#
+#   # Fast (sampled cases)
 #   devtools::test(filter = "exceed")
-# 
+#
+#   # Exhaustive (all combinations)
 #   options(ncrnwater.test.exhaustive = TRUE)
 #   devtools::test(filter = "exceed")
-# 
+#
+#   # Run this file only
+#   testthat::test_file("tests/testthat/test-exceed.R")
+#
+# ------------------------------------------------------------------------------
 library(testthat)
 library(NCRNWater)
 
