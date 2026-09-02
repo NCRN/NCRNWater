@@ -194,31 +194,20 @@ for (case in th_cases) {
 # -------------------------
 # Rows mode: operator overrides 'le'/'ge' include equality
 # -------------------------
-for (case in th_cases) {
+eq_cases <- list_equality_combos(wd)  # only cases where equality exists
+for (case in eq_cases) {
   park <- case$park; site <- case$site; param <- case$param
-  
-  test_that(sprintf("[exceed-rows] 'le'/'ge' include equality [%s:%s:%s]", park, site, param), {
+  test_that(sprintf("[exceed-rows] equality counted with le/ge [%s:%s:%s]", park, site, param), {
     rows <- NCRNWater::exceed(wd, parkcode = park, sitecode = site, charname = param,
                               mode = "rows", lower_op = "le", upper_op = "ge", points = "both")
-    expect_s3_class(rows, "data.frame"); expect_rows_schema(rows)
-    
-    # If any values equal thresholds, equality should count as exceed
+    expect_rows_schema(rows)
     eq_lower <- with(rows, which(!is.na(LowerPoint) & !is.na(Value) & Value == LowerPoint))
     eq_upper <- with(rows, which(!is.na(UpperPoint) & !is.na(Value) & Value == UpperPoint))
-    
-    if (length(eq_lower) == 0L && !exists(park, envir = .skip_once_exceed_env, inherits = FALSE)) {
-      assign(park, TRUE, envir = .skip_once_exceed_env)
-      skip(sprintf("No equality-at-lower threshold found for %s; equality behavior not exercised.", park))
-    }
-    if (length(eq_upper) == 0L && !exists(paste0(park, "_upper"), envir = .skip_once_exceed_env, inherits = FALSE)) {
-      assign(paste0(park, "_upper"), TRUE, envir = .skip_once_exceed_env)
-      skip(sprintf("No equality-at-upper threshold found for %s; equality behavior not exercised.", park))
-    }
-    
-    if (length(eq_lower) > 0L) expect_true(any(rows$Exceed_Lower[eq_lower]))
-    if (length(eq_upper) > 0L) expect_true(any(rows$Exceed_Upper[eq_upper]))
+    if (length(eq_lower) > 0) expect_true(any(rows$Exceed_Lower[eq_lower]))
+    if (length(eq_upper) > 0) expect_true(any(rows$Exceed_Upper[eq_upper]))
   })
 }
+
 
 # -------------------------
 # Rows mode: zero-exceed case returns empty schema

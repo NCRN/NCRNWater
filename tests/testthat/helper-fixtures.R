@@ -225,6 +225,22 @@ sample_n_valid_combos <- function(
   )
 }
 
+list_equality_combos <- function(wd) {
+  eq_cases <- list()
+  all <- enumerate_combos(wd, require_data = TRUE, require_threshold = TRUE, exhaustive = TRUE, list_out = TRUE)
+  
+  for (case in all) {
+    rows <- NCRNWater::exceed(wd, parkcode = case$park, sitecode = case$site, charname = case$param,
+                              points = "both", mode = "rows", lower_op = "le", upper_op = "ge")
+    if (nrow(rows) == 0) next
+    has_eq_lower <- any(!is.na(rows$LowerPoint) & !is.na(rows$Value) & rows$Value == rows$LowerPoint)
+    has_eq_upper <- any(!is.na(rows$UpperPoint) & !is.na(rows$Value) & rows$Value == rows$UpperPoint)
+    if (has_eq_lower || has_eq_upper) {
+      eq_cases[[length(eq_cases) + 1L]] <- case
+    }
+  }
+  eq_cases
+}
 
 # ---- Expectation helper: rows-mode schema check ----
 expect_rows_schema <- function(df) {
