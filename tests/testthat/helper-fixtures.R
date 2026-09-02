@@ -48,7 +48,7 @@ get_waterdata_fixture <- function(wqx = TRUE) {
   wd
 }
 
-# ---- Friendly wrapper: hydrate fixture but muffle benign filterActive() staging warning ----
+# ---- hydrate fixture but muffle benign filterActive() staging warning ----
 getWD <- function() {
   withCallingHandlers(
     get_waterdata_fixture(),
@@ -62,25 +62,169 @@ getWD <- function() {
   )
 }
 
-# ---- Picker: find a valid (park, site, param) with non-empty Date/Value data ----
-pick_valid_combo <- function(wd) {
-  parks <- names(wd)
+# ---- Unified combo enumerator ------------------------------------------------
+# Enumerate (park, site, param) combos from the fixture with flexible filters.
+# Returns a data.frame for ergonomic downstream use, or a list if list_out=TRUE.
+#
+# Parameters:
+# - wd                : hydrated NCRNWater object
+# - require_data      : TRUE -> only include combos with non-empty Date/Value
+# - require_threshold : TRUE -> only include combos with LowerPoint or UpperPoint defined
+# - parks             : character vector of parks to include (default = all)
+# - shard, n_shards   : allow CI sharding by park index (mod arithmetic)
+# - max_per_site      : cap number of characteristics per site (Inf for all)
+# - exhaustive        : TRUE -> return all matching; FALSE -> sample n_cases
+# - n_cases, seed     : sampling controls when exhaustive = FALSE
+# - list_out          : TRUE -> return list(list(park, site, param)); FALSE -> data.frame
+#
+# Examples
+# wd <- getWD()
+# 
+# ## Example: Get 5 combinations of park/site/char
+# n_cases      = 5
+# max_per_site = 2
+# seed         = 1
+# enumerate_combos(wd, exhaustive = FALSE, n_cases = n_cases, max_per_site = max_per_site, seed = seed, list_out = TRUE)
+# 
+# ## Example: Get one combination of park/site/char and pass to getCharInfo
+# df <- enumerate_combos(wd, exhaustive = FALSE, n_cases = 1L)
+# upperpoint <- NCRNWater::getCharInfo(park = df$park[1], site = df$site[1], param = df$param[1], info='UpperPoint')
+# 
+# ## Example: Get a list of all of the park/site/char that have thresholds
+# enumerate_combos(wd, require_data = TRUE, require_threshold = TRUE, exhaustive = TRUE, list_out = TRUE)
+# 
+# ## Example: Get a list of all park/site/char combinations
+# enumerate_combos(wd, require_data = TRUE, exhaustive = TRUE, list_out = TRUE)
+# 
+enumerate_combos <- function(
+    wd,
+    require_data      = TRUE,
+    require_threshold = FALSE,
+    parks             = NULL,
+    shard             = getOption("ncrnwater.test.shard", 1L),
+    n_shards          = getOption("ncrnwater.test.n_shards", 1L),
+    max_per_site      = Inf,
+    exhaustive        = TRUE,
+    n_cases           = getOption("ncrnwater.test.n_cases", 5L),
+    seed              = getOption("ncrnwater.test.seed", NULL),
+    list_out          = FALSE
+) {
+  stopifnot(is.list(wd))
+  
+  # 1) Park selection (+ sharding)
+  all_parks <- names(wd)
+  if (is.null(parks)) parks <- all_parks
+  parks <- intersect(parks, all_parks)
+  if (length(parks) == 0L) stop("No matching parks in fixture.")
+  keep_idx <- which((match(parks, all_parks) - 1L) %% n_shards == (shard - 1L))
+  parks <- parks[keep_idx]
+  if (length(parks) == 0L) stop("Shard selection produced zero parks.")
+  
+  # 2) Traverse sites/characteristics
+  rows <- list()
+  # Simple local cache to avoid recomputing getWData for the same triple
+  cache_env <- new.env(parent = emptyenv())
+  cache_key <- function(pk, st, ch) paste(pk, st, ch, sep = "|")
+  
   for (pk in parks) {
     sites <- names(wd[[pk]]@Sites)
     for (st in sites) {
       chars <- names(wd[[pk]]@Sites[[st]]@Characteristics)
-      for (ch in chars) {
-        df <- NCRNWater::getWData(
-          wd, parkcode = pk, sitecode = st, charname = ch, output = "data.frame"
-        )
-        if (is.data.frame(df) && all(c("Date","Value") %in% names(df)) && nrow(df) > 0) {
-          return(list(park = pk, site = st, param = ch))
+      take  <- if (is.finite(max_per_site)) utils::head(chars, max_per_site) else chars
+      for (ch in take) {
+        key <- cache_key(pk, st, ch)
+        
+        # Data presence check
+        have_data <- FALSE
+        df <- NULL
+        if (require_data) {
+          if (exists(key, envir = cache_env, inherits = FALSE)) {
+            df <- get(key, envir = cache_env, inherits = FALSE)
+          } else {
+            df <- NCRNWater::getWData(wd, parkcode = pk, sitecode = st, charname = ch, output = "data.frame")
+            assign(key, df, envir = cache_env)
+          }
+          have_data <- is.data.frame(df) && all(c("Date", "Value") %in% names(df)) && nrow(df) > 0
+          if (!have_data) next
         }
+        
+        # Threshold presence check
+        have_threshold <- TRUE
+        if (require_threshold) {
+          lop <- NCRNWater::getCharInfo(wd, parkcode = pk, sitecode = st, charname = ch, info = "LowerPoint")
+          uop <- NCRNWater::getCharInfo(wd, parkcode = pk, sitecode = st, charname = ch, info = "UpperPoint")
+          have_threshold <- (!is.na(lop) || !is.na(uop))
+          if (!have_threshold) next
+        }
+        
+        rows[[length(rows) + 1L]] <- list(
+          park = pk, site = st, param = ch,
+          has_data = have_data, has_lower = !is.na(NCRNWater::getCharInfo(wd, parkcode = pk, sitecode = st, charname = ch, info = "LowerPoint")),
+          has_upper = !is.na(NCRNWater::getCharInfo(wd, parkcode = pk, sitecode = st, charname = ch, info = "UpperPoint"))
+        )
       }
     }
   }
-  stop("No valid (park, site, param) with non-empty Date/Value data found in the fixture.")
+  
+  if (length(rows) == 0L) stop("No matching (park, site, param) combos satisfy the filters.")
+  
+  # 3) Build result frame & optional sampling
+  df <- do.call(rbind, lapply(rows, function(x) as.data.frame(x, stringsAsFactors = FALSE)))
+  rownames(df) <- NULL
+  
+  if (!exhaustive) {
+    if (!is.null(seed)) set.seed(seed)
+    n_cases <- min(n_cases, nrow(df))
+    df <- df[sample.int(nrow(df), n_cases), , drop = FALSE]
+  }
+  
+  if (isTRUE(list_out)) {
+    # Return as list of triples (backwards-compatible with older helpers)
+    return(lapply(seq_len(nrow(df)), function(i) list(park = df$park[i], site = df$site[i], param = df$param[i])))
+  }
+  df
 }
+
+# ---- Public helpers for common test modes ------------------------------------
+
+# 1) All combos with non-empty Date/Value
+list_all_valid_combos <- function(wd) {
+  enumerate_combos(
+    wd,
+    require_data = TRUE,
+    exhaustive   = TRUE,
+    list_out     = TRUE
+  )
+}
+
+# 2) All combos with at least one threshold (LowerPoint or UpperPoint)
+list_all_threshold_combos <- function(wd) {
+  enumerate_combos(
+    wd,
+    require_data      = TRUE,
+    require_threshold = TRUE,
+    exhaustive        = TRUE,
+    list_out          = TRUE
+  )
+}
+
+# 3) Sample N combos for fast dev runs
+sample_n_valid_combos <- function(
+    wd,
+    n_cases      = getOption("ncrnwater.test.n_cases", 5L),
+    max_per_site = getOption("ncrnwater.test.max_per_site", 2L),
+    seed         = getOption("ncrnwater.test.seed", NULL)
+) {
+  enumerate_combos(
+    wd,
+    exhaustive   = FALSE,
+    n_cases      = n_cases,
+    max_per_site = max_per_site,
+    seed         = seed,
+    list_out     = TRUE
+  )
+}
+
 
 # ---- Expectation helper: rows-mode schema check ----
 expect_rows_schema <- function(df) {
@@ -92,43 +236,10 @@ expect_rows_schema <- function(df) {
                         info = paste("Missing columns:", paste(missing, collapse=", ")))
 }
 
-# Optional: allow tests to reset the memoized fixture (rarely needed)
+# Reset the fixture (rarely needed)
 reset_waterdata_fixture <- function() {
   if (exists("WaterData", envir = .test_env, inherits = FALSE)) {
     rm("WaterData", envir = .test_env)
   }
   invisible(TRUE)
-}
-
-# Find all valid (park, site, param) combos with non-empty Date/Value
-list_valid_combos <- function(wd, max_per_site = 2L) {
-  out <- list()
-  parks <- names(wd)
-  for (pk in parks) {
-    sites <- names(wd[[pk]]@Sites)
-    for (st in sites) {
-      chars <- names(wd[[pk]]@Sites[[st]]@Characteristics)
-      # Optional cap per site to keep test time reasonable
-      take <- head(chars, max_per_site)
-      for (ch in take) {
-        df <- NCRNWater::getWData(wd, parkcode = pk, sitecode = st, charname = ch, output = "data.frame")
-        if (is.data.frame(df) && all(c("Date","Value") %in% names(df)) && nrow(df) > 0) {
-          out[[length(out) + 1L]] <- list(park = pk, site = st, param = ch)
-        }
-      }
-    }
-  }
-  out
-}
-
-# Sample N parameterized cases; defaults allow overriding via option/env
-sample_valid_combos <- function(wd,
-                                n_cases = getOption("ncrnwater.test.n_cases", 5L),
-                                max_per_site = getOption("ncrnwater.test.max_per_site", 2L),
-                                seed = getOption("ncrnwater.test.seed", NULL)) {
-  cases <- list_valid_combos(wd, max_per_site = max_per_site)
-  if (length(cases) == 0L) stop("No valid cases found in fixture.")
-  if (!is.null(seed)) set.seed(seed)
-  if (length(cases) <= n_cases) return(cases)
-  cases[sample.int(length(cases), n_cases)]
 }
