@@ -1,5 +1,47 @@
 # tests/testthat/test-getParkInfo.R
 #
+# ------------------------------------------------------------------------------
+# Test coverage summary for R/getParkInfo.R
+#
+# This test file exercises park-level metadata retrieval from NCRNWater objects
+# and confirms correct behavior for both filtered and unfiltered calls across
+# sampled or exhaustive sets of parks.
+#
+# Covered behaviors:
+#
+#   • Unfiltered calls:
+#       - getParkInfo(object, info = "ShortName") returns one ShortName per park.
+#       - getParkInfo(object, info = "Code") returns unique ParkCodes.
+#       - Validates deduplication when multiple Park objects appear in mixed input.
+#
+#   • Filtered calls (parkcode specified):
+#       - All requested fields (ShortName, LongName, Network) return a scalar,
+#         length-1 character string.
+#       - Names must be non-empty and correctly scoped to the chosen park.
+#
+#   • Mixed input (list of Park objects + duplicates):
+#       - Confirms getParkInfo() maintains uniqueness by ParkCode.
+#       - Filtered requests return exactly one deduped result.
+#
+#   • Compatibility behavior:
+#       - Tests use a fallback helper to handle both old-style ("ParkShortName")
+#         and new-style ("ShortName"/"LongName"/"Code") metadata fields.
+#
+#   • Non-existent park:
+#       - getParkInfo() behaves gracefully when no matches exist, returning either
+#         NULL or an empty character vector (depending on implementation).
+#
+#   • Shape checks across all parks:
+#       - Ensures that ShortName/LongName lengths match the number of unique ParkCodes
+#         for the unfiltered call.
+#
+# Notes:
+#   • Tests are parameterized over parks using sample_n_valid_combos() or
+#     list_all_valid_combos(), depending on run-mode knobs.
+#   • Summary assertions validate deduplication, scalar return shape, and naming
+#     behavior without relying on specific parkname strings.
+# ------------------------------------------------------------------------------
+# 
 # Example usage:
 #   testthat::test_file("tests/testthat/test-getParkInfo.R")
 #   devtools::test(filter = "getParkInfo")
