@@ -27,3 +27,16 @@ quiet_example_ncrnwater <- function(...) {
     }
   )
 }
+
+quiet_getSiteInfo <- function(...) {
+  withCallingHandlers(
+    NCRNWater::getSiteInfo(...),
+    warning = function(w) {
+      msg <- conditionMessage(w)
+      if (grepl("^No sites match these criteria\\.$", msg)) {
+        invokeRestart("muffleWarning")
+      }
+      # Let other warnings bubble
+    }
+  )
+}
