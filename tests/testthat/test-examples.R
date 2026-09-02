@@ -118,7 +118,9 @@ test_that("examples example_ncrnwater builds object and exceed works (summary)",
   # If your example data is large or slow, uncomment the next line:
   # skip_on_cran()
   
-  wd <- NCRNWater::example_ncrnwater()
+  # wd <- NCRNWater::example_ncrnwater() # loud, shows warnings that come from metadata IsActive filtering
+  wd <- quiet_example_ncrnwater() # quiet, hides warnings from metadata IsActive filtering which is normal behavior
+  
   # Top-level type: list of Park objects
   expect_true(is.list(wd))
   expect_true(length(wd) >= 1L)
