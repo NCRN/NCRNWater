@@ -22,7 +22,8 @@ testthat::test_that("example dataframes load", {
 
 test_that("example_ncrnwater builds an NCRNWater object", {
   # Build object from package-shipped example files
-  wd <- NCRNWater::example_ncrnwater()
+  # wd <- NCRNWater::example_ncrnwater() # loud, shows warnings that come from metadata IsActive filtering
+  wd <- quiet_example_ncrnwater() # quiet, hides warnings from metadata IsActive filtering
   
   # Top-level structure: list of Park S4 objects
   testthat::expect_true(is.list(wd))
