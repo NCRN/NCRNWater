@@ -33,160 +33,176 @@ setGeneric(
   signature = c("object")
 )
 
+#' Internal: core exceed implementation (do not export)
+#' @keywords internal
+.exceed_core <- function(object, parkcode = NA, sitecode = NA, charname = NA, category = NA,
+                         points = "both", lower = NA, upper = NA, all = FALSE, catsum = FALSE, ...) {
+  dots <- list(...)
+  mode <- if (!is.null(dots$mode)) match.arg(dots$mode, c("summary", "rows")) else "summary"
+  
+  # Do NOT forward controls meant for exceed() to getWData()
+  safe_dots <- dots
+  safe_dots[c("mode", "lower_op", "upper_op")] <- NULL
+  
+  # Build argument list for getWData without unsupported args
+  gw_args <- c(list(object   = object,
+                    parkcode = parkcode,
+                    sitecode = sitecode,
+                    charname = charname,
+                    category = category,
+                    output   = "list"),
+               safe_dots)
+  
+  DataUse <- do.call(getWData, gw_args)
+  NotNull <- !sapply(DataUse, is.null)
+  DataUse <- DataUse[NotNull]
+  
+  # Empty-path returns (rows vs summary)
+  if (length(DataUse) == 0L) {
+    if (mode == "rows") {
+      return(data.frame(
+        Park = character(0), Site = character(0),
+        Characteristic = character(0), Category = character(0),
+        Date = as.Date(character(0)), Value = numeric(0),
+        LowerPoint = numeric(0), UpperPoint = numeric(0),
+        LowerPointCondition = character(0), UpperPointCondition = character(0),
+        Exceed_Lower = logical(0), Exceed_Upper = logical(0),
+        Exceed_Type = character(0),
+        stringsAsFactors = FALSE
+      ))
+    }
+    return(data.frame(Park = character(0), Site = character(0),
+                      Characteristic = character(0), Category = character(0),
+                      Total = integer(0), Acceptable = integer(0),
+                      TooLow = integer(0), TooHigh = integer(0), AllExceed = integer(0),
+                      stringsAsFactors = FALSE))
+  }
+  
+  .first_scalar <- function(x) if (length(x) == 0L) NA else x[1]
+  n <- length(DataUse)
+  
+  need_lower <- (points %in% c("lower", "both")) && (length(lower) == 1L && is.na(lower))
+  need_upper <- (points %in% c("upper", "both")) && (length(upper) == 1L && is.na(upper))
+  
+  if (need_lower) {
+    lower <- vapply(DataUse, function(df) {
+      getCharInfo(object,
+                  parkcode = .first_scalar(df$Park),
+                  sitecode = .first_scalar(df$Site),
+                  charname = .first_scalar(df$Characteristic),
+                  category = .first_scalar(df$Category),
+                  info     = "LowerPoint")
+    }, FUN.VALUE = numeric(1))
+  }
+  if (need_upper) {
+    upper <- vapply(DataUse, function(df) {
+      getCharInfo(object,
+                  parkcode = .first_scalar(df$Park),
+                  sitecode = .first_scalar(df$Site),
+                  charname = .first_scalar(df$Characteristic),
+                  category = .first_scalar(df$Category),
+                  info     = "UpperPoint")
+    }, FUN.VALUE = numeric(1))
+  }
+  
+  .recycle_to_n <- function(x, nn) {
+    if (length(x) == nn) return(x)
+    if (length(x) == 1L) return(rep(x, nn))
+    stop(sprintf("Length of vector (%d) does not match number of data groups (%d).", length(x), nn))
+  }
+  lower <- if (!is.null(lower)) .recycle_to_n(lower, n) else rep(NA_real_, n)
+  upper <- if (!is.null(upper)) .recycle_to_n(upper, n) else rep(NA_real_, n)
+  
+  # Comparator code plumbing
+  need_lower_code <- (points %in% c("lower", "both"))
+  need_upper_code <- (points %in% c("upper", "both"))
+  
+  if (need_lower_code) {
+    lower_code <- if (!is.null(dots$lower_op)) .recycle_to_n(normalize_to_enum(dots$lower_op), n) else vapply(
+      DataUse, function(df) {
+        normalize_to_enum(getCharInfo(object,
+                                      parkcode = .first_scalar(df$Park),
+                                      sitecode = .first_scalar(df$Site),
+                                      charname = .first_scalar(df$Characteristic),
+                                      category = .first_scalar(df$Category),
+                                      info     = "LowerPointCondition"))
+      }, FUN.VALUE = character(1)
+    )
+  } else lower_code <- rep(NA_character_, n)
+  
+  if (need_upper_code) {
+    upper_code <- if (!is.null(dots$upper_op)) .recycle_to_n(normalize_to_enum(dots$upper_op), n) else vapply(
+      DataUse, function(df) {
+        normalize_to_enum(getCharInfo(object,
+                                      parkcode = .first_scalar(df$Park),
+                                      sitecode = .first_scalar(df$Site),
+                                      charname = .first_scalar(df$Characteristic),
+                                      category = .first_scalar(df$Category),
+                                      info     = "UpperPointCondition"))
+      }, FUN.VALUE = character(1)
+    )
+  } else upper_code <- rep(NA_character_, n)
+  
+  fill_default_code <- function(code, default) { code[is.na(code) | code == ""] <- default; code }
+  if (need_lower_code) lower_code <- fill_default_code(lower_code, "lt")
+  if (need_upper_code) upper_code <- fill_default_code(upper_code, "gt")
+  
+  validate_enum(lower_code, "lower_code")
+  validate_enum(upper_code, "upper_code")
+  
+  # Map each grouped data.frame via the df method
+  X <- purrr::pmap(
+    .l = list(object   = DataUse,
+              parkcode = rep(NA, n), sitecode = rep(NA, n),
+              charname = rep(NA, n), category = rep(NA, n),
+              points   = points, lower = lower, upper = upper,
+              all      = FALSE, catsum = FALSE,
+              mode     = mode, lower_op = lower_code, upper_op = upper_code),
+    .f = exceed
+  ) %>% dplyr::bind_rows()
+  
+  # Summary-mode shaping
+  if (mode == "summary") {
+    if (!all) {
+      X <- dplyr::filter(X, !(is.na(TooLow) & is.na(TooHigh)))
+    }
+    if (catsum) {
+      X <- X %>%
+        dplyr::group_by(Park, Site, Category) %>%
+        dplyr::summarize(
+          Total      = sum(Total),
+          Acceptable = sum(Acceptable),
+          TooLow     = sum(TooLow),
+          TooHigh    = sum(TooHigh),
+          AllExceed  = sum(AllExceed),
+          .groups    = "drop"
+        )
+      X <- dplyr::distinct(X, Park, Site, Category, .keep_all = TRUE)
+    } else {
+      X <- dplyr::distinct(X, Park, Site, Characteristic, Category, .keep_all = TRUE)
+    }
+  }
+  
+  X
+}
+
 # -------- NCRNWaterObj method --------
 setMethod(
   f = "exceed",
   signature = c(object = "NCRNWaterObj"),
   function(object, parkcode = NA, sitecode = NA, charname = NA, category = NA,
            points = "both", lower = NA, upper = NA, all = FALSE, catsum = FALSE, ...) {
-    
-    dots <- list(...)
-    mode <- if (!is.null(dots$mode)) match.arg(dots$mode, c("summary", "rows")) else "summary"
-    
-    # Do NOT forward controls meant for exceed() to getWData()
-    safe_dots <- dots
-    safe_dots[c("mode", "lower_op", "upper_op")] <- NULL
-    
-    # Build argument list for getWData without the unsupported args
-    gw_args <- c(list(object   = object,
-                      parkcode = parkcode,
-                      sitecode = sitecode,
-                      charname = charname,
-                      category = category,
-                      output   = "list"),
-                 safe_dots)
-    
-    DataUse <- do.call(getWData, gw_args)
-    NotNull <- !sapply(DataUse, is.null)
-    DataUse <- DataUse[NotNull]
-    
-    if (length(DataUse) == 0L) {
-      if (mode == "rows") {
-        return(data.frame(
-          Park = character(0), Site = character(0),
-          Characteristic = character(0), Category = character(0),
-          Date = as.Date(character(0)), Value = numeric(0),
-          LowerPoint = numeric(0), UpperPoint = numeric(0),
-          LowerPointCondition = character(0), UpperPointCondition = character(0),
-          Exceed_Lower = logical(0), Exceed_Upper = logical(0),
-          Exceed_Type = character(0),
-          stringsAsFactors = FALSE
-        ))
-      }
-      return(data.frame(Park = character(0), Site = character(0),
-                        Characteristic = character(0), Category = character(0),
-                        Total = integer(0), Acceptable = integer(0),
-                        TooLow = integer(0), TooHigh = integer(0), AllExceed = integer(0),
-                        stringsAsFactors = FALSE))
-    }
-    
-    .first_scalar <- function(x) if (length(x) == 0L) NA else x[1]
-    n <- length(DataUse)
-    
-    need_lower <- (points %in% c("lower", "both")) && (length(lower) == 1L && is.na(lower))
-    need_upper <- (points %in% c("upper", "both")) && (length(upper) == 1L && is.na(upper))
-    
-    if (need_lower) {
-      lower <- vapply(DataUse, function(df) {
-        getCharInfo(object,
-                    parkcode = .first_scalar(df$Park),
-                    sitecode = .first_scalar(df$Site),
-                    charname = .first_scalar(df$Characteristic),
-                    category = .first_scalar(df$Category),
-                    info     = "LowerPoint")
-      }, FUN.VALUE = numeric(1))
-    }
-    if (need_upper) {
-      upper <- vapply(DataUse, function(df) {
-        getCharInfo(object,
-                    parkcode = .first_scalar(df$Park),
-                    sitecode = .first_scalar(df$Site),
-                    charname = .first_scalar(df$Characteristic),
-                    category = .first_scalar(df$Category),
-                    info     = "UpperPoint")
-      }, FUN.VALUE = numeric(1))
-    }
-    
-    .recycle_to_n <- function(x, nn) {
-      if (length(x) == nn) return(x)
-      if (length(x) == 1L) return(rep(x, nn))
-      stop(sprintf("Length of vector (%d) does not match number of data groups (%d).", length(x), nn))
-    }
-    lower <- if (!is.null(lower)) .recycle_to_n(lower, n) else rep(NA_real_, n)
-    upper <- if (!is.null(upper)) .recycle_to_n(upper, n) else rep(NA_real_, n)
-    
-    # Enum codes for comparators
-    need_lower_code <- (points %in% c("lower", "both"))
-    need_upper_code <- (points %in% c("upper", "both"))
-    
-    if (need_lower_code) {
-      lower_code <- if (!is.null(dots$lower_op)) .recycle_to_n(normalize_to_enum(dots$lower_op), n) else vapply(
-        DataUse, function(df) {
-          normalize_to_enum(getCharInfo(object,
-                                        parkcode = .first_scalar(df$Park),
-                                        sitecode = .first_scalar(df$Site),
-                                        charname = .first_scalar(df$Characteristic),
-                                        category = .first_scalar(df$Category),
-                                        info     = "LowerPointCondition"))
-        }, FUN.VALUE = character(1)
-      )
-    } else lower_code <- rep(NA_character_, n)
-    
-    if (need_upper_code) {
-      upper_code <- if (!is.null(dots$upper_op)) .recycle_to_n(normalize_to_enum(dots$upper_op), n) else vapply(
-        DataUse, function(df) {
-          normalize_to_enum(getCharInfo(object,
-                                        parkcode = .first_scalar(df$Park),
-                                        sitecode = .first_scalar(df$Site),
-                                        charname = .first_scalar(df$Characteristic),
-                                        category = .first_scalar(df$Category),
-                                        info     = "UpperPointCondition"))
-        }, FUN.VALUE = character(1)
-      )
-    } else upper_code <- rep(NA_character_, n)
-    
-    fill_default_code <- function(code, default) { code[is.na(code) | code == ""] <- default; code }
-    if (need_lower_code) lower_code <- fill_default_code(lower_code, "lt")
-    if (need_upper_code) upper_code <- fill_default_code(upper_code, "gt")
-    
-    validate_enum(lower_code, "lower_code")
-    validate_enum(upper_code, "upper_code")
-    
-    X <- purrr::pmap(
-      .l = list(object   = DataUse,
-                parkcode = rep(NA, n), sitecode = rep(NA, n),
-                charname = rep(NA, n), category = rep(NA, n),
-                points   = points, lower = lower, upper = upper,
-                all      = FALSE, catsum = FALSE,
-                mode     = mode, lower_op = lower_code, upper_op = upper_code),
-      .f = exceed
-    ) %>% dplyr::bind_rows()
-    
-    
-    if (mode == "summary") {
-      if (!all) {
-        X <- dplyr::filter(X, !(is.na(TooLow) & is.na(TooHigh)))
-      }
-      if (catsum) {
-        X <- X %>%
-          dplyr::group_by(Park, Site, Category) %>%
-          dplyr::summarize(
-            Total      = sum(Total),
-            Acceptable = sum(Acceptable),
-            TooLow     = sum(TooLow),
-            TooHigh    = sum(TooHigh),
-            AllExceed  = sum(AllExceed),
-            .groups    = "drop"
-          )
-        # Distinct on park/site/category only (Characteristic was collapsed)
-        X <- dplyr::distinct(X, Park, Site, Category, .keep_all = TRUE)
-      } else {
-        # Distinct with Characteristic only when not catsum
-        X <- dplyr::distinct(X, Park, Site, Characteristic, Category, .keep_all = TRUE)
-      }
-    }
-    
-    return(X)
+    .exceed_core(object, parkcode, sitecode, charname, category, points, lower, upper, all, catsum, ...)
+  }
+)
+
+# -------- list method --------
+setMethod(
+  f = "exceed",
+  signature = c(object = "list"),
+  function(object, parkcode = NA, sitecode = NA, charname = NA, category = NA,
+           points = "both", lower = NA, upper = NA, all = FALSE, catsum = FALSE, ...) {
+    .exceed_core(object, parkcode, sitecode, charname, category, points, lower, upper, all, catsum, ...)
   }
 )
 
