@@ -186,9 +186,19 @@ test_that("[getSiteInfo(list)] non-existent site returns empty vector of correct
   expect_true(is.character(out_name) && length(out_name) == 0L)
 })
 
+# -------------------------
+# ParkShortName error when only sitecode provided and no matching park
+# -------------------------
 test_that("[getSiteInfo(list)] ParkShortName with only sitecode and no match errors", {
   expect_error(
-    NCRNWater::getSiteInfo(wd, sitecode = "__NO_SUCH_SITE__", info = "ParkShortName"),
+    withCallingHandlers(
+      NCRNWater::getSiteInfo(wd, sitecode = "__NO_SUCH_SITE__", info = "ParkShortName"),
+      warning = function(w) {
+        if (grepl("^No sites match these criteria\\.$", conditionMessage(w))) {
+          invokeRestart("muffleWarning")
+        }
+      }
+    ),
     "No Park found containing sitecode",
     fixed = TRUE
   )
