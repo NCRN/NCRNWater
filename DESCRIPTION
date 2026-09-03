@@ -31,7 +31,8 @@ Suggests:
     RODBC,
     NADA,
     openair,
-    stringr
+    stringr,
+    testthat (>= 3.0.0)
 RoxygenNote: 7.3.3
 Collate:
     'NCRNWater_Park_Class_def.R'
@@ -65,3 +66,4 @@ Collate:
     'waterheat.R'
     'watersite_comps.R'
     'wcosinor.R'
+Config/testthat/edition: 3
