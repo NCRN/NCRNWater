@@ -1,12 +1,22 @@
 ## Summary
-[Describe what changed and why.]
+Describe what changed and why.
 
-## Checklist
-- [ ] Ran `devtools::test()` (sampled mode) locally and tests passed
-- [ ] Ran `Rscript tests/run_exhaustive.R` locally and tests passed
-- [ ] Checked coverage (`covr::report()`) and targeted gaps where feasible
-- [ ] Updated/added docstrings for any new tests
-- [ ] Kept warning logs clean (quiet wrappers applied where appropriate)
+## Required (every merge)
+- [ ] Ran sampled suite locally: `devtools::test()`
+- [ ] Ran exhaustive suite locally: `Rscript tests/run_exhaustive.R`
+- [ ] Verified quiet logs (no benign warnings)
+- [ ] Updated/added test docstrings (boilerplate header)
+- [ ] Ensured type-correct empties (numeric(0), character(0), list())
+- [ ] Confirmed class invariants hold (test-classes.R)
+
+## Recommended (for non-trivial changes)
+- [ ] Ran full CRAN-style check: `devtools::check()`
+- [ ] Measured coverage: 
+      ```r
+      cov <- covr::package_coverage()
+      covr::report(cov)
+      ```
+- [ ] Addressed any new coverage gaps (where reasonable)
 
 ## Notes
-[Optional: screenshots, coverage deltas, special conditions, etc.]
+Anything relevant — logs, screenshots, coverage deltas, generated docs, edge cases, unusual failures.
