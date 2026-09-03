@@ -16,7 +16,7 @@
 # Terminal 2:
 # options(ncrnwater.test.exhaustive = TRUE, ncrnwater.test.n_shards = 2, ncrnwater.test.shard = 2)
 # 
-
+library(devtools)
 options(
   ncrnwater.test.exhaustive = TRUE,  # run every combo
   ncrnwater.test.n_shards   = 1,     # single shard locally (no parallel)
