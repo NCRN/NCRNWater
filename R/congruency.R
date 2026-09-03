@@ -1,349 +1,256 @@
+# R/congruency.R
+
 #' Check structural and semantic congruency between WQP data and NCRNWater metadata
 #'
-#' @description
-#' `congruency()` validates whether a user-provided WQP data file and NCRNWater
-#' metadata file are structurally compatible with each other and with the
-#' expected NCRNWater templates. The function checks:
-#'
-#' * that both user files exist and are CSVs
-#' * that the **columns** in the user data and metadata match those in the
-#'   official NCRNWater template files
-#' * that key **value pairs** (e.g., SiteCode vs SiteCodeWQX, CharacteristicName vs DataName)
-#'   are consistent across files
-#' * that the user data is internally consistent with the user metadata
-#'
-#' The function prints a human‑readable report to the console and halts with an error
+#' Validates whether a user-provided WQP data file and NCRNWater metadata file are
+#' structurally compatible with each other and with the expected NCRNWater templates
+#' located under inst/extdata/templates/. Prints a human-readable report and halts
+#' with an error if problems exist.
 #'
 #' @examples
 #' \dontrun{
-#' library(NCRNWater)
-#' my_data <- 'data/wqp.csv'
-#' my_metadata <- 'data/metadata.csv'
-#' NCRNWater::congruency(my_data, my_metadata)
+#' data_fp <- "path/to/wqp.csv"
+#' meta_fp <- "path/to/wqp_ncrnwater_metadata.csv"
+#' congruency(data_fp, meta_fp)
 #' }
-#' 
 #' @export
-#'
-
-
 congruency <- function(
     data_filename,
     metadata_filename,
-    data_template = system.file("templates", "wqp.csv", package = "NCRNWater"),
-    metadata_template = system.file("templates", "wqp_ncrnwater_metadata.csv", package = "NCRNWater")
-    ) {
-  
-  
-  # Optional: guard if system.file didn't find the files
+    data_template = system.file("extdata", "templates/wqp.csv", package = "NCRNWater"),
+    metadata_template = system.file("extdata", "templates/wqp_ncrnwater_metadata.csv", package = "NCRNWater")
+) {
+  # Guard: template files must exist in the installed package
   if (identical(data_template, "") || identical(metadata_template, "")) {
-    stop("Template files not found in installed package. Reinstall NCRNWater or contact maintainers.")
+    stop("Template files not found under inst/extdata/templates/. Reinstall NCRNWater or contact maintainers.")
+  }
+  
+  cat(sprintf("Checking congruency for user-files %s and %s ...\n\n", data_filename, metadata_filename))
+  
+  results <- list(problems = 0L, msgs = character(0))
+  
+  # existence + extension checks
+  results <- check_congruency_files_exist(c(data_filename, metadata_filename), results)
+  results <- check_congruency_files_are_csvs(c(data_filename, metadata_filename), results)
+  
+  # if problems were flagged, stop BEFORE reading user files
+  
+  if (is.list(results) && !is.null(results$problems) && results$problems > 0L) {
+    msgs <- paste(results$msgs, collapse = "\n")
+    cat(msgs, "\n", sep = "")
+    stop(sprintf("Your files have %d congruency problem(s). Resolve those problems before proceeding.\n",
+                 results$problems))
   }
   
   
-  cat(paste0('Checking congruency for user-files ', data_filename, ' and ', metadata_filename, ' ...\n\n'))
-  
-  # package together for convenience
-  files <- c(data_filename, metadata_filename)
-  
-  # instantiate
-  results <- list()
-  results[['problems']] <- 0
-  results[['msgs']] <- c()
-  
-  # do the files exist?
-  results <- check_congruency_files_exist(files, results)
-  
-  # are the files csv?
-  results <- check_congruency_files_are_csvs(files, results)
-  
-  # if the files exist and are the correct filetype, we're ready to test the files themselves
-  # package together for convenience
+  # Build file containers (user and template) — safe now because files exist and are CSVs
   files <- list(
-    'user' = list(
-      'data' = list(
-        'df' = read.csv(data_filename)
-        ,'fname' = data_filename
-      )
-      ,'metadata' = list(
-        'df' = read.csv(metadata_filename)
-        ,'fname' = metadata_filename
-      )
-    )
-    ,'template' = list(
-      'data' = list(
-        'df' = read.csv(data_template)
-        ,'fname' = ifelse(data_template=='templates/wqp.csv', 'WQP format', data_template)
-      )
-      ,'metadata' = list(
-        'df' = read.csv(metadata_template)
-        ,'fname' = ifelse(metadata_template=='templates/wqp_ncrnwater_metadata.csv', 'NCRNWater metadata format', metadata_template)
-      )
+    user = list(
+      data     = list(df = utils::read.csv(data_filename, stringsAsFactors = FALSE),     fname = data_filename),
+      metadata = list(df = utils::read.csv(metadata_filename, stringsAsFactors = FALSE), fname = metadata_filename)
+    ),
+    template = list(
+      data     = list(df = utils::read.csv(data_template, stringsAsFactors = FALSE),     fname = data_template),
+      metadata = list(df = utils::read.csv(metadata_template, stringsAsFactors = FALSE), fname = metadata_template)
     )
   )
   
-  # check user data against template data
-  # check user metadata against template metadata
-  results <- check_congruency_user_versus_template(files, results)
   
-  # check user data against user metadata
-  results <- check_congruency_user_versus_user(files, results)
-  
-  msgs <- paste(results[['msgs']], collapse = '\n')
-  if (results$problems == 0){
-    cat(msgs)
-    cat('\n')
-    cat('\nOK to proceed!')
-  } else {
-    cat(msgs)
-    stop(paste0('Your files have ',results[['problems']],' congruency problem(s). Resolve those problems before proceeding.\n'))
-  }
-  
-}
-
-check_congruency_user_versus_template <- function(files, results) {
-  
+  # Column name congruency (user vs template)
   files_to_check <- list(
-    c(files[['user']][['data']][['fname']], files[['template']][['data']][['fname']])
-    ,c(files[['user']][['metadata']][['fname']], files[['template']][['metadata']][['fname']])
+    c(files$user$data$fname,     files$template$data$fname),
+    c(files$user$metadata$fname, files$template$metadata$fname)
   )
-  
-  # are the columns present and named properly?
   results <- congruency_helper_column_names(files, files_to_check, results)
   
-  return(results)
+  # Value congruency across known pairs (user data vs user metadata)
+  results <- check_congruency_user_versus_user(files, results)
   
+  msgs <- paste(results$msgs, collapse = "\n")
+  if (results$problems == 0L) {
+    cat(msgs, "\n\nOK to proceed!", sep = "")
+  } else {
+    cat(msgs)
+    stop(sprintf("Your files have %d congruency problem(s). Resolve those problems before proceeding.\n", results$problems))
+  }
 }
 
-check_congruency_user_versus_user <- function(files, results) {
+# ---- Helpers (internal) ------------------------------------------------------
+
+#' @keywords internal
+check_congruency_files_exist <- function(files, results) {
+  tmp <- list(msgs = character(0), problems = 0L)
+  for (f in files) {
+    if (!file.exists(f)) {
+      msg <- sprintf("'%s' does not exist. Check for typos or missing information and try again.", f)
+      tmp$problems <- tmp$problems + 1L
+    } else {
+      msg <- sprintf("%s exists", f)
+    }
+    tmp$msgs <- c(tmp$msgs, msg)
+  }
+  results$problems <- results$problems + tmp$problems
+  results$msgs     <- c(results$msgs, tmp$msgs)
+  results
+}
+
+#' @keywords internal
+check_congruency_files_are_csvs <- function(files, results) {
+  tmp <- list(msgs = character(0), problems = 0L)
+  for (f in files) {
+    is_csv <- tolower(tools::file_ext(f)) == "csv"
+    if (!is_csv) {
+      msg <- sprintf("'%s' is not a CSV file. Check for typos or missing information and try again.", f)
+      tmp$problems <- tmp$problems + 1L
+    } else {
+      msg <- sprintf("%s is a CSV", f)
+    }
+    tmp$msgs <- c(tmp$msgs, msg)
+  }
+  results$problems <- results$problems + tmp$problems
+  results$msgs     <- c(results$msgs, tmp$msgs)
+  results
+}
+
+#' @keywords internal
+congruency_helper_column_names <- function(files, files_to_check, results) {
+  tmp <- list(msgs = character(0), problems = 0L)
   
+  # template locals
+  data_template_df <- files$template$data$df
+  data_template_fn <- files$template$data$fname
+  meta_template_df <- files$template$metadata$df
+  meta_template_fn <- files$template$metadata$fname
+  
+  # user locals
+  data_df <- files$user$data$df
+  data_fn <- files$user$data$fname
+  meta_df <- files$user$metadata$df
+  meta_fn <- files$user$metadata$fname
+  
+  # Compare (user data vs template data) and (user metadata vs template metadata)
+  pairs <- list(
+    list(user_df = data_df, user_label = data_fn, templ_df = data_template_df, templ_label = data_template_fn),
+    list(user_df = meta_df, user_label = meta_fn, templ_df = meta_template_df, templ_label = meta_template_fn)
+  )
+  
+  for (p in pairs) {
+    user_cols  <- colnames(p$user_df)
+    templ_cols <- colnames(p$templ_df)
+    miss_user  <- which(!(user_cols %in% templ_cols))
+    miss_templ <- which(!(templ_cols %in% user_cols))
+    
+    if (length(miss_user) > 0L || length(miss_templ) > 0L) {
+      tmp$msgs <- c(tmp$msgs,
+                    sprintf("\nThe column names %s do not match the column names in %s\n",
+                            p$user_label, p$templ_label))
+      if (length(miss_templ) > 0L) {
+        cols <- templ_cols[miss_templ]
+        tmp$msgs <- c(tmp$msgs,
+                      sprintf("%d column(s) are in %s but not in %s:\n%s\n",
+                              length(cols), p$templ_label, p$user_label, paste(cols, collapse = ", ")))
+        tmp$problems <- tmp$problems + 1L
+      }
+      if (length(miss_user) > 0L) {
+        cols <- user_cols[miss_user]
+        tmp$msgs <- c(tmp$msgs,
+                      sprintf("%d column(s) are in %s but not in %s:\n%s\n",
+                              length(cols), p$user_label, p$templ_label, paste(cols, collapse = ", ")))
+        tmp$problems <- tmp$problems + 1L
+      }
+    }
+  }
+  
+  if (tmp$problems == 0L) {
+    tmp$msgs <- c(tmp$msgs,
+                  sprintf("\n%d pairs of files passed column-congruency checks:\n%s columns match %s\n%s columns match %s",
+                          length(files_to_check),
+                          data_fn, data_template_fn,
+                          meta_fn, meta_template_fn))
+  }
+  
+  results$problems <- results$problems + tmp$problems
+  results$msgs     <- c(results$msgs, tmp$msgs)
+  results
+}
+
+#' @keywords internal
+check_congruency_user_versus_template <- function(files, results) {
+  files_to_check <- list(
+    c(files$user$data$fname,     files$template$data$fname),
+    c(files$user$metadata$fname, files$template$metadata$fname)
+  )
+  congruency_helper_column_names(files, files_to_check, results)
+}
+
+#' @keywords internal
+check_congruency_user_versus_user <- function(files, results) {
   # map each data column to its corresponding metadata column
   cols_to_check <- list(
-    c('MonitoringLocationIdentifier', 'SiteCode')
-    ,c('MonitoringLocationIdentifier', 'SiteCodeWQX')
-    ,c('MonitoringLocationName', 'SiteName')
-    ,c('CharacteristicName', 'DataName')
+    c("MonitoringLocationIdentifier", "SiteCode"),
+    c("MonitoringLocationIdentifier", "SiteCodeWQX"),
+    c("MonitoringLocationName",       "SiteName"),
+    c("CharacteristicName",           "DataName")
   )
-  
-  # are the values in column-pairs consistent?
-  results <- congruency_helper_values(files, cols_to_check, results)
-  
-  # TODO: type checking. Check that the columns that NCRNWater needs to be certain formats are actually those types.
-  # e.g., numbers are numeric, dates are formatted properly, factors, characters, etc.
-  # is.numeric(metadata$LowerPoint)
-  # is.numeric(metadata$UpperPoint)
-  # is.numeric(metadata$Lat)
-  # is.numeric(metadata$Long)
-  # parse metadata
-  # metadata %>% dplyr::select(DataName, DataType) %>% dplyr::distinct(DataName, DataType)
-  # does the metadata#DataType agree with data$ResultMeasureValue?
-  # make a lookup for (metadata$DataName, metadata$DataType)
-  # make a table of (data$CharacteristicName, data$ResultMeasureValue)
-  # try to change the column's data type and see what breaks
-  
-  # TODO: null checking. Check that required columns have values.
-  # e.g., thresholds (metadata$UpperPoint, metadata$LowerPoint) are required because things break otherwise
-  # the only column that you're allowed to provide NAs:
-  # LowerPoint, UpperPoint, LowerDescription, UpperDescription
-  # These can't be ALL NAs, but some NAs are allowed
-  
-  # TODO: coverage
-  # are there duplicates in the metadata file
-  # (SiteCode, DataName)
-  # is every combination of (MonitoringLocationIdentifier, CharacteristicName) covered with a combination of (SiteCode, DataName)?
-  
-  
-  return(results)
-  
+  congruency_helper_values(files, cols_to_check, results)
 }
 
+#' @keywords internal
 congruency_helper_values <- function(files, cols_to_check, results) {
+  tmp <- list(msgs = character(0), problems = 0L)
   
-  tmp <- list(
-    'msgs' = c()
-    ,problems = 0
-  )
+  # user locals
+  data_df    <- files$user$data$df
+  data_fn    <- files$user$data$fname
+  metadata_df <- files$user$metadata$df
+  metadata_fn <- files$user$metadata$fname
   
-  # template local variables
-  data_template <- files[['template']][['data']][['df']]
-  data_template_filename <- files[['template']][['data']][['fname']]
-  metadata_template <- files[['template']][['metadata']][['df']]
-  metadata_template_filename <- files[['template']][['metadata']][['fname']]
-  
-  # user local variables
-  data <- files[['user']][['data']][['df']]
-  data_filename <- files[['user']][['data']][['fname']]
-  metadata <- files[['user']][['metadata']][['df']]
-  metadata_filename <- files[['user']][['metadata']][['fname']]
-  
-  for (i in seq_along(cols_to_check)){
-    data_col <- cols_to_check[[i]][1]
+  for (i in seq_along(cols_to_check)) {
+    data_col     <- cols_to_check[[i]][1]
     metadata_col <- cols_to_check[[i]][2]
     
-    if (any(data[[data_col]] %>% unique %in% metadata[[metadata_col]] %>% unique == F)){
-      
-      msg_beginning <- paste0("\nThe values ", data_filename, "$",data_col, " do not match ")
-      msg_end <- paste0('the values in ', metadata_filename, "$",metadata_col, '\n')
-      msg <- paste0(msg_beginning, msg_end)
-      tmp[['msgs']] <- c(tmp[['msgs']], msg)
-      
-      in_data_not_metadata <- which(data[[data_col]] %>% unique %in% metadata[[metadata_col]] %>% unique == F)
-      in_metadata_not_data <- which(metadata[[metadata_col]] %>% unique %in% data[[data_col]] %>% unique == F)
-      
-      if (length(in_data_not_metadata)>0){
-        values_in_data_not_metadata <- (data[[data_col]] %>% unique)[in_data_not_metadata]
-        msg_beginning <- paste0(length(in_data_not_metadata), " value(s) are in ",data_filename," but not in ",metadata_filename,":\n")
-        msg_end <- "\n"
-        msg <- paste0(msg_beginning, paste(values_in_data_not_metadata, collapse = ', '), msg_end)
-        tmp[['problems']] <- tmp[['problems']] + 1
-        tmp[['msgs']] <- c(tmp[['msgs']], msg)
-      }
-      
-      if (length(in_metadata_not_data)>0){
-        values_in_metadata_not_data <- (metadata[[metadata_col]] %>% unique)[in_metadata_not_data]
-        msg_beginning <- paste0(length(in_metadata_not_data), " value(s) are in ",metadata_filename," but not in ",data_filename,":\n")
-        msg_end <- "\n"
-        msg <- paste0(msg_beginning, paste(values_in_metadata_not_data, collapse = ', '), msg_end)
-        tmp[['problems']] <- tmp[['problems']] + 1
-        tmp[['msgs']] <- c(tmp[['msgs']], msg)
-      }
-    }
-  }
-  
-  if (tmp[['problems']]==0){
-    msg_begining <- paste0('\n',length(cols_to_check), ' pairs of columns passed value-congruency checks:\n')
-    msg_middle <- c()
-    for (i in seq_along(cols_to_check)){
-      data_col <- paste0(data_filename, '$',cols_to_check[[i]][1])
-      metadata_col <- paste0(metadata_filename, '$', cols_to_check[[i]][2])
-      msg_tmp <- paste0(data_col, ' values match ', metadata_col)
-      msg_middle <- c(msg_middle, msg_tmp)
-    }
-    msg <- paste0(msg_begining, paste(msg_middle, collapse = '\n'))
-    tmp[['msgs']] <- c(tmp[['msgs']], msg)
-  }
-  
-  results[['problems']] <- results[['problems']] + tmp[['problems']]
-  results[['msgs']] <- c(results[['msgs']], tmp[['msgs']])
-  
-  return(results)
-}
-
-check_congruency_files_exist <- function(files, results) {
-  tmp <- list(
-    'msgs' = c()
-    ,problems = 0
-  )
-  
-  for (f in files){
-    if (file.exists(f)==F){
-      msg_beginning <- "'" 
-      msg_end <- ' does not exist. Check for typos or missing information and try again.'
-      msg <- paste0(msg_beginning, f, msg_end)
-      tmp[['problems']] <- tmp[['problems']] + 1
-    } else {
-      msg_beginning <- ""
-      msg_end <- ' exists'
-      msg <- paste0(msg_beginning, f, msg_end)
-    }
-    tmp[['msgs']] <- c(tmp[['msgs']], msg)
-  }
-  
-  results[['problems']] <- results[['problems']] + tmp[['problems']]
-  results[['msgs']] <- c(results[['msgs']], tmp[['msgs']])
-  return(results)
-}
-
-check_congruency_files_are_csvs <- function(files, results) {
-  tmp <- list(
-    'msgs' = c()
-    ,problems = 0
-  )
-  
-  for (f in files){
-    if (endsWith(f, '.csv')==F){
-      msg_beginning <- "'" 
-      msg_end <- ' is not a CSV file. Check for typos or missing information and try again.'
-      msg <- paste0(msg_beginning, f, msg_end)
-      tmp[['problems']] <- tmp[['problems']] + 1
-    } else {
-      msg_beginning <- ""
-      msg_end <- ' is a CSV'
-      msg <- paste0(msg_beginning, f, msg_end)
-    }
-    tmp[['msgs']] <- c(tmp[['msgs']], msg)
-  }
-  
-  results[['problems']] <- results[['problems']] + tmp[['problems']]
-  results[['msgs']] <- c(results[['msgs']], tmp[['msgs']])
-  return(results)
-}
-
-congruency_helper_column_names <- function(files, files_to_check, results) {
-  
-  tmp <- list(
-    'msgs' = c()
-    ,problems = 0
-  )
-  
-  # template local variables
-  data_template <- files[['template']][['data']][['df']]
-  data_template_filename <- files[['template']][['data']][['fname']]
-  metadata_template <- files[['template']][['metadata']][['df']]
-  metadata_template_filename <- files[['template']][['metadata']][['fname']]
-  
-  # user local variables
-  data <- files[['user']][['data']][['df']]
-  data_filename <- files[['user']][['data']][['fname']]
-  metadata <- files[['user']][['metadata']][['df']]
-  metadata_filename <- files[['user']][['metadata']][['fname']]
-  
-  for (i in seq_along(files_to_check)){
-    user_file <- files_to_check[[i]][1]
-    template_file <- files_to_check[[i]][2]
+    data_vals     <- unique(data_df[[data_col]])
+    metadata_vals <- unique(metadata_df[[metadata_col]])
     
-    if (any(colnames(user_file) %in% colnames(template_file) == F) | any(colnames(template_file) %in% colnames(user_file) == F)){
-      msg_beginning <- paste0("\nThe column names ", user_file, " do not match ")
-      msg_end <- paste0('the column names in ', template_file, '\n')
-      msg <- paste0(msg_beginning, msg_end)
-      tmp[['msgs']] <- c(tmp[['msgs']], msg)
+    in_data_not_metadata     <- which(!(data_vals %in% metadata_vals))
+    in_metadata_not_data     <- which(!(metadata_vals %in% data_vals))
+    
+    if (length(in_data_not_metadata) > 0L || length(in_metadata_not_data) > 0L) {
+      tmp$msgs <- c(tmp$msgs,
+                    sprintf("\nThe values %s$%s do not match the values in %s$%s\n",
+                            data_fn, data_col, metadata_fn, metadata_col))
       
-      in_template_not_user <- which(colnames(data_template) %in% colnames(data) == F)
-      in_user_not_template <- which(colnames(data) %in% colnames(data_template) == F)
-      
-      if (length(in_template_not_user)>0){
-        values_in_template_not_user <- colnames(data_template)[in_template_not_user]
-        msg_beginning <- paste0(length(in_template_not_user), " column(s) are in ",template_file," but not in ",user_file,":\n")
-        msg_end <- "\n"
-        msg <- paste0(msg_beginning, paste(values_in_data_not_metadata, collapse = ', '), msg_end)
-        tmp[['problems']] <- tmp[['problems']] + 1
-        tmp[['msgs']] <- c(tmp[['msgs']], msg)
+      if (length(in_data_not_metadata) > 0L) {
+        vals <- data_vals[in_data_not_metadata]
+        tmp$msgs <- c(tmp$msgs,
+                      sprintf("%d value(s) are in %s but not in %s:\n%s\n",
+                              length(vals), data_fn, metadata_fn, paste(vals, collapse = ", ")))
+        tmp$problems <- tmp$problems + 1L
       }
-      if (length(in_user_not_template)>0){
-        values_in_template_not_user <- colnames(data)[in_user_not_template]
-        msg_beginning <- paste0(length(in_user_not_template), " column(s) are in ",user_file," but not in ",template_file,":\n")
-        msg_end <- "\n"
-        msg <- paste0(msg_beginning, paste(values_in_data_not_metadata, collapse = ', '), msg_end)
-        tmp[['problems']] <- tmp[['problems']] + 1
-        tmp[['msgs']] <- c(tmp[['msgs']], msg)
+      
+      if (length(in_metadata_not_data) > 0L) {
+        vals <- metadata_vals[in_metadata_not_data]
+        tmp$msgs <- c(tmp$msgs,
+                      sprintf("%d value(s) are in %s but not in %s:\n%s\n",
+                              length(vals), metadata_fn, data_fn, paste(vals, collapse = ", ")))
+        tmp$problems <- tmp$problems + 1L
       }
     }
   }
   
-  if (tmp[['problems']]==0){
-    msg_begining <- paste0('\n',length(files_to_check), ' pairs of files passed column-congruency checks:\n')
-    msg_middle <- c()
-    for (i in seq_along(files_to_check)){
-      data_col <- paste0(files_to_check[[i]][1])
-      metadata_col <- paste0(files_to_check[[i]][2])
-      msg_tmp <- paste0(data_col, ' columns match ', metadata_col)
-      msg_middle <- c(msg_middle, msg_tmp)
+  # Success message if no problems
+  if (tmp$problems == 0L) {
+    msg_begining <- sprintf("\n%d pairs of columns passed value-congruency checks:\n", length(cols_to_check))
+    msg_middle <- character(0)
+    for (i in seq_along(cols_to_check)) {
+      msg_middle <- c(msg_middle,
+                      sprintf("%s$%s values match %s$%s",
+                              data_fn, cols_to_check[[i]][1], metadata_fn, cols_to_check[[i]][2]))
     }
-    msg <- paste0(msg_begining, paste(msg_middle, collapse = '\n'))
-    tmp[['msgs']] <- c(tmp[['msgs']], msg)
+    tmp$msgs <- c(tmp$msgs, paste0(msg_begining, paste(msg_middle, collapse = "\n")))
   }
   
-  results[['problems']] <- results[['problems']] + tmp[['problems']]
-  results[['msgs']] <- c(results[['msgs']], tmp[['msgs']])
-  
-  return(results)
+  results$problems <- results$problems + tmp$problems
+  results$msgs     <- c(results$msgs, tmp$msgs)
+  results
 }
