@@ -62,6 +62,7 @@ Collate:
     'importNCRNWater.R'
     'nonparTrends.R'
     'shinyHydrationService.R'
+    'shinyPhotoService.R'
     'waterbands.R'
     'waterbox.R'
     'waterheat.R'
