@@ -108,17 +108,3 @@ hydrate_network <- function(network,
   meta_active <- utils::read.csv(meta_active_path, stringsAsFactors = FALSE)
   list(wd = wd, metadata_active = meta_active, root = root)
 }
-hydrate_network <- function(network,
-                            base_dir = "Data",
-                            dataname = "wqp.csv",
-                            metadataname = "wqp_ncrnwater_metadata.csv",
-                            active_dataname = "wqp_active.csv",
-                            active_metadataname = "wqp_ncrnwater_metadata_active.csv",
-                            wqx = TRUE) {
-  root <- file.path(base_dir, network)
-  wd <- suppressWarnings(importNCRNWater(root, Data = dataname, MetaData = metadataname, wqx = wqx))
-  meta_active_file <- if (network == "NCRN") active_metadataname else metadataname
-  meta_active_path <- file.path(base_dir, network, meta_active_file)
-  meta_active <- utils::read.csv(meta_active_path, stringsAsFactors = FALSE)
-  list(wd = wd, metadata_active = meta_active, root = root)
-}
