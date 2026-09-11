@@ -5,7 +5,7 @@
 #' @description
 #' The Shiny hydration service provides a thin, app-facing wrapper to **hydrate**
 #' NCRNWater data for a single monitoring network. It constructs the network root
-#' directory (`file.path(base_dir, network)`), imports an NCRNWater object via
+#' directory (`file.path(datadir, network)`), imports an NCRNWater object via
 #' [NCRNWater::importNCRNWater()], and loads the corresponding **active metadata**
 #' table into memory for downstream use in Shiny modules.
 #'
@@ -38,7 +38,7 @@
 #' @section File layout:
 #' The service expects the following layout:
 #' \preformatted{
-#'   <base_dir>/<network>/
+#'   <datadir>/<network>/
 #'     wqp.csv
 #'     wqp_ncrnwater_metadata.csv
 #'     # optionally, if you pre-create active files:
@@ -47,8 +47,8 @@
 #' }
 #'
 #' @param network Character. Monitoring network code (e.g., `"NCRN"`). Used to
-#'   construct the hydration root as `file.path(base_dir, network)`.
-#' @param base_dir Character. Base directory containing the network subfolder
+#'   construct the hydration root as `file.path(datadir, network)`.
+#' @param datadir Character. Base directory containing the network subfolder
 #'   with the CSV files. In tests this can be `tempdir()`; in installed assets
 #'   it can be `system.file("extdata", package = "NCRNWater")`. Default: `"Data"`.
 #' @param dataname Character. Basename of the **raw** WQP data CSV (e.g., `"wqp.csv"`).
@@ -69,7 +69,7 @@
 #' \describe{
 #'   \item{wd}{Hydrated NCRNWater object (list of Park S4 objects).}
 #'   \item{metadata_active}{Active metadata as a `data.frame`.}
-#'   \item{root}{Character scalar: the hydration root used (`file.path(base_dir, network)`).}
+#'   \item{root}{Character scalar: the hydration root used (`file.path(datadir, network)`).}
 #' }
 #'
 #' @examples
@@ -78,7 +78,7 @@
 #' base <- system.file("extdata", package = "NCRNWater")
 #' res  <- hydrate_network(
 #'   network              = "NCRN",
-#'   base_dir             = base,
+#'   datadir             = base,
 #'   dataname             = "wqp.csv",
 #'   metadataname         = "wqp_ncrnwater_metadata.csv",
 #'   active_dataname      = "wqp_active.csv",
@@ -95,16 +95,16 @@
 #'
 #' @export
 hydrate_network <- function(network,
-                            base_dir = "Data",
+                            datadir = "Data",
                             dataname = "wqp.csv",
                             metadataname = "wqp_ncrnwater_metadata.csv",
                             active_dataname = "wqp_active.csv",
                             active_metadataname = "wqp_ncrnwater_metadata_active.csv",
                             wqx = TRUE) {
-  root <- file.path(base_dir, network)
+  root <- file.path(datadir, network)
   wd <- suppressWarnings(importNCRNWater(root, Data = dataname, MetaData = metadataname, wqx = wqx))
   meta_active_file <- if (network == "NCRN") active_metadataname else metadataname
-  meta_active_path <- file.path(base_dir, network, meta_active_file)
+  meta_active_path <- file.path(datadir, network, meta_active_file)
   meta_active <- utils::read.csv(meta_active_path, stringsAsFactors = FALSE)
   list(wd = wd, metadata_active = meta_active, root = root)
 }

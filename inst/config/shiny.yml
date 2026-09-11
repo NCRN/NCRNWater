@@ -1,0 +1,59 @@
+# inst/config/shiny.yml
+
+# A default profile and configuration data model
+default:
+  app:
+    app_name: "Water Quality Explorer"
+    figure_defaults:
+      show_legend: true
+      font_size: 20
+      # colors should exist in files.colors_csv
+      good_color: "Blue"
+      bad_color: "Orange"
+      out_color: "Vermillion"
+      point_size: 6
+      threshold_line_color: "Orange"
+      tr_line_color: "Green"
+      line_width: 2
+      show_point: true
+      figure_horizontal_scaling: 0.9
+      figure_vertical_scaling: 0.7
+
+  files:
+    colors_csv: "extdata/colors.csv"
+    dataset_url: "https://irma.nps.gov/DataStore/"  # generic fallback
+    datadir: "Data"
+    imagesdir: "img"
+
+  wqx:
+    enabled: true
+
+  time:
+    min_year: "auto"
+    max_year: "auto"
+
+# Network profiles that override defaults for each provided kwarg
+NCRN:
+  app:
+    app_name: "Stream Water Quality"
+    network_code: "NCRN"
+    network_long: "National Capital Region Network"
+    dataset_url: "https://irma.nps.gov/DataStore/Reference/Profile/2317661"
+
+  files:
+    dataname: "wqp.csv"
+    metadataname: "wqp_ncrnwater_metadata.csv"
+
+  wqx:
+    enabled: true
+
+NETN:
+  app:
+    app_name: "Stream Water Quality"
+    network_code: "NETN"
+    network_long: "Northeast Temperate Network"
+
+  files:
+    dataname: "wqp.csv"
+    metadataname: "wqp_ncrnwater_metadata.csv"
+
