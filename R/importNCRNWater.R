@@ -62,8 +62,7 @@ importNCRNWater <- function(Dir, Data = "wqp.csv", MetaData = "wqp_ncrnwater_met
     Indata <- Indata %>% mutate(ValueCen = as.numeric(ValueCen), Censored = as.logical(Censored))
   }
   
-  # After: MetaData <- read_csv(...)
-  # Add this normalization block:
+  # safely handle operators (e.g., >, <=) that can get mangled when moving data into and out of different systems
   normalize_op <- function(x) {
     x <- as.character(x)                 # ensure character
     x <- trimws(x)                       # strip spaces
