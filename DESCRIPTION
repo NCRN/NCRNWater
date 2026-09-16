@@ -64,6 +64,7 @@ Collate:
     'shinyConfig.R'
     'shinyHydrationService.R'
     'shinyPhotoService.R'
+    'shinySplashService.R'
     'shinyTimeService.R'
     'waterbands.R'
     'waterbox.R'
