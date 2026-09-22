@@ -5,7 +5,7 @@
 #' @description
 #' Collects and validates the splash (loading) content defined in the app
 #' configuration (`cfg$app$splash`), and converts splash image filenames into
-#' absolute file paths based on the configured data directory layout. Returns
+#' relative file paths based on the configured data directory layout. Returns
 #' a ready-to-use list for the Shiny UI: a character vector of loading text
 #' and a list of image entries with resolved paths and metadata.
 #'
@@ -44,7 +44,7 @@
 #' \describe{
 #'   \item{loading_text}{Character vector (as provided by config).}
 #'   \item{loading_images}{List of image entries; each entry is a list with:
-#'         \code{src} (absolute path), \code{location} (string), \code{date} (string),
+#'         \code{src} (relative path), \code{location} (string), \code{date} (string),
 #'         \code{alt} (string), and \code{exists} (logical).}
 #' }
 #'
