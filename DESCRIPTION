@@ -71,4 +71,5 @@ Collate:
     'waterheat.R'
     'watersite_comps.R'
     'wcosinor.R'
+    'zzz.R'
 Config/testthat/edition: 3
