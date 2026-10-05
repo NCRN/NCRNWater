@@ -45,6 +45,7 @@ A named \strong{list} containing (at minimum):
   \item{grammar1, grammar2}{Short strings used in summary text for recent/all-year contexts.}
   \item{extext, extext_bullets}{HTML-friendly summary sentences and bullet list.}
   \item{p}{A ggplot bar chart of yearly percent exceeded (present if \code{show_plot = TRUE}).}
+  \item{html_extext}{A html un-ordered list that summarizes the data shown in plot \code{p}.}
 }
 }
 \description{

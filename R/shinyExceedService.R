@@ -82,6 +82,7 @@
 #'   \item{grammar1, grammar2}{Short strings used in summary text for recent/all-year contexts.}
 #'   \item{extext, extext_bullets}{HTML-friendly summary sentences and bullet list.}
 #'   \item{p}{A ggplot bar chart of yearly percent exceeded (present if \code{show_plot = TRUE}).}
+#'   \item{html_extext}{A html un-ordered list that summarizes the data shown in plot \code{p}.}
 #' }
 #'
 #' @examples
@@ -148,11 +149,19 @@ build_exceed_site_package <- function(wd, park, site, char, show_plot = TRUE) {
   
   # Descriptive exceed dataframe (renames to match your UI)
   desc_exdf <- exdf %>%
+    dplyr::select(-Site) %>%
     dplyr::rename(
       Units      = "ResultMeasure.MeasureUnitCode",
-      # Site       = "MonitoringLocationName",
+      Site       = "MonitoringLocationName",
       Parameter  = "Characteristic",
       SampleDate = "Date"
+    ) %>%
+    dplyr::select(
+      Site,
+      SampleDate,
+      Parameter,
+      Value,
+      Units
     )
   
   # Year counts: total vs exceed
@@ -231,6 +240,39 @@ build_exceed_site_package <- function(wd, park, site, char, show_plot = TRUE) {
   )
   extext_bullets <- paste0("<li>", extext, "</li>", collapse = "")
   
+  # Compose HTML summary fragment (heading + bullets)
+  # Match legacy style used by exDUM()
+  has_exceedances <- sum_nex > 0
+  
+  # Build per-year bullets if you still want them (optional)
+  alt_raw <- character(0)
+  if (has_exceedances) {
+    for (i in seq_len(nrow(histdata))) {
+      nex  <- histdata$nex[i]
+      ntot <- histdata$ntot[i]
+      alt_raw <- c(
+        alt_raw,
+        paste0(
+          "<b>", histdata$Year[i], "</b>: ",
+          nex, " of ", ntot, " measurement", if (ntot > 1) "s", " (",
+          histdata$formatted_percent_ex[i], ") exceeded ",
+          ExPoint, " ", units
+        )
+      )
+    }
+  }
+  alt_bullets  <- if (length(alt_raw)) paste0("<li>", alt_raw, "</li>", collapse = "") else ""
+  alt_bullets2 <- if (length(alt_raw)) paste0("<ul>", alt_bullets, "</ul>") else ""
+  
+  # Heading + summary bullets (+ per-year bullets if present)
+  html_extext <- paste0(
+    "<p><b><span style='font-size: 18px;'>Exceedances Summary:</span></b></p>",
+    "<ul>",
+    extext_bullets,        # already contains <li>...</li> elements
+    if (has_exceedances) alt_bullets2 else "",
+    "</ul>"
+  )
+  
   # Return the package for this site (same names your UI expects)
   list(
     df             = df,
@@ -255,6 +297,7 @@ build_exceed_site_package <- function(wd, park, site, char, show_plot = TRUE) {
     grammar2       = grammar2,
     extext         = extext,
     extext_bullets = extext_bullets,
+    html_extext    = html_extext,
     p              = p
   )
 }
