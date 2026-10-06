@@ -142,6 +142,7 @@ build_exceed_site_package <- function(wd, park, site, char, show_plot = TRUE) {
     wd, parkcode = park, sitecode = site, charname = char,
     points = "both", mode = "rows", lower_op = "le", upper_op = "ge"
   )
+  rows$Characteristic <- dispname
   # Add threshold description columns (if present)
   if (!is.null(lower_desc)) rows$LowerThreshold <- lower_desc
   if (!is.null(upper_desc)) rows$UpperThreshold <- upper_desc
