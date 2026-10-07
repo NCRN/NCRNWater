@@ -143,6 +143,7 @@ build_exceed_site_package <- function(wd, park, site, char, show_plot = TRUE) {
   sitename   <- NCRNWater::getCharInfo(wd, parkcode = park, sitecode = site, charname = char, info = "SiteName")
   dispname   <- NCRNWater::getCharInfo(wd, parkcode = park, sitecode = site, charname = char, info = "DisplayName")
   units      <- NCRNWater::getCharInfo(wd, parkcode = park, sitecode = site, charname = char, info = "Units")
+  reference  <- NCRNWater::getCharInfo(wd, parkcode = park, sitecode = site, charname = char, info = "AssessmentDetails")
   
   # Use the same comparators for precise narrative
   lower_op  <- .map_cond_to_op(NCRNWater::getCharInfo(wd, parkcode=park, sitecode=site, charname=char, info="LowerPointCondition"))
@@ -183,7 +184,7 @@ build_exceed_site_package <- function(wd, park, site, char, show_plot = TRUE) {
     if (is.null(lower_line)) {
       lower_line <- sprintf(
         "Acceptable %s is %s %s %s",
-        tolower(dispname), lower_phrase, format(lower_pt, trim = TRUE), units
+        tolower(dispname), lower_phrase, lower_pt, units
       )
     }
   }
@@ -192,7 +193,7 @@ build_exceed_site_package <- function(wd, park, site, char, show_plot = TRUE) {
     if (is.null(upper_line)) {
       upper_line <- sprintf(
         "Acceptable %s is %s %s %s",
-        tolower(dispname), upper_phrase, format(upper_pt, trim = TRUE), units
+        tolower(dispname), upper_phrase, upper_pt, units
       )
     }
   }
@@ -386,8 +387,8 @@ build_exceed_site_package <- function(wd, park, site, char, show_plot = TRUE) {
     if (!is.na(lower_pt) && is.na(upper_pt)) {
       # LOWER ONLY: precise comparator-negation
       html_extext <- sprintf(
-        "<p><b><span style='font-size: 18px;'>%s</span></b><br/>No %s measurements were %s (%s) %s %s at %s.</p>",
-        lower_line,
+        "<p><b><span style='font-size: 18px;'>%s (%s)</span></b><br/>No %s measurements were %s (%s) %s %s at %s.</p>",
+        lower_line, reference,
         dispname,
         lower_phrase,                # e.g., "less than or equal to"
         lower_symbol_a11y, lower_pt, # e.g., "≤ 600"
@@ -397,8 +398,8 @@ build_exceed_site_package <- function(wd, park, site, char, show_plot = TRUE) {
     } else if (is.na(lower_pt) && !is.na(upper_pt)) {
       # UPPER ONLY: precise comparator-negation
       html_extext <- sprintf(
-        "<p><b><span style='font-size: 18px;'>%s</span></b><br/>No %s measurements were %s (%s) %s %s at %s.</p>",
-        upper_line,
+        "<p><b><span style='font-size: 18px;'>%s (%s)</span></b><br/>No %s measurements were %s (%s) %s %s at %s.</p>",
+        upper_line, reference,
         dispname,
         upper_phrase,                # e.g., "greater than or equal to"
         upper_symbol_a11y, upper_pt, # e.g., "≥ 600"
@@ -408,11 +409,11 @@ build_exceed_site_package <- function(wd, park, site, char, show_plot = TRUE) {
     } else {
       # BOTH: precise negation using *metadata-based* comparators
       html_extext <- sprintf(
-        "<p><b><span style='font-size: 18px;'>%s</span></b><br/>
-   <b><span style='font-size: 18px;'>%s</span></b><br/>
+        "<p><b><span style='font-size: 18px;'>%s (%s)</span></b><br/>
+   <b><span style='font-size: 18px;'>%s (%s)</span></b><br/>
    No %s measurements were %s (%s) %s or %s (%s) %s %s at %s.</p>",
-        lower_line,
-        upper_line,
+        lower_line, reference,
+        upper_line, reference,
         dispname,
         lower_phrase, lower_symbol_a11y, lower_pt,
         upper_phrase, upper_symbol_a11y, upper_pt,
