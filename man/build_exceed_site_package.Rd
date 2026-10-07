@@ -83,9 +83,12 @@ legacy logic (e.g., \code{exDUM()}) without changing UI rendering code.
 
 **Comparators**
 \itemize{
-  \item \code{lower_op = "le"} (less-than-or-equal) and \code{upper_op = "ge"}
-        (greater-than-or-equal) match legacy behavior where values equal to a
-        threshold are considered exceedances. Adjust if policy changes.
+  \item Comparators are derived from metadata: \code{LowerPointCondition} and
+        \code{UpperPointCondition} (one of \code{"lt"}, \code{"le"}, \code{"gt"}, \code{"ge"}).
+  \item These comparators are passed to \code{\link[NCRNWater]{exceed}} and also drive
+        the human-readable narrative (e.g., “less than (<)”, “greater than (>)”).
+  \item If a condition is missing but a threshold point exists, the service defaults to
+        inclusive comparators (\code{"le"} for lower, \code{"ge"} for upper).
 }
 
 **Plot**

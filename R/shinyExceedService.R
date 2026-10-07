@@ -37,9 +37,12 @@
 #'
 #' **Comparators**
 #' \itemize{
-#'   \item \code{lower_op = "le"} (less-than-or-equal) and \code{upper_op = "ge"}
-#'         (greater-than-or-equal) match legacy behavior where values equal to a
-#'         threshold are considered exceedances. Adjust if policy changes.
+#'   \item Comparators are derived from metadata: \code{LowerPointCondition} and
+#'         \code{UpperPointCondition} (one of \code{"lt"}, \code{"le"}, \code{"gt"}, \code{"ge"}).
+#'   \item These comparators are passed to \code{\link[NCRNWater]{exceed}} and also drive
+#'         the human-readable narrative (e.g., “less than (<)”, “greater than (>)”).
+#'   \item If a condition is missing but a threshold point exists, the service defaults to
+#'         inclusive comparators (\code{"le"} for lower, \code{"ge"} for upper).
 #' }
 #'
 #' **Plot**
@@ -119,6 +122,11 @@
 #'
 #' @keywords internal
 #' 
+
+# -------------------------------------------------------------------
+# Main service: build the exceedance package for one (park, site, char)
+# -------------------------------------------------------------------
+
 build_exceed_site_package <- function(wd, park, site, char, show_plot = TRUE) {
   # Base data
   df <- NCRNWater::getWData(wd, parkcode = park, sitecode = site, charname = char, output = "data.frame")
@@ -136,26 +144,71 @@ build_exceed_site_package <- function(wd, park, site, char, show_plot = TRUE) {
   dispname   <- NCRNWater::getCharInfo(wd, parkcode = park, sitecode = site, charname = char, info = "DisplayName")
   units      <- NCRNWater::getCharInfo(wd, parkcode = park, sitecode = site, charname = char, info = "Units")
   
-  # Exceed rows via NCRNWater::exceed()
+  # Use the same comparators for precise narrative
+  lower_op  <- .map_cond_to_op(NCRNWater::getCharInfo(wd, parkcode=park, sitecode=site, charname=char, info="LowerPointCondition"))
+  upper_op  <- .map_cond_to_op(NCRNWater::getCharInfo(wd, parkcode=park, sitecode=site, charname=char, info="UpperPointCondition"))
+  
+  # If a site/parameter has a threshold point but no *PointCondition in metadata, set a sensible default so both exceed() and your text don’t break
+  if (is.na(lower_op) && !is.na(lower_pt)) lower_op <- "le"  # default inclusive
+  if (is.na(upper_op) && !is.na(upper_pt)) upper_op <- "ge"
+  
+  lower_phrase <- .op_phrase(lower_op)
+  upper_phrase <- .op_phrase(upper_op)
+  lower_symbol <- .op_symbol(lower_op)
+  upper_symbol <- .op_symbol(upper_op)
+  
+  lower_symbol_a11y <- symbol_with_aria(lower_symbol, lower_phrase)
+  upper_symbol_a11y <- symbol_with_aria(upper_symbol, upper_phrase)
+  
+  # Exceed rows via NCRNWater::exceed() with the comparators you want reflected in text
   rows <- NCRNWater::exceed(
-    wd, parkcode = park, sitecode = site, charname = char,
-    points = "both", mode = "rows", lower_op = "le", upper_op = "ge"
+    wd,
+    parkcode = park,
+    sitecode = site,
+    charname = char,
+    points   = "both",
+    mode     = "rows",
+    lower_op = lower_op,  # now metadata-driven
+    upper_op = upper_op
   )
   
-  can_have_exceedances <- if (!is.na(lower_pt) | !is.na(upper_pt)) T else F
-  has_exceedances <- if (nrow(rows) >0) T else F
+  can_have_exceedances <- (!is.na(lower_pt) || !is.na(upper_pt))
+  has_exceedances      <- (nrow(rows) > 0)
   
-  if (isTRUE(has_exceedances)){
+  # Comparator-aware policy lines (prefer metadata if present)
+  lower_line <- NULL
+  upper_line <- NULL
+  if (!is.na(lower_pt)) {
+    lower_line <- .nonempty(lower_desc)
+    if (is.null(lower_line)) {
+      lower_line <- sprintf(
+        "Acceptable %s is %s %s %s",
+        tolower(dispname), lower_phrase, format(lower_pt, trim = TRUE), units
+      )
+    }
+  }
+  if (!is.na(upper_pt)) {
+    upper_line <- .nonempty(upper_desc)
+    if (is.null(upper_line)) {
+      upper_line <- sprintf(
+        "Acceptable %s is %s %s %s",
+        tolower(dispname), upper_phrase, format(upper_pt, trim = TRUE), units
+      )
+    }
+  }
+  
+  if (isTRUE(has_exceedances)) {
+    # Normalize dispname in rows
     rows$Characteristic <- dispname
-    # Add threshold description columns (if present)
-    if (!is.null(lower_desc)) rows$LowerThreshold <- lower_desc
-    if (!is.null(upper_desc)) rows$UpperThreshold <- upper_desc
-    exdf <- rows
     
+    # Add threshold description columns only when they are present (non-NA and non-empty)
+    if (!is.na(lower_desc) && nzchar(lower_desc)) rows$LowerThreshold <- lower_desc
+    if (!is.na(upper_desc) && nzchar(upper_desc)) rows$UpperThreshold <- upper_desc
+    
+    exdf <- rows
     threshold_cols_present <- intersect(c("UpperThreshold", "LowerThreshold"), names(exdf))
     
-    # Descriptive exceed dataframe (renames to match your UI)
-    
+    # Descriptive exceed dataframe (renames to match UI) with row-wise difference from exceeded side
     desc_exdf <- rows %>%
       dplyr::select(-Site) %>%
       dplyr::rename(
@@ -177,48 +230,49 @@ build_exceed_site_package <- function(wd, park, site, char, show_plot = TRUE) {
       dplyr::arrange(dplyr::desc(SampleDate)) %>%
       dplyr::select(
         "Site", "SampleDate", "Parameter", "Value", "Difference", "Units",
-        dplyr::any_of(threshold_cols_present)   # ← include only present columns
+        dplyr::any_of(threshold_cols_present)   # include only present threshold description columns
       )
     
     # Year counts: total vs exceed
     totcount <- df %>%
-      dplyr::mutate(
-        Characteristic = dispname,
-        Year = lubridate::year(Date)
-      ) %>%
+      dplyr::mutate(Characteristic = dispname, Year = lubridate::year(Date)) %>%
       dplyr::count(Year, name = "ntot")
     totcount <- subset(totcount, !is.na(Year))
-    excount  <- exdf %>% dplyr::mutate(Year = lubridate::year(Date)) %>% dplyr::count(Year, name = "nex")
+    
+    excount  <- exdf %>%
+      dplyr::mutate(Year = lubridate::year(Date)) %>%
+      dplyr::count(Year, name = "nex")
     excount  <- subset(excount, !is.na(Year))
     
     histdata <- dplyr::left_join(totcount, excount, by = "Year")
     histdata[is.na(histdata)] <- 0
     histdata <- histdata %>%
-      dplyr::mutate(percent_ex = (nex / ntot) * 100,
-                    formatted_percent_ex = scales::percent(percent_ex / 100, accuracy = 1))
+      dplyr::mutate(
+        percent_ex           = (nex / ntot) * 100,
+        formatted_percent_ex = scales::percent(percent_ex / 100, accuracy = 1)
+      )
     
     # Text metrics
-    recent_year  <- max(histdata$Year, na.rm = TRUE)
-    oldest_year  <- min(histdata$Year, na.rm = TRUE)
-    nex_recent   <- histdata[histdata$Year == recent_year, "nex", drop = TRUE]
-    ntot_recent  <- histdata[histdata$Year == recent_year, "ntot", drop = TRUE]
-    sum_nex      <- sum(histdata$nex)
-    sum_ntot     <- sum(histdata$ntot)
+    recent_year <- max(histdata$Year, na.rm = TRUE)
+    oldest_year <- min(histdata$Year, na.rm = TRUE)
+    nex_recent  <- histdata[histdata$Year == recent_year, "nex",  drop = TRUE]
+    ntot_recent <- histdata[histdata$Year == recent_year, "ntot", drop = TRUE]
+    sum_nex     <- sum(histdata$nex)
+    sum_ntot    <- sum(histdata$ntot)
     
     # Choose ExPoint (threshold shown in titles / alt text)
     ExPoint <- dplyr::case_when(
       is.na(upper_pt) && !is.na(lower_pt) ~ lower_pt,
       !is.na(upper_pt) && is.na(lower_pt) ~ upper_pt,
       !is.na(upper_pt) && !is.na(lower_pt) ~ {
-        # Heuristic: prefer a single point if one side actually exceeded
         if (any(exdf$Value <= lower_pt, na.rm = TRUE) && !any(exdf$Value >= upper_pt, na.rm = TRUE)) lower_pt
         else if (any(exdf$Value >= upper_pt, na.rm = TRUE) && !any(exdf$Value <= lower_pt, na.rm = TRUE)) upper_pt
-        else upper_pt # default if both exceeded; your UI treats both points anyway
+        else upper_pt
       },
       TRUE ~ NA_real_
     )
     
-    # Simple grammar (same as your implementation, condensed)
+    # Grammars (recent year vs all years)
     grammar1 <- if (nex_recent == 0) {
       paste0("there were no ", dispname, " exceedances ")
     } else if (nex_recent == 1) {
@@ -237,37 +291,38 @@ build_exceed_site_package <- function(wd, park, site, char, show_plot = TRUE) {
       paste0("there were <b>", sum_nex, "</b> ", dispname, " exceedances ")
     }
     
-    # Plot (ggplot bar; your code already wraps in plotly with hover_text)
-    p <- ggplot2::ggplot(histdata, ggplot2::aes(x = Year, y = percent_ex)) +
-      ggplot2::geom_bar(stat = "identity", fill = "lightgray") +
-      ggplot2::scale_x_continuous(breaks = seq(min(histdata$Year), max(histdata$Year), by = 1)) +
-      ggplot2::ylim(0, 100) +
-      ggplot2::labs(
-        title = paste0(
-          sitename, ", ", dispname, ", ", oldest_year, "-", recent_year, "\n",
-          sum_nex, " of ", non_na_obs, " measurements (",
-          round(100 * (sum_nex / non_na_obs), 1), "%) exceeded ", ExPoint, " ", units
-        ),
-        x = "Year", y = "% of measurements"
-      ) +
-      ggplot2::theme_minimal() +
-      ggplot2::theme(panel.grid.major.x = ggplot2::element_blank(),
-                     plot.title = ggplot2::element_text(hjust = 0.5))
+    # Plot (ggplot bar; wrap with plotly in your UI if desired)
+    p <- if (isTRUE(show_plot)) {
+      ggplot2::ggplot(histdata, ggplot2::aes(x = Year, y = percent_ex)) +
+        ggplot2::geom_bar(stat = "identity", fill = "lightgray") +
+        ggplot2::scale_x_continuous(breaks = seq(min(histdata$Year), max(histdata$Year), by = 1)) +
+        ggplot2::ylim(0, 100) +
+        ggplot2::labs(
+          title = paste0(
+            sitename, ", ", dispname, ", ", oldest_year, "-", recent_year, "\n",
+            sum_nex, " of ", non_na_obs, " measurements (",
+            round(100 * (sum_nex / non_na_obs), 1), "%) exceeded ", ExPoint, " ", units
+          ),
+          x = "Year", y = "% of measurements"
+        ) +
+        ggplot2::theme_minimal() +
+        ggplot2::theme(
+          panel.grid.major.x = ggplot2::element_blank(),
+          plot.title         = ggplot2::element_text(hjust = 0.5)
+        )
+    } else {
+      ggplot2::ggplot()
+    }
     
-    # Assemble text bullets (keeps your HTML wrapper compatible)
+    # Summary bullets + optional per-year bullets
     extext <- c(
       paste0("In the most recent year of data, ", recent_year, ", ", grammar1, " at ", sitename, "."),
       paste0("In all years of data, ", oldest_year, " through ", recent_year, ", ", grammar2, " at ", sitename, ".")
     )
     extext_bullets <- paste0("<li>", extext, "</li>", collapse = "")
     
-    # Compose HTML summary fragment (heading + bullets)
-    # Match legacy style used by exDUM()
-    has_exceedances <- sum_nex > 0
-    
-    # Build per-year bullets if you still want them (optional)
     alt_raw <- character(0)
-    if (has_exceedances) {
+    if (sum_nex > 0) {
       for (i in seq_len(nrow(histdata))) {
         nex  <- histdata$nex[i]
         ntot <- histdata$ntot[i]
@@ -285,85 +340,174 @@ build_exceed_site_package <- function(wd, park, site, char, show_plot = TRUE) {
     alt_bullets  <- if (length(alt_raw)) paste0("<li>", alt_raw, "</li>", collapse = "") else ""
     alt_bullets2 <- if (length(alt_raw)) paste0("<ul>", alt_bullets, "</ul>") else ""
     
+    # Exceedances Summary (for has_exceedances)
     html_extext <- paste0(
-        "<p><b><span style='font-size: 18px;'>Exceedances Summary:</span></b></p>",
-        "<ul>",
-        extext_bullets,        # already contains <li>...</li> elements
-        alt_bullets2,
-        "</ul>"
-      )
-    # Return the package for this site (same names your UI expects)
-    list(
-      df             = df,
-      total_obs      = total_obs,
-      non_na_obs     = non_na_obs,
-      LowerThreshold = lower_desc,
-      UpperThreshold = upper_desc,
-      LowerPoint     = lower_pt,
-      UpperPoint     = upper_pt,
-      Sitename       = sitename,
-      Characteristic = dispname,
-      Unit           = units,
-      exdf           = exdf,
-      desc_exdf      = desc_exdf,
-      histdata       = histdata,
-      recent_year    = recent_year,
-      oldest_year    = oldest_year,
-      sum_nex        = sum_nex,
-      sum_ntot       = sum_ntot,
-      ExPoint        = ExPoint,
-      grammar1       = grammar1,
-      grammar2       = grammar2,
-      extext         = extext,
-      extext_bullets = extext_bullets,
-      html_extext    = html_extext,
-      p              = p,
-      has_exceedances= has_exceedances
+      "<p><b><span style='font-size: 18px;'>Exceedances Summary:</span></b></p>",
+      "<ul>",
+      extext_bullets,  # already contains <li>...</li>
+      alt_bullets2,
+      "</ul>"
     )
-  
-  }
-  # Heading + summary bullets (+ per-year bullets if present)
-  else{
     
-    html_extext <- 
-      ifelse(
-        isTRUE(can_have_exceedances),
-        dplyr::case_when(
-          is.na(upper_pt) && !is.na(lower_pt) ~ sprintf("<p><b><span style='font-size: 18px;'>%s\nNo measurements of %s exceeded %s %s at %s.</span></b></p>", lower_desc, dispname, lower_pt, units, sitename),
-          !is.na(upper_pt) && is.na(lower_pt) ~ sprintf("<p><b><span style='font-size: 18px;'>%s\nNo measurements of %s exceeded %s %s at %s.</span></b></p>", upper_desc, dispname, upper_pt, units, sitename),
-          !is.na(upper_pt) && !is.na(lower_pt) ~ sprintf("<p><b><span style='font-size: 18px;'>%s\n%s\nNo %s measurements were outside the range %s to %s %s at %s.</span></b></p>",lower_desc, upper_desc, dispname, lower_pt, upper_pt, units, sitename),
-          TRUE ~ ""
-        ),
-        sprintf("<p><b><span style='font-size: 18px;'>There is no water quality threshold for parameter %s at %s</span></b></p>",dispname,sitename) 
+    # Return (same shape your UI expects)
+    return(list(
+      df              = df,
+      total_obs       = total_obs,
+      non_na_obs      = non_na_obs,
+      LowerThreshold  = lower_desc,
+      UpperThreshold  = upper_desc,
+      LowerPoint      = lower_pt,
+      UpperPoint      = upper_pt,
+      Sitename        = sitename,
+      Characteristic  = dispname,
+      Unit            = units,
+      exdf            = exdf,
+      desc_exdf       = desc_exdf,
+      histdata        = histdata,
+      recent_year     = recent_year,
+      oldest_year     = oldest_year,
+      sum_nex         = sum_nex,
+      sum_ntot        = sum_ntot,
+      ExPoint         = ExPoint,
+      grammar1        = grammar1,
+      grammar2        = grammar2,
+      extext          = extext,
+      extext_bullets  = extext_bullets,
+      html_extext     = html_extext,
+      p               = p,
+      has_exceedances = TRUE
+    ))
+  }
+  
+  # -------------------------
+  # No exceedances observed
+  # -------------------------
+  if (isTRUE(can_have_exceedances)) {
+    if (!is.na(lower_pt) && is.na(upper_pt)) {
+      # LOWER ONLY: precise comparator-negation
+      html_extext <- sprintf(
+        "<p><b><span style='font-size: 18px;'>%s</span></b><br/>No %s measurements were %s (%s) %s %s at %s.</p>",
+        lower_line,
+        dispname,
+        lower_phrase,                # e.g., "less than or equal to"
+        lower_symbol_a11y, lower_pt, # e.g., "≤ 600"
+        units,
+        sitename
       )
-
-    # Return the package for this site (same names UI expects)
-    list(
-      df             = df,
-      total_obs      = total_obs,
-      non_na_obs     = non_na_obs,
-      LowerThreshold = lower_desc,
-      UpperThreshold = upper_desc,
-      LowerPoint     = lower_pt,
-      UpperPoint     = upper_pt,
-      Sitename       = sitename,
-      Characteristic = dispname,
-      Unit           = units,
-      exdf           = rows,
-      desc_exdf      = rows,
-      histdata       = rows,
-      recent_year    = NA,
-      oldest_year    = NA,
-      sum_nex        = 0,
-      sum_ntot       = 0,
-      ExPoint        = NA,
-      grammar1       = "",
-      grammar2       = "",
-      extext         = "",
-      extext_bullets = "",
-      html_extext    = html_extext,
-      p              = ggplot(),
-      has_exceedances= has_exceedances
+    } else if (is.na(lower_pt) && !is.na(upper_pt)) {
+      # UPPER ONLY: precise comparator-negation
+      html_extext <- sprintf(
+        "<p><b><span style='font-size: 18px;'>%s</span></b><br/>No %s measurements were %s (%s) %s %s at %s.</p>",
+        upper_line,
+        dispname,
+        upper_phrase,                # e.g., "greater than or equal to"
+        upper_symbol_a11y, upper_pt, # e.g., "≥ 600"
+        units,
+        sitename
+      )
+    } else {
+      # BOTH: precise negation using *metadata-based* comparators
+      html_extext <- sprintf(
+        "<p><b><span style='font-size: 18px;'>%s</span></b><br/>
+   <b><span style='font-size: 18px;'>%s</span></b><br/>
+   No %s measurements were %s (%s) %s or %s (%s) %s %s at %s.</p>",
+        lower_line,
+        upper_line,
+        dispname,
+        lower_phrase, lower_symbol_a11y, lower_pt,
+        upper_phrase, upper_symbol_a11y, upper_pt,
+        units,
+        sitename
+      )
+      # If you prefer explicit disjunction instead of "outside the range", use:
+      # html_extext <- sprintf(
+      #   "<p><b><span style='font-size: 18px;'>%s</span></b><br/><b><span style='font-size: 18px;'>%s</span></b><br/>No %s measurements were %s (%s %s) or %s (%s %s) at %s.</p>",
+      #   lower_line, upper_line, dispname,
+      #   lower_phrase, lower_symbol, format(lower_pt, trim = TRUE),
+      #   upper_phrase, upper_symbol, format(upper_pt, trim = TRUE),
+      #   sitename
+      # )
+    }
+  } else {
+    html_extext <- sprintf(
+      "<p><b><span style='font-size: 18px;'>There is no water quality threshold for parameter %s at %s.</span></b></p>",
+      dispname, sitename
     )
   }
+  
+  # Return a consistent shape (placeholders where not applicable)
+  list(
+    df              = df,
+    total_obs       = total_obs,
+    non_na_obs      = non_na_obs,
+    LowerThreshold  = lower_desc,
+    UpperThreshold  = upper_desc,
+    LowerPoint      = lower_pt,
+    UpperPoint      = upper_pt,
+    Sitename        = sitename,
+    Characteristic  = dispname,
+    Unit            = units,
+    exdf            = rows,       # no exceedances rows
+    desc_exdf       = rows,       # placeholder (not used in no-exceedances UI)
+    histdata        = rows,       # placeholder (not used in no-exceedances UI)
+    recent_year     = NA,
+    oldest_year     = NA,
+    sum_nex         = 0,
+    sum_ntot        = 0,
+    ExPoint         = NA,
+    grammar1        = "",
+    grammar2        = "",
+    extext          = "",
+    extext_bullets  = "",
+    html_extext     = html_extext,
+    p               = ggplot2::ggplot(),
+    has_exceedances = FALSE
+  )
 }
+
+# -------------------------------------------------------------------
+# Helpers: operator -> phrase/symbol, and non-empty guard
+# -------------------------------------------------------------------
+
+# Map comparator code to readable phrase
+.op_phrase <- function(op) {
+  switch(tolower(op),
+         "lt" = "less than",
+         "le" = "less than or equal to",
+         "gt" = "greater than",
+         "ge" = "greater than or equal to",
+         op
+  )
+}
+
+# Map comparator code to math symbol
+.op_symbol <- function(op) {
+  switch(tolower(op),
+         "lt" = "<",
+         "le" = "≤",
+         "gt" = ">",
+         "ge" = "≥",
+         op
+  )
+}
+
+# Guard: return NULL if empty/missing
+.nonempty <- function(x) {
+  if (is.null(x) || is.na(x) || (is.character(x) && !nzchar(x))) return(NULL)
+  x
+}
+
+# Map NCRNWater condition string -> internal op code
+.map_cond_to_op <- function(cond) {
+  # cond is like "lt", "le", "gt", "ge"
+  switch(tolower(cond),
+         "lt" = "lt",
+         "le" = "le",
+         "gt" = "gt",
+         "ge" = "ge",
+         NA    # fallback
+  )
+}
+
+# Screen readers sometimes read operators like > and < oddly. You can add aria-label to your comparator symbols.
+symbol_with_aria <- function(sym, phrase) sprintf("<span aria-label='%s'>%s</span>", phrase, sym)
