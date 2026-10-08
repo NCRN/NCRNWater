@@ -409,11 +409,13 @@ build_exceed_site_package <- function(wd, park, site, char, show_plot = TRUE) {
     } else {
       # BOTH: precise negation using *metadata-based* comparators
       html_extext <- sprintf(
-        "<p><b><span style='font-size: 18px;'>%s (%s)</span></b><br/>
-   <b><span style='font-size: 18px;'>%s (%s)</span></b><br/>
+        "<p><b><span style='font-size: 18px;'>%s</span></b><br/>
+   <b><span style='font-size: 18px;'>%s</span></b><br/>
+   <b><span style='font-size: 18px;'>(%s)</span></b><br/>
    No %s measurements were %s (%s) %s or %s (%s) %s %s at %s.</p>",
-        lower_line, reference,
-        upper_line, reference,
+        lower_line,
+        upper_line,
+        reference,
         dispname,
         lower_phrase, lower_symbol_a11y, lower_pt,
         upper_phrase, upper_symbol_a11y, upper_pt,
