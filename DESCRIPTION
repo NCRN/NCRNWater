@@ -61,6 +61,7 @@ Collate:
     'filterActive.R'
     'importNCRNWater.R'
     'nonparTrends.R'
+    'run_shiny_app.R'
     'shinyConfig.R'
     'shinyExceedService.R'
     'shinyHydrationService.R'
