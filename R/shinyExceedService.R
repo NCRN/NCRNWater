@@ -12,7 +12,10 @@
 #'         \code{\link[NCRNWater]{getCharInfo}}.
 #'   \item Computes per-sample **threshold exceedances** using
 #'         \code{\link[NCRNWater]{exceed}} with \code{points = "both"} and
-#'         inclusive comparators (\code{lower_op = "le"}; \code{upper_op = "ge"}).
+#'         comparators derived from metadata (\code{LowerPointCondition},
+#'         \code{UpperPointCondition}: one of \code{"lt"}, \code{"le"},
+#'         \code{"gt"}, \code{"ge"}). If a condition is missing but a threshold
+#'         point is present, the service defaults to inclusive comparators.
 #'   \item Summarizes counts by year (total vs. exceed) and percent exceeded.
 #'   \item Builds a ggplot bar chart (your UI can wrap with \code{plotly::ggplotly()}).
 #'   \item Composes short grammar strings and HTML bullet points for the summary text.
