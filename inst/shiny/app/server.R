@@ -2714,10 +2714,16 @@ output$SeriesRefSummaryMultiple<-renderUI(HTML(SeriesRefSummaryMultiple()))
   # netzoom<-dplyr::case_when(NETWORK == "NCRN" ~ 9,
   #                          NETWORK == "NETN" ~ 7)
 
-    leaflet() %>%
-      # "Map" = Standard OpenStreetMap
-      leaflet::addProviderTiles(providers$OpenStreetMap, group = "Map") %>%
-      leaflet::setView(lng = netlon, lat = netlat , zoom = netzoom) 
+    
+    leaflet(options = leafletOptions(preferCanvas = TRUE)) %>%
+      leaflet::addProviderTiles(
+        providers$OpenStreetMap,
+        group   = "Map",
+        # optional tuning
+        options = providerTileOptions(noWrap = TRUE)
+      ) %>%
+      leaflet::setView(lng = netlon, lat = netlat , zoom = netzoom) %>%
+      leaflet::addScaleBar(position = "bottomright") 
      })
 
   NPSAttrib<-HTML("<a href='https://www.nps.gov/npmap/disclaimer/' target='_blank' rel='noopener noreferrer'>Disclaimer</a> | 
