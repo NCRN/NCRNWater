@@ -2705,25 +2705,25 @@ output$SeriesRefSummaryMultiple<-renderUI(HTML(SeriesRefSummaryMultiple()))
     map_values$netlon <- netlon
     map_values$netzoom <- netzoom
 
-  #netzoom<- ifelse(max(lat_range, long_range) >5, 7, 9)
-
-  # netlat<-dplyr::case_when(NETWORK == "NCRN" ~ 39.25,
-  #                          NETWORK == "NETN" ~ 42.5)
-  # netlon<-dplyr::case_when(NETWORK == "NCRN" ~ -77,
-  #                          NETWORK == "NETN" ~ -71.6)
-  # netzoom<-dplyr::case_when(NETWORK == "NCRN" ~ 9,
-  #                          NETWORK == "NETN" ~ 7)
-
     
-    leaflet(options = leafletOptions(preferCanvas = TRUE)) %>%
-      leaflet::addProviderTiles(
-        providers$OpenStreetMap,
-        group   = "Map",
-        # optional tuning
-        options = providerTileOptions(noWrap = TRUE)
-      ) %>%
-      leaflet::setView(lng = netlon, lat = netlat , zoom = netzoom) %>%
-      leaflet::addScaleBar(position = "bottomright") 
+    # Build the map and add basemaps from config (defaults to OpenStreetMap if none provided)
+    m <- leaflet::leaflet(options = leaflet::leafletOptions(preferCanvas = TRUE)) %>%
+      add_configured_basemaps(cfg) %>%
+      leaflet::setView(lng = netlon, lat = netlat, zoom = netzoom) %>%
+      leaflet::addScaleBar(position = "bottomright")
+    
+    base_groups <- tryCatch(vapply(cfg$map$basemaps, function(x) x$group %||% x$name, character(1)),
+                            error = function(e) character(0))
+    if (length(unique(base_groups)) > 1) {
+      m <- m %>%
+        leaflet::addLayersControl(
+          baseGroups = unique(base_groups),
+          options    = leaflet::layersControlOptions(collapsed = TRUE)
+        )
+    }
+    
+    m
+    
      })
 
   NPSAttrib<-HTML("<a href='https://www.nps.gov/npmap/disclaimer/' target='_blank' rel='noopener noreferrer'>Disclaimer</a> | 

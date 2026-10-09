@@ -32,6 +32,30 @@ default:
   time:
     min_year: "auto"
     max_year: "auto"
+    
+  map:
+    default_provider: "OpenStreetMap"
+  
+    basemaps:
+      - name: "NPS Atlas Light"
+        group: "NPS Light"
+        url: "https://atlas-stg.geoplatform.gov/styles/v1/atlas-user/ck58pyquo009v01p99xebegr9/tiles/256/{z}/{x}/{y}@2x?access_token={API_KEY}"
+        attribution: "© National Park Service, © OpenStreetMap contributors"
+        token_keys:
+          API_KEY: "ENV:NPS_MAP_API_KEY"   # resolved at runtime from environment
+  
+      - name: "NPS Atlas Slate"
+        group: "NPS Slate"
+        url: "https://atlas-stg.geoplatform.gov/styles/v1/atlas-user/ck5cpvc2e0avf01p9zaw4co8o/tiles/256/{z}/{x}/{y}@2x?access_token={API_KEY}"
+        attribution: "© National Park Service, © OpenStreetMap contributors"
+        token_keys:
+          API_KEY: "ENV:NPS_MAP_API_KEY"
+  
+      # Keep a token‑free default as a fallback / option
+      - name: "OpenStreetMap"
+        group: "OpenStreetMap"
+        provider: "OpenStreetMap"
+        attribution: "© OpenStreetMap contributors"
 
 # Network profiles that override defaults for each provided kwarg
 NCRN:
@@ -75,4 +99,14 @@ NETN:
   files:
     dataname: "wqp.csv"
     metadataname: "wqp_ncrnwater_metadata.csv"
+
+GLKN:
+  app:
+    app_name: "Stream Water Quality"
+    network_code: "GLKN"
+    network_long: "Great Lakes Network"
+
+  files:
+    dataname: "wqp_glkn.csv"
+    metadataname: "MetaData.csv"
 

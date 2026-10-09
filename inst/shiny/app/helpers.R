@@ -368,3 +368,67 @@ photoChooser2<-function(input, output, session, data, park, site, years, imgs, s
   
   return(reactive(input$PhotoPhoto2))
 }
+
+
+resolve_tokens <- function(url, token_keys) {
+  # token_keys example: list(API_KEY = "ENV:NPS_MAP_API_KEY")
+  if (is.null(token_keys) || !length(token_keys)) return(url)
+  out <- url
+  for (nm in names(token_keys)) {
+    v <- token_keys[[nm]]
+    # Allow ENV:VAR or raw string
+    val <- if (is.character(v) && startsWith(v, "ENV:")) Sys.getenv(sub("^ENV:", "", v), "")
+    else v
+    out <- gsub(paste0("\\{", nm, "\\}"), val, out, fixed = FALSE)
+  }
+  out
+}
+
+# --- Basemap helpers ----------------------------------------------------------
+
+`%||%` <- function(a, b) if (!is.null(a)) a else b
+
+# Replace token placeholders in a tile URL template using ENV values or raw strings.
+# Example: token_keys = list(API_KEY = "ENV:NPS_MAP_API_KEY")   -> reads Sys.getenv("NPS_MAP_API_KEY")
+resolve_tokens <- function(url, token_keys) {
+  if (is.null(token_keys) || !length(token_keys)) return(url)
+  out <- url
+  for (nm in names(token_keys)) {
+    src <- token_keys[[nm]]
+    val <- if (is.character(src) && startsWith(src, "ENV:")) Sys.getenv(sub("^ENV:", "", src), "")
+    else src
+    out <- gsub(paste0("\\{", nm, "\\}"), val, out, fixed = FALSE)
+  }
+  out
+}
+
+# Add configured basemaps to a Leaflet map object from cfg$map$basemaps.
+# Supports either providers (e.g., "OpenStreetMap") or raw XYZ templates (url + attribution).
+add_configured_basemaps <- function(m, cfg) {
+  basemaps <- tryCatch(cfg$map$basemaps, error = function(e) NULL)
+  default_provider <- tryCatch(cfg$map$default_provider, error = function(e) "OpenStreetMap")
+  
+  # Fallback: just OpenStreetMap if no basemaps were specified
+  if (is.null(basemaps) || !length(basemaps)) {
+    return(m %>% leaflet::addProviderTiles(providers[[default_provider %||% "OpenStreetMap"]], group = default_provider))
+  }
+  
+  for (bm in basemaps) {
+    grp  <- bm$group %||% bm$name %||% "Basemap"
+    attr <- bm$attribution %||% ""
+    
+    if (!is.null(bm$provider)) {
+      # Use Leaflet provider catalog (e.g., providers$OpenStreetMap, providers$OpenTopoMap)
+      prov_obj <- providers[[bm$provider]]
+      m <- m %>% leaflet::addProviderTiles(prov_obj, group = grp)
+    } else if (!is.null(bm$url)) {
+      # Raw XYZ tiles with optional tokens and subdomains
+      url <- resolve_tokens(bm$url, bm$token_keys)
+      subdomains <- if (!is.null(bm$subdomains)) strsplit(bm$subdomains, ",")[[1]] else NULL
+      tile_opts  <- if (is.null(subdomains)) leaflet::tileOptions() else leaflet::tileOptions(subdomains = subdomains)
+      m <- m %>% leaflet::addTiles(group = grp, urlTemplate = url, attribution = attr, options = tile_opts)
+    }
+  }
+  
+  m
+}
