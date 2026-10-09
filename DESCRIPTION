@@ -1,8 +1,8 @@
 Package: NCRNWater
 Type: Package
 Title: Data analysis and visualization for NPS I&M water monitoring
-Version: 1.0.1
-Date: 2026-04-30
+Version: 1.0.3
+Date: 2026-10-09
 Author: John Paul Schmit, Aaron Weed, Kate Miler, Charles Wainright
 Maintainer: John Paul Schmit <john_schmit@nps.gov>, Charles Wainright <charles_wainright@nps.gov>
 Encoding: UTF-8
@@ -62,6 +62,7 @@ Collate:
     'importNCRNWater.R'
     'nonparTrends.R'
     'run_shiny_app.R'
+    'run_shiny_example.R'
     'shinyConfig.R'
     'shinyExceedService.R'
     'shinyHydrationService.R'

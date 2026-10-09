@@ -13,7 +13,7 @@ This is an R package used to process water quality monitoring data.
 
 ## NEWS
 
-### NCRNWater 1.0.2 2026-08-25
+### NCRNWater 1.0.3 2026-10-09
 
 #### New features
 
@@ -25,18 +25,39 @@ Use a profile in the package YAML, provide a user YAML, or override keys at runt
 ```r
 library(NCRNWater)
 
-# A) Using packaged profile (expects files.datadir/<network>/wqp.csv etc.)
-run_shiny_app(profile = "NCRN")
+# Quick demo (uses the packaged example dataset staged into a temp sandbox)
+NCRNWater::run_shiny_example()
 
-# B) Using a user-supplied YAML
-run_shiny_app(config_file = "/path/to/my/shiny.yml")
+# A) Use a packaged profile (expects files.datadir/<network>/wqp.csv etc.)
+NCRNWater::run_shiny_app(profile = "NCRN")
 
-# C) Overriding keys at runtime
-run_shiny_app(
+# B) Use a user-supplied YAML (full control over paths & settings)
+NCRNWater::run_shiny_app(config_file = "/path/to/my/shiny.yml")
+
+# C) Override specific keys at runtime (no YAML required)
+NCRNWater::run_shiny_app(
   profile   = "NCRN",
-  overrides = list(files = list(datadir = "/path/to/MyWaterData"))
+  overrides = list(files = list(datadir = "/path/to/Data"))
 )
 ```
+
+If you want to run the shiny app with your own data, your project needs a folder structure like this
+```
+Data (required, yaml.files.datadir)
+├── NCRN (required, yaml.profile)
+│   ├── img (optional, photo viewer, yaml.files.imagesdir)
+│   │   ├── ANTI_SHCK_20060228 (1).jpg
+│   │   ├── ANTI_SHCK_20060518 (1).jpg
+│   │   ├── ANTI_SHCK_20060628 (1).jpg
+│   ├── splash (optional, app-loading splash screens, yaml.files.splashdir)
+│   │   ├── dwq_NCRN_ANTI_SHCK_2024-06-04_20240604-131442.jpg
+│   │   ├── dwq_NCRN_MONO_BUCK_2024-06-04_20240604-084406.jpg
+│   │   └── dwq_NCRN_PRWI_BONE_2024-06-11_20240611-130821.jpg
+│   ├── wqp.csv (required, yaml.files.dataname)
+└── └── wqp_ncrnwater_metadata.csv (required, yaml.files.metadataname)
+
+```
+
 Example data are provided:
 - **NCRNWater::example_data(assign = TRUE)** Reads example data into dataframes: `wqp` and `wqp_metadata`.
 - **NCRNWater::example_data(assign = FALSE)** Reads example into a list of dataframes: `example$wqp` and `example$wqp_metadata`.
