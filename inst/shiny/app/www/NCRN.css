@@ -1,0 +1,52 @@
+.col-sm-12, .col-sm-3, .col-sm-9{
+  padding: 2px
+}
+
+
+hr{
+  background-color: black;
+  height: 1px;
+  margin: 5px
+}
+
+#GoodC, #GoodColor, #TheshPColor, #BadColor, #OutC, #OutColor, #ThreshLCol,#ThColor, #TrendLCol, #TrColor, #PointSli, #LineSliPan, #LegCheck {
+  display: inline-block;
+  width: 130px
+}
+
+.control-label {
+  display: inline
+}
+
+
+
+
+/*
+.shiny-text-output{
+  font-size:18px
+}
+
+
+
+
+.shiny-bound-input {
+  margin-left: 10px
+}
+
+
+h5{
+  margin: 5px 0px
+} 
+
+.span8 p{
+  font-size: 16px
+}
+
+
+#WaterTable{
+  width: 650px
+}
+
+*/
+
+

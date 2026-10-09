@@ -16,6 +16,27 @@ This is an R package used to process water quality monitoring data.
 ### NCRNWater 1.0.2 2026-08-25
 
 #### New features
+
+Water shiny app included in NCRNWater
+#### Running the Shiny app
+
+Use a profile in the package YAML, provide a user YAML, or override keys at runtime.
+
+```r
+library(NCRNWater)
+
+# A) Using packaged profile (expects files.datadir/<network>/wqp.csv etc.)
+run_shiny_app(profile = "NCRN")
+
+# B) Using a user-supplied YAML
+run_shiny_app(config_file = "/path/to/my/shiny.yml")
+
+# C) Overriding keys at runtime
+run_shiny_app(
+  profile   = "NCRN",
+  overrides = list(files = list(datadir = "/path/to/MyWaterData"))
+)
+```
 Example data are provided:
 - **NCRNWater::example_data(assign = TRUE)** Reads example data into dataframes: `wqp` and `wqp_metadata`.
 - **NCRNWater::example_data(assign = FALSE)** Reads example into a list of dataframes: `example$wqp` and `example$wqp_metadata`.

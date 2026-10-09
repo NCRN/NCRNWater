@@ -1,0 +1,127 @@
+.container-fluid{                /* This sets the eniter page to 700px wide to match space in NPS frame*/
+  width: 700px;
+  padding: 0px
+}
+
+body{                     /*  This makes the site fit in the frame correctly, otherwise it is offset */
+  padding: 0px;
+  outline-offset:0px
+} 
+
+.row-fluid{                                                                /* set to NPS fonts */
+  font-family: 'Frutiger, Arial, Verdana, Helvetica, sans-serif'
+}
+
+
+
+
+/*.row-fluid:first-child{ */
+#NPSBanner{            /* eliminates dispaly of the .span12 header with NPS banner */
+  display:none
+}
+ 
+
+.span12 p{                   /* these are the setting for the not-displayed header */
+  color: white;
+  font-family: Arial;
+  padding-left:20px
+}
+
+
+
+
+.span4 {                   /* this sets the width of the control pannel to the width of the screen */
+  min-width:700px
+}
+
+.span4 .well {            /*eliminates padding around the control panel except a little on left side */
+padding: 0px 0px 0px 8px
+
+}
+
+  
+#parkControl {                  /* makes park dropdown inline block */
+  display: inline-block;
+  max-width: 220px         
+}
+
+#streamControl {                      /* makes stream dropdown inline block and provides spacing between dropdowns */
+  display: inline-block;
+  max-width: 220px;
+  margin: 0px 5px
+}
+
+#ParameterControl {                  /* makes parameter dropdown inline block */
+  display: inline-block;
+  max-width: 220px
+}
+
+#yearControl{
+  margin-left: 100px
+  }
+
+#yearControl .control-label {
+display: inline;
+margin: 0px 20px
+}
+
+#ThreshHeader{
+  display: inline;
+  margin:0px 10px 0px 0px
+}
+#TrendhHeader{
+  display: inline;
+  margin:0px 10px 0px 0px
+}
+#DownloadHeader{
+  display: inline;
+  margin:0px 10px 0px 0px
+}
+
+
+label.checkbox {                  /*puts checkbox labels on same line as checkbox */
+  display: inline-block;
+  margin-right: 10px;
+  margin-bottom: 0px
+}
+
+
+.jslider{                             /* controls the with of sliders and put label text on same line as the slider */
+  max-width: 220px;
+  display: inline-block;
+  margin-left: 10px
+}
+
+hr{                                     /* controls the black horizontal lines that break up section in the control area */
+  background-color: black;
+  height: 1px;
+  margin: 5px
+}
+                                       /* sets the width of the graph display area */
+.span8 {
+  min-width: 700px
+}
+
+.shiny-text-output{            /*sets characteristics for the display below the graph */
+  font-size: 18px;
+  font-family: 'Frutiger, Arial, Verdana, Helvetica, sans-serif'
+}
+
+label.control-label {
+    display: inline
+}
+
+#GoodC, #GoodColor, #TheshPColor, #BadColor, #OutC, #OutColor, #ThreshLCol,#ThColor, #TrendLCol, #TrColor, #FontSli, #PointSli, #LineSliPan {
+  display: inline-block;
+  width: 130px
+}
+
+
+.span8 p{
+  font-size:16px
+}
+
+#WaterTable{
+  width: 650px
+}
+

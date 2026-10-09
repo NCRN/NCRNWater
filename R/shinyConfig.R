@@ -186,5 +186,10 @@ load_app_config <- function(profile = NULL,
     }
   }
   
+  # --- Caller overrides (wins over all) ---------------------------------------
+  if (is.list(overrides) && length(overrides)) {
+    cfg <- .merge(cfg, overrides)
+  }
+  
   cfg
 }

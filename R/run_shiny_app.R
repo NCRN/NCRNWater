@@ -57,6 +57,11 @@ run_shiny_app <- function(profile = "NCRN",
     use_options = TRUE  # keep if you want dev convenience
   )
   
+  # # HOTFIX: re-merge overrides in case loader ignored them
+  # if (is.list(overrides) && length(overrides)) {
+  #   cfg <- utils::modifyList(cfg, overrides, keep.null = TRUE)
+  # }
+  
   # Basic preflight on data paths (fail-fast, clear messages)
   network_code <- cfg$app$network_code
   datadir      <- cfg$files$datadir
@@ -69,14 +74,24 @@ run_shiny_app <- function(profile = "NCRN",
   meta_fp      <- file.path(network_dir, metaname)
   photos_dir   <- file.path(network_dir, imagesdir)
   
+  
   if (!file.exists(data_fp)) {
-    stop("Data file not found: ", data_fp,
-         "\nCheck YAML: files.datadir and files.dataname, and that your data directory is correct.")
+    stop(
+      "Data file not found: ", data_fp, "\n",
+      "Expected layout:\n  ",
+      cfg$files$datadir, "/", cfg$app$network_code, "/", cfg$files$dataname, "\n",
+      "Set 'files.datadir' via YAML or overrides."
+    )
   }
   if (!file.exists(meta_fp)) {
-    stop("Metadata file not found: ", meta_fp,
-         "\nCheck YAML: files.datadir and files.metadataname, and that your metadata file is correct.")
+    stop(
+      "Metadata file not found: ", meta_fp, "\n",
+      "Expected layout:\n  ",
+      cfg$files$datadir, "/", cfg$app$network_code, "/", cfg$files$metadataname, "\n",
+      "Set 'files.datadir' via YAML or overrides."
+    )
   }
+  
   # Photos are optional; handled gently in the app
   photos_available <- dir.exists(photos_dir)
   
@@ -89,6 +104,7 @@ run_shiny_app <- function(profile = "NCRN",
     wqx          = cfg$wqx$enabled
   )
   wd <- dh$wd
+  md_active <- dh$metadata_active
   
   # ---- 3) Late resolution of time bounds ('auto' -> numerics) ---------------
   if (identical(cfg$time$min_year, "auto") || identical(cfg$time$max_year, "auto")) {
@@ -105,19 +121,21 @@ run_shiny_app <- function(profile = "NCRN",
   
   # ---- 5) Inject bootstrap state for the app to read ------------------------
   options(
-    ncrnwater.cfg             = cfg,
-    ncrnwater.wd              = wd,
-    ncrnwater.splash          = splash,
-    ncrnwater.photos_dir      = if (photos_available) photos_dir else NULL,
-    ncrnwater.photos_available= photos_available
+    ncrnwater.cfg              = cfg,
+    ncrnwater.wd               = wd,
+    ncrnwater.metadata_active  = md_active,
+    ncrnwater.splash           = splash,
+    ncrnwater.photos_dir       = if (photos_available) photos_dir else NULL,
+    ncrnwater.photos_available = photos_available
   )
   on.exit({
     options(
-      ncrnwater.cfg             = NULL,
-      ncrnwater.wd              = NULL,
-      ncrnwater.splash          = NULL,
-      ncrnwater.photos_dir      = NULL,
-      ncrnwater.photos_available= NULL
+      ncrnwater.cfg              = NULL,
+      ncrnwater.wd               = NULL,
+      ncrnwater.metadata_active  = NULL,
+      ncrnwater.splash           = NULL,
+      ncrnwater.photos_dir       = NULL,
+      ncrnwater.photos_available = NULL
     )
   }, add = TRUE)
   

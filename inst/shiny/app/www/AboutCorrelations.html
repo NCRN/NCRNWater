@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    table {
+      border-collapse: collapse;
+      margin: auto;
+    }
+    th, td {
+      border: 1px solid #999;
+      padding: 2px;
+      text-align: center;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    tr:hover {
+      background-color: #e0e0e0;
+    }
+  </style>
+</head>
+<body>
+
+<p>The "Correlations" graph plots two parameters against each other. Each point on the graph is a pair of measurements taken on the same date at the same location. The "Correlations" graph shows the mean of the site visit's measurements when more than one measurement was taken for a parameter on one site visit.</p> 
+   
+<h4>Correlation Table</h4>   
+   
+<table>
+  <tr>
+    <th>Parameter 1</th>
+    <th>Parameter 2</th>
+    <th>Correlation Type</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>Air Temperature</td>
+    <td>Water Temperature</td>
+    <td>Positive</td>
+    <td>Higher air temperatures raise water temperature.</td>
+  </tr>
+  <tr>
+    <td>Conductivity</td>
+    <td>SPC / TDS / Salinity</td>
+    <td>Positive</td>
+    <td>All reflect dissolved ion concentrations.</td>
+  </tr>
+  <tr>
+    <td>Conductivity</td>
+    <td>Total N / Total P</td>
+    <td>Positive</td>
+    <td>Nutrient loading increases dissolved ion content.</td>
+  </tr>
+  <tr>
+    <td>Cross Section Depth</td>
+    <td>Wetted Width</td>
+    <td>Positive</td>
+    <td>Wider streams are often deeper in natural systems.</td>
+  </tr>
+  <tr>
+    <td>Discharge</td>
+    <td>ANC (Alkalinity)</td>
+    <td>Variable</td>
+    <td>Higher discharge can increase or decrease ANC.</td>
+  </tr>
+  <tr>
+    <td>Discharge</td>
+    <td>Cross Section Depth / Wetted Width</td>
+    <td>Positive</td>
+    <td>Greater flow expands stream cross-section.</td>
+  </tr>
+  <tr>
+    <td>Discharge</td>
+    <td>Velocity</td>
+    <td>Positive</td>
+    <td>Higher discharge usually increases flow speed.</td>
+  </tr>
+  <tr>
+    <td>Discharge</td>
+    <td>DO Concentration</td>
+    <td>Variable</td>
+    <td>Higher discharge can increase DO via aeration or dilute it depending on conditions.</td>
+  </tr>
+  <tr>
+    <td>pH</td>
+    <td>ANC (Alkalinity)</td>
+    <td>Positive</td>
+    <td>ANC buffers pH; higher ANC stabilizes or raises pH.</td>
+  </tr>
+  <tr>
+    <td>Salinity</td>
+    <td>TDS / Conductivity / SPC</td>
+    <td>Positive</td>
+    <td>All are measures of dissolved ions.</td>
+  </tr>
+  <tr>
+    <td>SPC (Specific Conductance)</td>
+    <td>TDS / Salinity / Conductivity</td>
+    <td>Positive</td>
+    <td>SPC is temperature-corrected conductivity; all are highly correlated.</td>
+  </tr>
+  <tr>
+    <td>TDS</td>
+    <td>Conductivity / SPC / Salinity</td>
+    <td>Positive</td>
+    <td>More dissolved ions raise TDS and conductivity.</td>
+  </tr>
+  <tr>
+    <td>Total N</td>
+    <td>Total P</td>
+    <td>Positive</td>
+    <td>Common sources (agriculture, sewage) raise both nutrients.</td>
+  </tr>
+  <tr>
+    <td>Total N or P</td>
+    <td>DO Concentration</td>
+    <td>Negative (indirect)</td>
+    <td>Nutrients promote eutrophication, which may lead to oxygen depletion.</td>
+  </tr>
+  <tr>
+    <td>Velocity</td>
+    <td>DO Concentration</td>
+    <td>Positive (general)</td>
+    <td>Higher velocity enhances mixing and oxygenation.</td>
+  </tr>
+  <tr>
+    <td>Water Temperature</td>
+    <td>DO Concentration</td>
+    <td>Negative</td>
+    <td>Warmer water holds less oxygen.</td>
+  </tr>
+  <tr>
+    <td>Water Temperature</td>
+    <td>DO Saturation</td>
+    <td>Negative</td>
+    <td>Saturation decreases with higher temperature.</td>
+  </tr>
+  <tr>
+    <td>Water Temperature</td>
+    <td>pH</td>
+    <td>Negative (general)</td>
+    <td>pH can decline with increasing temperature due to chemical equilibria.</td>
+  </tr>
+  <tr>
+    <td>Water Temperature</td>
+    <td>Conductivity / SPC</td>
+    <td>Positive (slight)</td>
+    <td>Ion mobility increases with temperature, slightly increasing conductivity.</td>
+  </tr>
+  <tr>
+    <td>Water Temperature</td>
+    <td>TDS</td>
+    <td>Neutral</td>
+    <td>TDS itself doesn't change, but its conductivity response does.</td>
+  </tr>
+</table>   
+   
+<h4>Downloads</h4>
+
+<p>You can download the graph in .png format by mousing over the graph and then clicking the camera icon.</p>
+
+<h4>Graphics Options</h4>
+
+<p>Clicking the Graphics Options button will allow you to adjust the graph height and width, the point and line color and size, and the font size.</p>
+  
+</body>
+</html>
