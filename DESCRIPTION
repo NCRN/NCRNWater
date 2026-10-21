@@ -26,7 +26,12 @@ Imports:
     season,
     tidyr,
     viridis,
-    methods
+    methods,
+    shiny,
+    leaflet,
+    DT,
+    openair,
+    NADA
 Suggests:
     RODBC,
     NADA,
