@@ -438,7 +438,7 @@ shinyUI(
     
     tabPanel(
       h4("About")
-      ,shiny::includeHTML("www/projectintro.html")
+      ,shiny::includeHTML("www/AboutNCRN.html")
       )
     )
   )
