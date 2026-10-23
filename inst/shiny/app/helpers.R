@@ -432,3 +432,9 @@ add_configured_basemaps <- function(m, cfg) {
   
   m
 }
+
+getThresholdText<-function(object, parkcode,sitecode,charname){    
+  x<-c(getCharInfo(object, parkcode=parkcode, sitecode=sitecode, charname=charname, info="LowerDescription"),
+       getCharInfo(object, parkcode=parkcode, sitecode=sitecode, charname=charname, info="UpperDescription"))
+  return(x[!is.na(x)])
+}
