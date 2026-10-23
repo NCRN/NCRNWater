@@ -2611,7 +2611,7 @@ output$SeriesRefSummaryMultiple<-renderUI(HTML(SeriesRefSummaryMultiple()))
       dplyr::filter(SiteCode %in% active_sites)
   
   #CharIndex is a true/false of characters that have thresholds
-  CharIndex<-{getCharInfo(WaterData,info="LowerPoint") %>% is.na %>% not} | {getCharInfo(WaterData,info="UpperPoint") %>% is.na %>% not} 
+  CharIndex<-{getCharInfo(WaterData,info="LowerPoint") %>% { !is.na(.) }} | {getCharInfo(WaterData,info="UpperPoint") %>% { !is.na(.) }} 
   NPSchars<-getCharInfo(WaterData, info="CharName")[CharIndex] %>% unique
   names(NPSchars)<-getCharInfo(WaterData, info="DisplayName")[CharIndex] %>% unique
   output$MapChars<-renderUI( selectizeInput(inputId="MapChar",label="Parameter", choices=NPSchars[order(names(NPSchars))] ))
