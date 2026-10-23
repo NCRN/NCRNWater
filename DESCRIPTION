@@ -1,15 +1,17 @@
 Package: NCRNWater
 Type: Package
 Title: Data analysis and visualization for NPS I&M water monitoring
-Version: 1.0.3
-Date: 2026-10-09
+Version: 1.1.0
+Date: 2026-10-23
 Author: John Paul Schmit, Aaron Weed, Kate Miler, Charles Wainright
-Maintainer: John Paul Schmit <john_schmit@nps.gov>, Charles Wainright <charles_wainright@nps.gov>
+Maintainer: Charles Wainright <charles_wainright@nps.gov>
 Encoding: UTF-8
-Description: This package is designed to analyze and visualize data from the
-    National Park Service Inventory and Monitoring Program. Package was originally
-    designed for the National Capital Region, and has been expanded to cover the 
-    Northeast Temperate Network.
+Description: Tools to analyze and visualize water quality monitoring data in
+    water quality portal (WQP) format. Originally developed for National Park Service
+    Inventory and Monitoring Program's National Capital Region Network, but 
+    can work for others with WQP-formatted data. 
+    The package's provided shiny app should work for a WQP-formatted dataset, if the required metadata are provided.
+    `NCRNWater::example_data(assign=T)` to explore example data and metadata.
 License: Public Domain
 LazyData: true
 Depends:
