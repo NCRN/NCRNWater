@@ -14,6 +14,73 @@ if (!is.null(cfg$app$about$path) && file.exists(cfg$app$about$path)) {
   )
 }
 
+# At the top of ui.R, splash is available from global.R:
+# splash <- getOption("ncrnwater.splash")
+
+loading_overlay <- NULL
+loading_script  <- NULL
+
+if (isTRUE(splash$enabled) && length(splash$loading_images)) {
+  # build a clean array of images for JS (only ones that exist)
+  JS_IMAGES <- lapply(
+    Filter(function(x) isTRUE(x$exists), splash$loading_images),
+    function(x) list(src = x$src, location = x$location, date = x$date)
+  )
+  JS_FACTS <- splash$loading_text
+  
+  loading_overlay <- div(
+    id    = "loading_screen",
+    style = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: white; opacity: 0.8; z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column;",
+    tags$div(id = "typingText",  class = "typing-text"),
+    tags$img(id = "loadingImage", class = "loading-image", alt = "Water monitoring Image"),
+    tags$div(id = "captionText"),
+    tags$div(id = "spinner", class = "loading-bar-container",
+             tags$div(id = "progressBar", class = "loading-bar"))
+  )
+  
+  loading_script <- tags$script(HTML(sprintf("
+    const facts  = %s;
+    const images = %s;
+
+    setTimeout(() => {
+      if (!window.shinyAppLoaded && facts.length && images.length) {
+        const fact_index   = Math.floor(Math.random() * facts.length);
+        const image_index  = Math.floor(Math.random() * images.length);
+
+        const factEl    = document.getElementById('typingText');
+        const imgEl     = document.getElementById('loadingImage');
+        const captionEl = document.getElementById('captionText');
+        const spinnerEl = document.getElementById('spinner');
+        const progressEl= document.getElementById('progressBar');
+
+        factEl.textContent = facts[fact_index];
+        factEl.style.display = 'block';
+
+        imgEl.src = images[image_index].src;
+        imgEl.style.display = 'block';
+
+        captionEl.textContent = images[image_index].location + ' - ' + images[image_index].date;
+        captionEl.style.display = 'block';
+
+        spinnerEl.style.display = 'block';
+
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+          if (progress < 100) {
+            progress += 0.7;
+            progressEl.style.width = progress + '%%';
+          } else {
+            clearInterval(progressInterval);
+          }
+        }, 60);
+      }
+    }, 2000);
+  ",
+                                             jsonlite::toJSON(JS_FACTS,  auto_unbox = TRUE),
+                                             jsonlite::toJSON(JS_IMAGES, auto_unbox = TRUE)
+  )))
+}
+
 
 shinyUI(
   fluidPage(
@@ -180,53 +247,9 @@ shinyUI(
                     #' }
                     ")),
       
-      #Loading screen HTML div (initially visible)
-      div(id = "loading_screen", #"Loading, please wait...",
-          style = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: white; opacity: 0.8; 
-          z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column;",
-          
-          tags$div(id =  "typingText", class = "typing-text"),
-          tags$img(id = "loadingImage", class = "loading-image", alt = "Water monitoring Image"),
-          tags$div(id = "captionText"),
-          tags$div(id = "spinner", class = "loading-bar-container",
-                   tags$div(id = "progressBar", class = "loading-bar"))),
-      
-      tags$script(HTML(sprintf("
-                     const facts = %s;
-                     const images = %s;
-                     
-              setTimeout(() => {
-                     if (!window.shinyAppLoaded) {
-                     const fact_index = Math.floor(Math.random() * facts.length);
-                     const image_index = Math.floor(Math.random() * images.length);
-                   
-                    const fact1 = document.getElementById('typingText'); 
-                      fact1.textContent = facts[fact_index];
-                      fact1.style.display = 'block';
-                    const img1 = document.getElementById('loadingImage')
-                      img1.src = images[image_index].src;
-                      img1.style.display = 'block';
-                    const caption1 = document.getElementById('captionText')
-                      caption1.textContent = images[image_index].location + ' - ' + images[image_index].date;
-                      caption1.style.display = 'block';  
-                    const spinner1 = document.getElementById('spinner');
-                    const progressBar = document.getElementById('progressBar');
-                      spinner1.style.display = 'block';
-                         
-                    let progress = 0;
-                    const progressInterval = setInterval(() => {
-                    if (progress < 100) {
-                    progress += 0.7;
-                    
-                    document.getElementById('progressBar').style.width = progress + '%%';
-                    } else {
-                    clearInterval(progressInterval);
-                      }
-                     }, 60);
-                    }
-                  }, 2000);",
-                               jsonlite::toJSON('Application loading...', auto_unbox = TRUE),
-                               jsonlite::toJSON(LOADING_IMAGES[[1]]$src, auto_unbox = TRUE)))))
+      loading_overlay,
+      loading_script
+      )
     ),
     
   

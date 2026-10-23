@@ -76,45 +76,59 @@
 #'   \code{\link{parsePhotos}} for photo indexing.
 #'
 #' @keywords internal
+# R/shinySplashService.R (or wherever you keep it)
 resolve_splash <- function(cfg) {
-  
   sp <- cfg$app$splash
-  if (is.null(sp) || !is.list(sp))
-    stop("Config 'app.splash' must be present and a list.")
   
-  # Validate loading_text
-  lt <- sp$loading_text
-  if (is.null(lt) || !is.vector(lt) || !all(vapply(lt, is.character, TRUE))) {
-    stop("Config 'app.splash.loading_text' must be a character vector.")
+  # Optional: if no splash provided, return a disabled object
+  if (is.null(sp) || !is.list(sp)) {
+    return(list(
+      enabled        = FALSE,
+      loading_text   = character(0),
+      loading_images = list()
+    ))
   }
   
-  # Validate loading_images
-  li <- sp$loading_images
-  if (is.null(li) || !is.list(li))
-    stop("Config 'app.splash.loading_images' must be a list of maps.")
+  # Validate loading_text when provided (allow empty vector)
+  lt <- sp$loading_text %||% character(0)
+  if (!is.vector(lt) || !all(vapply(lt, is.character, TRUE))) {
+    stop("Config 'app.splash.loading_text' must be a character vector when supplied.")
+  }
   
-  # Resolve image filepaths
-  img_root <- file.path(cfg$files$datadir,
-                        cfg$app$network_code,
-                        cfg$files$splashdir)
+  # Validate loading_images when provided (allow empty list)
+  li <- sp$loading_images %||% list()
+  if (!is.list(li)) {
+    stop("Config 'app.splash.loading_images' must be a list of maps when supplied.")
+  }
+  
+  # Resolve image filepaths under datadir/<network>/splashdir
+  img_root <- file.path(cfg$files$datadir, cfg$app$network_code, cfg$files$splashdir)
   
   imgs <- lapply(li, function(x) {
     required <- c("src", "location", "date")
     miss <- setdiff(required, names(x))
-    if (length(miss))
-      stop("Missing keys in app.splash.loading_images entry: ",
-           paste(miss, collapse = ", "))
-    
+    if (length(miss)) {
+      stop("Missing keys in app.splash.loading_images entry: ", paste(miss, collapse = ", "))
+    }
     fp <- file.path(img_root, x$src)
-    
     list(
-      src       = fp,
-      location  = x$location,
-      date      = x$date,
-      alt       = if (!is.null(x$alt)) x$alt else basename(x$src),
-      exists    = file.exists(fp)
+      src      = fp,
+      location = x$location,
+      date     = x$date,
+      alt      = if (!is.null(x$alt)) x$alt else basename(x$src),
+      exists   = file.exists(fp)
     )
   })
   
-  list(loading_text = lt, loading_images = imgs)
+  # If no text or no usable images, mark disabled (UI won't include overlay)
+  enabled <- (length(lt) > 0) && any(vapply(imgs, `[[`, logical(1), "exists"))
+  
+  list(
+    enabled        = enabled,
+    loading_text   = lt,
+    loading_images = imgs
+  )
 }
+
+`%||%` <- function(a, b) if (!is.null(a)) a else b
+
