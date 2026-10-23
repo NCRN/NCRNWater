@@ -2,6 +2,18 @@ library(shiny)
 library(leaflet)
 library(plotly)
 
+# Utility for defaults
+`%||%` <- function(a, b) if (!is.null(a)) a else b
+
+# Build About tab only if YAML provided an about page
+about_tab <- NULL
+if (!is.null(cfg$app$about$path) && file.exists(cfg$app$about$path)) {
+  about_tab <- tabPanel(
+    h4(cfg$app$about$title %||% "About"),
+    shiny::includeHTML(cfg$app$about$path)
+  )
+}
+
 
 shinyUI(
   fluidPage(
@@ -434,12 +446,13 @@ shinyUI(
         )  ,imageOutput("image_plot2")      
       )
     )
-    ),
+    )
+  ,about_tab
     
-    tabPanel(
-      h4("About")
-      ,shiny::includeHTML("www/AboutNCRN.html")
-      )
+    # ,tabPanel(
+    #   h4("About")
+    #   ,shiny::includeHTML("www/AboutNCRN.html")
+    #   )
     )
   )
 )

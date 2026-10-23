@@ -185,6 +185,28 @@ load_app_config <- function(profile = NULL,
       stop("Absolute colors CSV not found: ", cfg$files$colors_csv)
     }
   }
+  # --- 4) Normalize app.about.path ---------------------------------------
+  if (!is.null(cfg$app$about) && is.list(cfg$app$about)) {
+    ap <- cfg$app$about$path
+    if (is.character(ap) && length(ap) == 1L && nzchar(ap)) {
+      if (!.is_abs(ap)) {
+        about_fp <- system.file(ap, package = "NCRNWater")
+        if (nzchar(about_fp) && file.exists(about_fp)) {
+          cfg$app$about$path <- about_fp
+        } else {
+          # not found in installed package – disable about
+          cfg$app$about$path <- NULL
+        }
+      } else {
+        # absolute path on disk
+        if (!file.exists(ap)) cfg$app$about$path <- NULL
+      }
+    }
+    # default title fallback
+    if (is.null(cfg$app$about$title) || !nzchar(cfg$app$about$title)) {
+      cfg$app$about$title <- "About"
+    }
+  }
   
   # --- Caller overrides (wins over all) ---------------------------------------
   if (is.list(overrides) && length(overrides)) {
