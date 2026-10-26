@@ -2299,7 +2299,16 @@ output$SeriesRefSummaryMultiple<-renderUI(HTML(SeriesRefSummaryMultiple()))
   )
     
 ### Data table output ####
-  output$DatasetURL <- renderUI({tagList(DATASET_URL)}) # a constant stored in global.R
+  
+  output$DatasetURL <- renderUI({
+    a(
+      href   = DATASET_URL, # from yaml
+      target = "_blank",
+      rel    = "noopener noreferrer",
+      'Download the dataset'
+    )
+  })
+  
   DATATABLE_COLNAME_LOOKUP <- c( # a lookup used in output$WaterTable
     Site = 'MonitoringLocationName'
     ,Latitude = 'ActivityLocation.LatitudeMeasure'

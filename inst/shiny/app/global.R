@@ -8,8 +8,8 @@ cfg    <- getOption("ncrnwater.cfg")
 wd     <- getOption("ncrnwater.wd")
 splash <- getOption("ncrnwater.splash")
 
-PHOTOS_DIR       <- getOption("ncrnwater.photos_dir")
-PHOTOS_AVAILABLE <- isTRUE(getOption("ncrnwater.photos_available"))
+# PHOTOS_DIR       <- getOption("ncrnwater.photos_dir")
+# PHOTOS_AVAILABLE <- isTRUE(getOption("ncrnwater.photos_available"))
 
 if (is.null(cfg) || is.null(wd) || is.null(splash)) {
   stop("NCRNWater::run_shiny_app() must be used to launch the app.\n",
@@ -22,6 +22,7 @@ NETWORK      <- cfg$app$network_code
 VIZ_NAME     <- cfg$app$app_name
 MINYR        <- cfg$time$min_year
 MAXYR        <- cfg$time$max_year
+DATASET_URL  <- cfg$files$dataset_url
 
 WaterData        <- wd
 metadata_active <- getOption("ncrnwater.metadata_active")
