@@ -1230,6 +1230,10 @@ shinyServer(function(input,output,session){
   series_df <- DataUseMultiple() %>%
     dplyr::filter(Year >= DataOpts$Years[1] & Year <= DataOpts$Years[2]) %>% #year filtering
     dplyr::arrange(MonitoringLocationName, Date)
+  series_df <- series_df %>%
+    dplyr::mutate(
+      Value_jit = Value + rnorm(nrow(series_df), sd=0.2)
+    )
 
   # initialize variables
   ynames <- c()
@@ -1316,18 +1320,18 @@ shinyServer(function(input,output,session){
       plotly::plot_ly(
           series_df
           ,type='scatter'
-          ,mode='lines'
+          ,mode='lines+markers'
           ,width = (GraphOpts$FigureHorizontalScaling*as.numeric(input$dimension[1])) # to dynamically resize fig
           ,height = (GraphOpts$FigureVerticalScaling*as.numeric(input$dimension[2]))
       ) %>% add_trace(
-          y= ~Value
+          y= ~Value_jit
           ,x= ~Date
           ,color= ~MonitoringLocationName
           ,symbol= ~MonitoringLocationName
           ,connectgaps=TRUE # set to FALSE to create breaks in the line for NAs
           ,line=list(width=GraphOpts$LineWidth)
           ,marker=list(
-              size=GraphOpts$PointSize
+              size=GraphOpts$PointSize+1
               ,opacity=as.numeric(GraphOpts$ShowHidePoint)
           )
           ,hovertemplate = paste0(
@@ -1347,7 +1351,8 @@ shinyServer(function(input,output,session){
               title=list(text='<br><br>')
               ,font=list(size=GraphOpts$FontSize)
           )
-          ,hovermode='x'
+          ,hovermode='closest'
+          ,hoverdistance=5
           ,showlegend=T
           ,yaxis = list(title=list(text=paste0(yname, '<br>'), font=list(size=GraphOpts$FontSize)), font=list(size=GraphOpts$FontSize))
           ,xaxis = list(title=list(text=paste0(xname, '<br>'), font=list(size=GraphOpts$FontSize)), font=list(size=GraphOpts$FontSize))
