@@ -276,6 +276,28 @@ build_exceed_site_package <- function(wd, park, site, char, show_plot = TRUE) {
       TRUE ~ NA_real_
     )
     
+    ExPhrase <- dplyr::case_when(
+      is.na(upper_pt) & !is.na(lower_pt) ~ lower_phrase,
+      !is.na(upper_pt) & is.na(lower_pt) ~ upper_phrase,
+      
+      !is.na(upper_pt) & !is.na(lower_pt) ~ {
+        if (any(exdf$Value <= lower_pt, na.rm = TRUE) &&
+            !any(exdf$Value >= upper_pt, na.rm = TRUE)) {
+          lower_phrase
+        } else if (
+          any(exdf$Value >= upper_pt, na.rm = TRUE) &&
+          !any(exdf$Value <= lower_pt, na.rm = TRUE)
+        ) {
+          upper_phrase
+        } else {
+          upper_phrase
+        }
+      },
+      
+      TRUE ~ "exceeded"
+    )
+    
+    
     # Grammars (recent year vs all years)
     grammar1 <- if (nex_recent == 0) {
       paste0("there were no ", dispname, " exceedances ")
@@ -303,9 +325,12 @@ build_exceed_site_package <- function(wd, park, site, char, show_plot = TRUE) {
         ggplot2::ylim(0, 100) +
         ggplot2::labs(
           title = paste0(
+            
             sitename, ", ", dispname, ", ", oldest_year, "-", recent_year, "\n",
             sum_nex, " of ", non_na_obs, " measurements (",
-            round(100 * (sum_nex / non_na_obs), 1), "%) exceeded ", ExPoint, " ", units
+            round(100 * (sum_nex / non_na_obs), 1), "%) were ",
+            ExPhrase, " ", ExPoint, " ", units
+            
           ),
           x = "Year", y = "% of measurements"
         ) +
@@ -329,15 +354,19 @@ build_exceed_site_package <- function(wd, park, site, char, show_plot = TRUE) {
     if (sum_nex > 0) {
       for (i in seq_len(nrow(histdata))) {
         nex  <- histdata$nex[i]
+        verb <- if (nex == 1) "was" else "were"
         ntot <- histdata$ntot[i]
         alt_raw <- c(
           alt_raw,
+          
           paste0(
             "<b>", histdata$Year[i], "</b>: ",
             nex, " of ", ntot, " measurement", if (ntot > 1) "s", " (",
-            histdata$formatted_percent_ex[i], ") exceeded ",
-            ExPoint, " ", units
+            histdata$formatted_percent_ex[i], ") ",
+            verb, " ",
+            ExPhrase, " ", ExPoint, " ", units
           )
+          
         )
       }
     }
