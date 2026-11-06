@@ -2493,7 +2493,15 @@ output$SeriesRefSummaryMultiple<-renderUI(HTML(SeriesRefSummaryMultiple()))
       mydatastructure <- exDUM() # get the data, again
       site <- DataOpts$Site[i] # site ID (e.g., 'NCRN_GWMP_TURU')
       output[[paste0("dynamic_text_",i)]] <- shiny::renderUI({HTML(mydatastructure[[site]][["html_extext"]])})
-      output[[paste0("hist_",i)]]<- renderPlotly({plotly::ggplotly(mydatastructure[[site]][["p"]], tooltip = "text")})
+      output[[paste0("hist_", i)]] <- plotly::renderPlotly({
+        plotly::ggplotly(
+          mydatastructure[[i]]$p,
+          tooltip = "text"
+        ) %>%
+          plotly::layout(
+            hovermode = "closest"
+          )
+      })
       output[[paste0("alt_text_",i)]] <- shiny::renderUI({HTML(mydatastructure[[site]][["alt_text"]])})
       output[[paste0("datatable_",i)]] <- DT::renderDataTable({
         DT::datatable(mydatastructure[[site]][['desc_exdf']]
