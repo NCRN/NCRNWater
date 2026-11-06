@@ -297,6 +297,26 @@ build_exceed_site_package <- function(wd, park, site, char, show_plot = TRUE) {
       TRUE ~ "exceeded"
     )
     
+    histdata <- histdata %>%
+      dplyr::mutate(
+        measurement_label = dplyr::if_else(
+          ntot == 1,
+          "measurement",
+          "measurements"
+        ),
+        exceedance_verb = dplyr::if_else(
+          nex == 1,
+          "was",
+          "were"
+        ),
+        hover_text = paste0(
+          "<b>Year: ", Year, "</b>",
+          "<br>", nex, " of ", ntot, " ", measurement_label,
+          " (", formatted_percent_ex, ") ",
+          exceedance_verb, " ",
+          ExPhrase, " ", ExPoint, " ", units
+        )
+      )
     
     # Grammars (recent year vs all years)
     grammar1 <- if (nex_recent == 0) {
@@ -319,25 +339,37 @@ build_exceed_site_package <- function(wd, park, site, char, show_plot = TRUE) {
     
     # Plot (ggplot bar; wrap with plotly in your UI if desired)
     p <- if (isTRUE(show_plot)) {
-      ggplot2::ggplot(histdata, ggplot2::aes(x = Year, y = percent_ex)) +
-        ggplot2::geom_bar(stat = "identity", fill = "lightgray") +
-        ggplot2::scale_x_continuous(breaks = seq(min(histdata$Year), max(histdata$Year), by = 1)) +
+      ggplot2::ggplot(
+        histdata,
+        ggplot2::aes(x = Year, y = percent_ex)
+      ) +
+        ggplot2::geom_col(
+          ggplot2::aes(text = hover_text),
+          fill = "lightgray"
+        ) +
+        ggplot2::scale_x_continuous(
+          breaks = seq(
+            min(histdata$Year),
+            max(histdata$Year),
+            by = 1
+          )
+        ) +
         ggplot2::ylim(0, 100) +
         ggplot2::labs(
           title = paste0(
-            
-            sitename, ", ", dispname, ", ", oldest_year, "-", recent_year, "\n",
+            sitename, ", ", dispname, ", ",
+            oldest_year, "-", recent_year, "\n",
             sum_nex, " of ", non_na_obs, " measurements (",
             round(100 * (sum_nex / non_na_obs), 1), "%) were ",
             ExPhrase, " ", ExPoint, " ", units
-            
           ),
-          x = "Year", y = "% of measurements"
+          x = "Year",
+          y = "% of measurements"
         ) +
         ggplot2::theme_minimal() +
         ggplot2::theme(
           panel.grid.major.x = ggplot2::element_blank(),
-          plot.title         = ggplot2::element_text(hjust = 0.5)
+          plot.title = ggplot2::element_text(hjust = 0.5)
         )
     } else {
       ggplot2::ggplot()
@@ -402,6 +434,7 @@ build_exceed_site_package <- function(wd, park, site, char, show_plot = TRUE) {
       sum_nex         = sum_nex,
       sum_ntot        = sum_ntot,
       ExPoint         = ExPoint,
+      ExPhrase        = ExPhrase,
       grammar1        = grammar1,
       grammar2        = grammar2,
       extext          = extext,
