@@ -53,7 +53,7 @@ NCRN:
     app_name: "Stream Water Quality"
     network_code: "NCRN"
     network_long: "National Capital Region Network"
-    dataset_url: "https://irma.nps.gov/DataStore/Reference/Profile/2317661"
+    dataset_url: "https://irma.nps.gov/DataStore/Reference/Profile/2321438"
     # for example
     # splash:
     #   loading_text:
