@@ -223,15 +223,14 @@ build_exceed_site_package <- function(wd, park, site, char, show_plot = TRUE) {
       ) %>%
       dplyr::mutate(
         Difference = dplyr::case_when(
-          !is.na(UpperPoint) &  is.na(LowerPoint)                 ~ Value - UpperPoint,
-          is.na(UpperPoint) & !is.na(LowerPoint)                  ~ Value - LowerPoint,
-          !is.na(UpperPoint) & !is.na(LowerPoint) & Exceed_Upper  ~ Value - UpperPoint,
-          !is.na(UpperPoint) & !is.na(LowerPoint) & Exceed_Lower  ~ Value - LowerPoint,
-          TRUE                                                    ~ NA_real_
+          !is.na(UpperPoint) &  is.na(LowerPoint)                ~ Value - UpperPoint,
+          is.na(UpperPoint) & !is.na(LowerPoint)                ~ Value - LowerPoint,
+          !is.na(UpperPoint) & !is.na(LowerPoint) & Exceed_Upper ~ Value - UpperPoint,
+          !is.na(UpperPoint) & !is.na(LowerPoint) & Exceed_Lower ~ Value - LowerPoint,
+          TRUE                                                  ~ NA_real_
         ),
         Difference = round(Difference, 4),
-        
-        AssessmentDetails = reference
+        Citation = reference
       ) %>%
       dplyr::arrange(dplyr::desc(SampleDate)) %>%
       dplyr::select(
@@ -241,7 +240,7 @@ build_exceed_site_package <- function(wd, park, site, char, show_plot = TRUE) {
         "Value",
         "Difference",
         "Units",
-        "AssessmentDetails",
+        "Citation",
         dplyr::any_of(threshold_cols_present)
       )
     
