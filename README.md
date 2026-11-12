@@ -13,7 +13,7 @@ This is an R package used to process water quality monitoring data.
 
 ## NEWS
 
-### NCRNWater 1.1.0 (2026-11-06)
+### NCRNWater 1.1.1 (2026-11-06)
 
 #### Major Features
 
